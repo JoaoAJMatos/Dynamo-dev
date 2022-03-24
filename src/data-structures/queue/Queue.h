@@ -11,6 +11,7 @@ namespace DS
 {
     template <typename T>
 
+    // Tentar criar uma instancia da classe para conseguir usar o typename T dentro da classe
     class Queue: private LinkedList<int>
     {
     public:
