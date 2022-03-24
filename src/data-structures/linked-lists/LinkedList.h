@@ -43,7 +43,7 @@ namespace DS
             // Since we know how deep in the list we want to go, we can use a for loop to iterate
             for (int i = 0; i < index; i++)
             {
-                cursor = cursor->next;
+                cursor = cursor->get_next();
             }
 
             return cursor;
@@ -59,7 +59,7 @@ namespace DS
             if (index == 0)
             {
                 // Set the new node pointer to the previous head
-                newNode->next = head;
+                newNode->set_next(head);
                 // Update the head
                 head = newNode;
             }
@@ -68,9 +68,9 @@ namespace DS
                 // Get a pointer to the node before the specified index
                 Node<T>* cursor = get_node_at_index(index - 1);
                 // Set the new node's pointer to the previous node's pointer
-                newNode->next = cursor->next;
+                newNode->set_next(cursor->get_next());
                 // Update the previous node's pointer
-                cursor->next = newNode;
+                cursor->set_next(newNode);
             }
 
             // Update the linked list length
@@ -83,14 +83,26 @@ namespace DS
             // Check if the list is not empty
             if (length == 0)
             {
-                throw std::invalid_argument("Unable to print empty list");
+                std::cout << "[]\n";
+                return;
             }
+
+            std::cout << "[";
 
             // Traverse the list
             for (int i = 0; i < length; i++)
             {
-                std::cout << get_node_at_index(i)->data << " ";
+                if (i < length - 1)
+                {
+                    std::cout << get_node_at_index(i)->get_data() << ", ";
+                }
+                else
+                {
+                    std::cout << get_node_at_index(i)->get_data();
+                }
             }
+
+            std::cout << "]\n";
         }
 
         // Function to delete a node at a given position
@@ -99,21 +111,18 @@ namespace DS
             // To delete the head of the list
             if (index == 0)
             {
-                // To prevent memory leaks, we save where the original head was
-                Node<T>* item_to_remove;
+                // TODO: do something to prevent memory leaks
                 // Update the head to the new head
-                head = head->next;
-                // Finally, destroy the original head
-                destroy(item_to_remove);
+                head = head->get_next();
             }
             else
             {
                 // Get a pointer to the node previous to the node we want to remove
                 Node<T>* cursor = get_node_at_index(index - 1);
                 // Get a pointer to the node we want to remove
-                Node<T>* item_to_remove = cursor->next;
+                Node<T>* item_to_remove = cursor->get_next();
                 // Update the previous node's pointer to the node the item we want to remove was pointing to
-                cursor->next = item_to_remove->next;
+                cursor->set_next(item_to_remove->get_next());
                 // Destroy the item we want to remove to prevent memory leaks
                 free(item_to_remove);
             }
@@ -126,7 +135,13 @@ namespace DS
         T retrieve(int index)
         {
             Node<T> * cursor = get_node_at_index(index);
-            return cursor->data;
+            return cursor->get_data();
+        }
+
+        /* GETTERS */
+        int len()
+        {
+            return length;
         }
     };
 }
