@@ -1,0 +1,4 @@
+# ninja log v5
+1	224	6698522483064864	build.ninja	545643dbc96547be
+4	292	6698516536742064	CMakeFiles/dev_dynamo.dir/main.cpp.obj	209314a583f77f8f
+293	390	6698516537685123	dev_dynamo.exe	a4cd298cb442eecb
