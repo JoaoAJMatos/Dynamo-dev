@@ -27,13 +27,15 @@ namespace net
         // type, and interface of a given socket. These parameters are specified and set in the constructor
         struct sockaddr_in address;
 
+#ifdef _WIN32
         // Struct that contains information about the windows sockets implementation
         WSADATA wsa;
+#endif
 
     public:
         /* CONSTRUCTOR */
         // A parameterized constructor is required to instantiate the class.
-        Socket(int domain, int service, int protocol, int port, u_long iface);
+        Socket(int domain, int service, int protocol, int port, unsigned long iface);
 
         /* VIRTUAL FUNCTIONS */
         // This function connects to the network using either bind() or connect() from winsock2.h

@@ -2,8 +2,6 @@
 // Created by joaoa on 25/03/2022.
 //
 
-#ifdef _WIN32
-
 #include "Socket.h"
 
 /* CONSTRUCTOR */
@@ -14,6 +12,7 @@ net::Socket::Socket(int domain, int service, int protocol, int port, u_long ifac
     address.sin_port = htons(port); // Convert integer byte order to network
     address.sin_addr.s_addr = htonl(iface);
 
+#ifdef _WIN32
     // Attempt to initialize winsock
     WORD wVersionRequired = MAKEWORD(2, 2);
     int iResult = WSAStartup(wVersionRequired, &wsa);
@@ -24,6 +23,7 @@ net::Socket::Socket(int domain, int service, int protocol, int port, u_long ifac
         std::cout << "WSAStartup failed with error: " << WSAGetLastError() << std::endl;
         exit(EXIT_FAILURE);
     }
+#endif
 
     // Establish socket
     sock = socket(domain, service, protocol);
@@ -33,6 +33,7 @@ net::Socket::Socket(int domain, int service, int protocol, int port, u_long ifac
 /* PUBLIC FUNCTIONS */
 void net::Socket::test_connection(int item_to_test)
 {
+#ifdef _WIN32
     // Confirms that either the socket or the connection have been properly established
     // If an error is found, show it and exit the program
     switch (item_to_test)
@@ -85,6 +86,13 @@ void net::Socket::test_connection(int item_to_test)
         default:
             return;
     }
+#endif
+
+    if (item_to_test < 0)
+    {
+        perror("Connection failed...");
+        exit(EXIT_FAILURE);
+    }
 }
 
 /* GETTERS */
@@ -97,5 +105,3 @@ struct sockaddr_in net::Socket::get_address() {
 int net::Socket::get_sock() const {
     return sock;
 }
-
-#endif
