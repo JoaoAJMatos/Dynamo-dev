@@ -1,3 +1,0 @@
-C:/Users/Matos/programacao/GitHub/dynamo-dev/cmake-build-dynamo-dev/CMakeFiles/dev_dynamo.dir
-C:/Users/Matos/programacao/GitHub/dynamo-dev/cmake-build-dynamo-dev/CMakeFiles/edit_cache.dir
-C:/Users/Matos/programacao/GitHub/dynamo-dev/cmake-build-dynamo-dev/CMakeFiles/rebuild_cache.dir
