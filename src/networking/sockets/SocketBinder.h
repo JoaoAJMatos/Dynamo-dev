@@ -14,9 +14,6 @@
 
 #ifdef _WIN32
 #include "common/Socket.h"
-#else
-#include "common/LinuxSocket.h"
-#endif
 
 namespace net
 {
@@ -41,5 +38,31 @@ namespace net
     };
 }
 
+#else
+#include "common/LinuxSocket.h"
+
+namespace net
+{
+    class SocketBinder: public LinuxSocket
+    {
+    private:
+        /* MEMBER VARIABLES */
+        // The binding variable stores the value 0 if the socket binding was successful
+        int binding;
+
+        /* MEMBER FUNCTIONS */
+        // Virtual function from parent
+        int connect(int sock, struct sockaddr_in address) override;
+
+    public:
+        /* CONSTRUCTOR */
+        // A parameterized constructor is required for this class
+        SocketBinder(int domain, int service, int protocol, int port, u_long iface);
+
+        /* GETTERS */
+        int get_binding() const;
+    };
+}
+#endif
 
 #endif //DEV_DYNAMO_SOCKETBINDER_H
