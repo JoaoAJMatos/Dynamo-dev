@@ -12,7 +12,11 @@
 #ifndef DEV_DYNAMO_SOCKETBINDER_H
 #define DEV_DYNAMO_SOCKETBINDER_H
 
+#ifdef _WIN32
 #include "common/Socket.h"
+#else
+#include "common/LinuxSocket.h"
+#endif
 
 namespace net
 {
