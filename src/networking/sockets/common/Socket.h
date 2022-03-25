@@ -2,6 +2,7 @@
 // Created by joaoa on 25/03/2022.
 //
 
+#ifdef _WIN32
 
 #ifndef DEV_DYNAMO_SOCKET_H
 #define DEV_DYNAMO_SOCKET_H
@@ -49,5 +50,6 @@ namespace net
     };
 }
 
-
 #endif //DEV_DYNAMO_SOCKET_H
+
+#endif
