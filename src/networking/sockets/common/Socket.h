@@ -5,9 +5,14 @@
 #ifndef DEV_DYNAMO_SOCKET_H
 #define DEV_DYNAMO_SOCKET_H
 
+#ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <winerror.h>
+#else
+#include <sys/socket.h>
+#include <netinet/in.h>
+#endif
 #include <tchar.h>
 #include <iostream>
 
