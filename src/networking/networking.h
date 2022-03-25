@@ -6,5 +6,6 @@
 #define DEV_DYNAMO_NETWORKING_H
 
 #include "sockets/sockets.h"
+#include "server/servers.h"
 
 #endif //DEV_DYNAMO_NETWORKING_H
