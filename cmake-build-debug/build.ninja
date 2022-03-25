@@ -55,6 +55,30 @@ build CMakeFiles/dev_dynamo.dir/main.cpp.obj: CXX_COMPILER__dev_dynamo_Debug C$:
   OBJECT_DIR = CMakeFiles\dev_dynamo.dir
   OBJECT_FILE_DIR = CMakeFiles\dev_dynamo.dir
 
+build CMakeFiles/dev_dynamo.dir/src/networking/sockets/common/LinuxSocket.cpp.obj: CXX_COMPILER__dev_dynamo_Debug C$:/Users/joaoa/CLionProjects/dev-dynamo/src/networking/sockets/common/LinuxSocket.cpp || cmake_object_order_depends_target_dev_dynamo
+  DEP_FILE = CMakeFiles\dev_dynamo.dir\src\networking\sockets\common\LinuxSocket.cpp.obj.d
+  FLAGS = -g -std=gnu++14
+  OBJECT_DIR = CMakeFiles\dev_dynamo.dir
+  OBJECT_FILE_DIR = CMakeFiles\dev_dynamo.dir\src\networking\sockets\common
+
+build CMakeFiles/dev_dynamo.dir/src/networking/sockets/common/Socket.cpp.obj: CXX_COMPILER__dev_dynamo_Debug C$:/Users/joaoa/CLionProjects/dev-dynamo/src/networking/sockets/common/Socket.cpp || cmake_object_order_depends_target_dev_dynamo
+  DEP_FILE = CMakeFiles\dev_dynamo.dir\src\networking\sockets\common\Socket.cpp.obj.d
+  FLAGS = -g -std=gnu++14
+  OBJECT_DIR = CMakeFiles\dev_dynamo.dir
+  OBJECT_FILE_DIR = CMakeFiles\dev_dynamo.dir\src\networking\sockets\common
+
+build CMakeFiles/dev_dynamo.dir/src/networking/sockets/SocketBinder.cpp.obj: CXX_COMPILER__dev_dynamo_Debug C$:/Users/joaoa/CLionProjects/dev-dynamo/src/networking/sockets/SocketBinder.cpp || cmake_object_order_depends_target_dev_dynamo
+  DEP_FILE = CMakeFiles\dev_dynamo.dir\src\networking\sockets\SocketBinder.cpp.obj.d
+  FLAGS = -g -std=gnu++14
+  OBJECT_DIR = CMakeFiles\dev_dynamo.dir
+  OBJECT_FILE_DIR = CMakeFiles\dev_dynamo.dir\src\networking\sockets
+
+build CMakeFiles/dev_dynamo.dir/src/networking/sockets/SocketConnector.cpp.obj: CXX_COMPILER__dev_dynamo_Debug C$:/Users/joaoa/CLionProjects/dev-dynamo/src/networking/sockets/SocketConnector.cpp || cmake_object_order_depends_target_dev_dynamo
+  DEP_FILE = CMakeFiles\dev_dynamo.dir\src\networking\sockets\SocketConnector.cpp.obj.d
+  FLAGS = -g -std=gnu++14
+  OBJECT_DIR = CMakeFiles\dev_dynamo.dir
+  OBJECT_FILE_DIR = CMakeFiles\dev_dynamo.dir\src\networking\sockets
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target dev_dynamo
@@ -63,9 +87,9 @@ build CMakeFiles/dev_dynamo.dir/main.cpp.obj: CXX_COMPILER__dev_dynamo_Debug C$:
 #############################################
 # Link the executable dev_dynamo.exe
 
-build dev_dynamo.exe: CXX_EXECUTABLE_LINKER__dev_dynamo_Debug CMakeFiles/dev_dynamo.dir/main.cpp.obj
+build dev_dynamo.exe: CXX_EXECUTABLE_LINKER__dev_dynamo_Debug CMakeFiles/dev_dynamo.dir/main.cpp.obj CMakeFiles/dev_dynamo.dir/src/networking/sockets/common/LinuxSocket.cpp.obj CMakeFiles/dev_dynamo.dir/src/networking/sockets/common/Socket.cpp.obj CMakeFiles/dev_dynamo.dir/src/networking/sockets/SocketBinder.cpp.obj CMakeFiles/dev_dynamo.dir/src/networking/sockets/SocketConnector.cpp.obj
   FLAGS = -g
-  LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
+  LINK_LIBRARIES = -lwsock32  -lws2_32  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\dev_dynamo.dir
   POST_BUILD = cd .
   PRE_LINK = cd .

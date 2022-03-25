@@ -1,4 +1,10 @@
 # ninja log v5
-1	224	6698522483064864	build.ninja	545643dbc96547be
-4	292	6698516536742064	CMakeFiles/dev_dynamo.dir/main.cpp.obj	209314a583f77f8f
-293	390	6698516537685123	dev_dynamo.exe	a4cd298cb442eecb
+0	218	6699270350191736	build.ninja	545643dbc96547be
+3	335	6699180016404152	CMakeFiles/dev_dynamo.dir/main.cpp.obj	209314a583f77f8f
+488	804	6699022042694531	dev_dynamo.exe	a4cd298cb442eecb
+3	1097	6699266604946920	CMakeFiles/dev_dynamo.dir/src/networking/sockets/common/Socket.cpp.obj	b7d94d3c0817ef37
+23	83	6699180013880912	CMakeFiles/dev_dynamo.dir/src/networking/sockets/SocketConnector.cpp.obj	6302edadde4a0446
+3	65	6699266172739204	CMakeFiles/dev_dynamo.dir/src/networking/sockets/common/LinuxSocket.cpp.obj	63459eae028a1a45
+3	1186	6699263818348189	CMakeFiles/dev_dynamo.dir/src/networking/sockets/SocketBinder.cpp.obj	942410cecf6c021c
+3	1165	6699270367525350	CMakeFiles/dev_dynamo.dir/src/networking/sockets/common/Socket.cpp.obj	b7d94d3c0817ef37
+1165	1271	6699270368562819	dev_dynamo.exe	693f71a053f092db

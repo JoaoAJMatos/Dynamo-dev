@@ -111,7 +111,6 @@ namespace DS
             // To delete the head of the list
             if (index == 0)
             {
-                // TODO: do something to prevent memory leaks
                 // Update the head to the new head
                 head = head->get_next();
             }
