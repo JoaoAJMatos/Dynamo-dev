@@ -9,7 +9,7 @@ net::SocketBinder::SocketBinder(int domain, int service, int protocol, int port,
                   : Socket(domain, service, protocol, port, iface)
 {
     // Establish network connection
-    connect(get_sock(), get_address());
+    sock_connect(get_sock(), get_address());
     // Test the connection
     test_connection(binding);
 }
@@ -18,7 +18,7 @@ net::SocketBinder::SocketBinder(int domain, int service, int protocol, int port,
 // Definition of connect() virtual function
 // This function overrides the Socket.h's connect() and defines it to use
 // the bind() function from winsock2.h
-int net::SocketBinder::connect(int sock, struct sockaddr_in address)
+int net::SocketBinder::sock_connect(int sock, struct sockaddr_in address)
 {
     binding = bind(sock, (struct sockaddr *)&address, sizeof(address));
 }

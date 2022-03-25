@@ -42,7 +42,7 @@ namespace net
 
         /* VIRTUAL FUNCTIONS */
         // This function connects to the network using either bind() or connect() from winsock2.h
-        virtual int connect(int sock, struct sockaddr_in address) = 0;
+        virtual int sock_connect(int sock, struct sockaddr_in address) = 0;
 
         /* TESTERS */
         // This function exits the program if the connection is not properly established.
