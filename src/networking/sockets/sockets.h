@@ -5,13 +5,8 @@
 #ifndef DEV_DYNAMO_SOCKETS_H
 #define DEV_DYNAMO_SOCKETS_H
 
-// Import different header files for Linux and Windows
-#ifdef __linux__
-#include "common/LinuxSocket.h"
-#else
 #include "common/Socket.h"
-#endif
-
 #include "SocketBinder.h"
+#include "SocketConnector.h"
 
 #endif //DEV_DYNAMO_SOCKETS_H
