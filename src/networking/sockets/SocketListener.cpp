@@ -12,12 +12,14 @@ net::SocketListener::SocketListener(int domain, int service, int protocol, int p
     backlog = bklg;
     // Start listening to the network
     sock_listen();
+    // Check for errors
+    test_connection(listening);
 }
 
-/* PUBLIC FUNCTIONS */
+/* MUTATORS */
 void net::SocketListener::sock_listen()
 {
-
+    listening = listen(get_sock(), backlog);
 }
 
 /* GETTERS */
