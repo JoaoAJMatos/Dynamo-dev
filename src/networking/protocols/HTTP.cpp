@@ -46,18 +46,21 @@ int what_method(char* method_string)
 
 net::HTTP::HTTP(char *request_string)
 {
+    char requested[strlen(request_string)];
+    strcpy(requested, request_string);
+
     // Loop through the string array and replace the new-line character
     // separating the request body by a different separator token
-    for (int i = 0; i < strlen(request_string) - 1; i++)
+    for (int i = 0; i < strlen(requested) - 1; i++)
     {
-        if (request_string[i] == '\n' && request_string[i + 1] == '\n')
+        if (requested[i] == '\n' && requested[i + 1] == '\n')
         {
-            request_string[1 + 1] = '|';
+            requested[1 + 1] = '|';
         }
     }
 
     // Separate the request string into sections
-    char* request_line = strtok(request_string, "\n");
+    char* request_line = strtok(requested, "\n");
     char* header_fields = strtok(nullptr, "|");
     char* body = strtok(nullptr, "|");
 
