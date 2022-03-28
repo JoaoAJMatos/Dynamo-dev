@@ -5,8 +5,9 @@
 #ifndef DEV_DYNAMO_LINKEDLIST_H
 #define DEV_DYNAMO_LINKEDLIST_H
 
-#include "Node.h"
+#include "../common/Node.h"
 #include <stdexcept>
+#include <string>
 
 namespace DS
 {

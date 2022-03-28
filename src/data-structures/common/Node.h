@@ -15,7 +15,7 @@
 #define DEV_DYNAMO_NODE_H
 
 #include <iostream>
-#include <stdexcept>
+#include <cstdio>
 
 namespace DS
 {
@@ -24,7 +24,7 @@ namespace DS
     class Node {
     private:
         /* MEMBER VARIABLES */
-        void* data; // Data variable that stores the node data
+        T data; // Data variable that stores the node data
         Node* next; // Pointer to the next node
         Node* previous; // Pointer to the previous node
 
@@ -33,40 +33,21 @@ namespace DS
         // Default constructor
         Node()
         {
-            // Set all the pointers to null
-            data = nullptr;
+            data = NULL;
             next = nullptr;
             previous = nullptr;
         }
 
         // Parameterized constructor
-        explicit Node(void* data, unsigned long size)
+        explicit Node(T data)
         {
-            // Return an error if the specified value for the size is less than 1
-            if (size < 1)
-            {
-                std::invalid_argument give_me_a_name("Invalid value for size");
-                exit(EXIT_FAILURE);
-            }
-
-            // Allocate space for the data
-            this->data = malloc(size);
-            memcpy(this->data, data, size);
-
-            // Set the pointers to null
+            this->data = data;
             this->next = nullptr;
             this->previous = nullptr;
         }
 
-        /* DESTRUCTOR */
-        ~Node()
-        {
-            free(this->data);
-            free(this);
-        }
-
         /* GETTERS & SETTERS*/
-        void* get_data()
+        T get_data()
         {
             return data;
         }
@@ -76,9 +57,19 @@ namespace DS
             return next;
         }
 
+        Node* get_previous()
+        {
+            return previous;
+        }
+
         void set_next(Node* input_next)
         {
             next = input_next;
+        }
+
+        void set_previous(Node* input_prev)
+        {
+            previous = input_prev;
         }
     };
 }

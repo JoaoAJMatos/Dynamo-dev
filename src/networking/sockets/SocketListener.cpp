@@ -1,12 +1,14 @@
 //
-// Created by Matos on 3/25/2022.
+// Created by joaoa on 28/03/2022.
 //
+
+#include "SocketListener.h"
 
 #include "SocketListener.h"
 
 /* CONSTRUCTOR */
 net::SocketListener::SocketListener(int domain, int service, int protocol, int port, unsigned long iface, int bklg)
-: SocketBinder(domain, service, protocol, port, iface)
+        : SocketBinder(domain, service, protocol, port, iface)
 {
     // Set backlog variable
     backlog = bklg;

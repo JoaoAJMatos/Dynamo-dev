@@ -1,8 +1,6 @@
 //
-// Created by Matos on 3/25/2022.
+// Created by joaoa on 28/03/2022.
 //
-// The SocketListener class is the basis for creating a server object
-
 
 #ifndef DEV_DYNAMO_SOCKETLISTENER_H
 #define DEV_DYNAMO_SOCKETLISTENER_H
