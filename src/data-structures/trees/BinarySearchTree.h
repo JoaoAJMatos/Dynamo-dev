@@ -54,28 +54,112 @@ namespace DS
         /* MEMBER VARIABLES */
         Node<T>* head;
 
+        /* FUNCTION POINTERS */
+        int (*compare)(T data_one, T data_two);
+
         /* MEMBER FUNCTIONS */
-        Node<T>* iterate() {
-            return nullptr;
+        // The iterate function is a recursive algorithm that traverses the branches of a tree.
+        // It utilizes the compare function to determine if it should move left or right, and returns the cursor once there is nowhere left for the iterator to move.
+        // The user must take care to ensure this function returns the node they are actually looking for.
+        // The function takes a reference to the current position, desired data, and an int pointer as arguments.
+        Node<T>* iterate(Node<T>* cursor, T data, int* direction)
+        {
+            // Compare the cursor's data to the desired data
+            if(compare(cursor->get_data(), data) == 1)
+            {
+                // Check if there is another node in the chain to be tested
+                if (cursor->get_next())
+                {
+                    // Recursively test the next node (right)
+                    return iterate(cursor->get_next(), data, compare, direction);
+                }
+                else
+                {
+                    // Set the direction pointer and return the cursor
+                    *direction = 1;
+                    return cursor;
+                }
+            }
+            // Alternative outcome of the compare function
+            else if(compare(cursor->get_data(), data) == -1)
+            {
+                // Check if there is another node in the chain to be tested
+                if (cursor->get_previous())
+                {
+                    // Recursively test the previous node (left)
+                    return iterate(cursor->get_next(), data, compare, &direction);
+                }
+                else
+                {
+                    // Set the direction pointer and return the cursor
+                    *direction = -1;
+                    return cursor;
+                }
+            }
+
+            // If the two values are equal
+            *direction = 0;
+            return cursor;
         }
 
     public:
-        BinarySearchTree();
+        /* CONSTRUCTOR */
+        explicit BinarySearchTree(int (*compare_function)(T data_one, T data_two))
+        {
+            head = nullptr;
+            compare = compare_function;
+        }
 
-        /* VIRTUAL FUNCTIONS */
-        // The compare function should be implemented inside the child class
+
+        /* PUBLIC FUNCTIONS */
+        void insert(T data)
+        {
+            // Check if this is the first node in the tree
+            if(!head)
+            {
+                head = new Node<T>(data);
+            }
+            else
+            {
+                // Set the direction pointer
+                int direction = 0;
+                // Find the desired position
+                Node<T>* cursor = iterate(head, data, &direction);
+
+                // Check if the new node should be inserted to the left or right
+                if (direction == 1)
+                {
+                    cursor->set_next(new Node<T>(data));
+                }
+                else if (direction == -1)
+                {
+                    cursor->set_previous(new Node<T>(data));
+                }
+                // If the node is duplicate, we skip
+            }
+        }
+
+
+        // SEARCH, searches for a node given the data and a compare function. Returns a pointer to a Node.
+        // The compare function should be passed as a pointer to a function.
         // It must return either -1, 0, or 1.
         // Where -1 is going to represent a direction of -1 (left) and 1 is going to represent a direction of +1 (right)
         // The value 0 should be returned if both of the arguments are equal, informing the required node has been found.
-        virtual int compare(void* data_one, void* data_two) = 0;
+        T search(T data)
+        {
+            // Set the direction pointer
+            int direction = 0;
+            // Use iterate to find de desired position
+            Node<T>* cursor = iterate(head, data, compare, &direction);
 
-        /* PUBLIC FUNCTIONS */
-        void insert(T data) {
+            // Check if the node that was found by iterate is the desired one, or an adjacent one
+            if (direction == 0)
+            {
+                return cursor->get_data();
+            }
 
-        }
-
-        void* search(T data) {
-            return nullptr;
+            // If not, return null
+            return NULL;
         }
     };
 }

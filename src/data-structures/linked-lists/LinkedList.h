@@ -23,7 +23,7 @@ namespace DS
         /* CONSTRUCTOR */
         LinkedList()
         {
-            head = NULL;
+            head = nullptr;
             length = 0;
         }
 
