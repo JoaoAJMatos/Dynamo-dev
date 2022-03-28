@@ -15,6 +15,7 @@
 #define DEV_DYNAMO_NODE_H
 
 #include <iostream>
+#include <cstdio>
 
 namespace DS
 {
@@ -23,8 +24,9 @@ namespace DS
     class Node {
     private:
         /* MEMBER VARIABLES */
-        T data;     // Data variable that stores the node data
+        T data; // Data variable that stores the node data
         Node* next; // Pointer to the next node
+        Node* previous; // Pointer to the previous node
 
     public:
         /* CONSTRUCTORS */
@@ -33,12 +35,15 @@ namespace DS
         {
             data = NULL;
             next = nullptr;
+            previous = nullptr;
         }
+
         // Parameterized constructor
         explicit Node(T data)
         {
             this->data = data;
             this->next = nullptr;
+            this->previous = nullptr;
         }
 
         /* GETTERS & SETTERS*/
@@ -52,9 +57,19 @@ namespace DS
             return next;
         }
 
+        Node* get_previous()
+        {
+            return previous;
+        }
+
         void set_next(Node* input_next)
         {
             next = input_next;
+        }
+
+        void set_previous(Node* input_prev)
+        {
+            previous = input_prev;
         }
     };
 }
