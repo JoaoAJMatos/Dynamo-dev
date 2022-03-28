@@ -3,9 +3,9 @@
 #include <vector>
 
 int main() {
-    DS::Queue<std::vector<int>> q;
+    DS::Queue<int> q;
 
-    q.push();
+    q.push(0);
 
     q.print_queue();
 
