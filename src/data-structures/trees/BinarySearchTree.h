@@ -56,7 +56,7 @@ namespace DS
         Node<T>* head;
 
         /* FUNCTION POINTERS */
-        virtual int compare(T data_one, T data_two) = 0;
+        int (*compare)(T data_one, T data_two);
 
         /* MEMBER FUNCTIONS */
         // The iterate function is a recursive algorithm that traverses the branches of a tree.
@@ -65,6 +65,8 @@ namespace DS
         // The function takes a reference to the current position, desired data, and an int pointer as arguments.
         Node<T>* iterate(Node<T>* cursor, T data, int* direction)
         {
+            std::cout << "Here";
+
             // Compare the cursor's data to the desired data
             if(compare(cursor->get_data(), data) == 1)
             {
@@ -88,7 +90,7 @@ namespace DS
                 if (cursor->get_previous())
                 {
                     // Recursively test the previous node (left)
-                    return iterate(cursor->get_next(), data, &direction);
+                    return iterate(cursor->get_next(), data, direction);
                 }
                 else
                 {
@@ -110,6 +112,10 @@ namespace DS
             head = nullptr;
         }
 
+        void set_compare(int (*incoming_compare)(T data_one, T data_two))
+        {
+            compare = incoming_compare;
+        }
 
         /* PUBLIC FUNCTIONS */
         void insert(T data)
@@ -150,16 +156,16 @@ namespace DS
             // Set the direction pointer
             int direction = 0;
             // Use iterate to find de desired position
+
             Node<T>* cursor = iterate(head, data, &direction);
+
+            std::cout << "Here";
 
             // Check if the node that was found by iterate is the desired one, or an adjacent one
             if (direction == 0)
             {
                 return cursor->get_data();
             }
-
-            // If not, return null
-            return NULL;
         }
     };
 }

@@ -1,29 +1,35 @@
 #include "src/data-structures/queue/Queue.h"
 #include "src/data-structures/dictionary/Dictionary.h"
-#include "src/data-structures/trees/default-comparisons/string-keys-compare.h"
 #include <iostream>
 #include <vector>
 
-int int_compare(int entry_one, int entry_two)
+
+int compare_string_keys(Dict::Entry<char*, char*> entry_one, Dict::Entry<char*, char*> entry_two)
 {
-    if (entry_two > entry_one)
+    if (strcmp(entry_one.getKey(), entry_two.getKey()) > 0)
     {
         return 1;
     }
-    else if (entry_one > entry_two)
+    else if (strcmp((char *)(entry_one.getKey()), (char *)(entry_two.getKey())) < 0)
     {
         return -1;
     }
-    else
-    {
-        return 0;
-    }
+    return 0;
 }
 
 int main() {
-    //DS::Dictionary2<int, int> dict(int_compare);
-    DS::Dictionary<int, int> dict;
+    DS::Dictionary<char*, char*> dict(&compare_string_keys);
 
+    char* key = "Hello";
+    char* val = "Bye";
+
+    char* got = dict.searchInDict("Hello");
+
+    std::string printable(dict.searchInDict("Hello"));
+
+    std::cout << printable;
+
+    //dict.insertInDict(key, val);
 
     return 0;
 }
