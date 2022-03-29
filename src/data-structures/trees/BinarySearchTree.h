@@ -49,13 +49,14 @@ namespace DS
 {
     template <typename T>
 
-    class BinarySearchTree {
+    class BinarySearchTree
+    {
     private:
         /* MEMBER VARIABLES */
         Node<T>* head;
 
         /* FUNCTION POINTERS */
-        int (*compare)(T data_one, T data_two);
+        virtual int compare(T data_one, T data_two) = 0;
 
         /* MEMBER FUNCTIONS */
         // The iterate function is a recursive algorithm that traverses the branches of a tree.
@@ -71,7 +72,7 @@ namespace DS
                 if (cursor->get_next())
                 {
                     // Recursively test the next node (right)
-                    return iterate(cursor->get_next(), data, compare, direction);
+                    return iterate(cursor->get_next(), data, direction);
                 }
                 else
                 {
@@ -87,7 +88,7 @@ namespace DS
                 if (cursor->get_previous())
                 {
                     // Recursively test the previous node (left)
-                    return iterate(cursor->get_next(), data, compare, &direction);
+                    return iterate(cursor->get_next(), data, &direction);
                 }
                 else
                 {
@@ -104,10 +105,9 @@ namespace DS
 
     public:
         /* CONSTRUCTOR */
-        explicit BinarySearchTree(int (*compare_function)(T data_one, T data_two))
+        explicit BinarySearchTree()
         {
             head = nullptr;
-            compare = compare_function;
         }
 
 
@@ -150,7 +150,7 @@ namespace DS
             // Set the direction pointer
             int direction = 0;
             // Use iterate to find de desired position
-            Node<T>* cursor = iterate(head, data, compare, &direction);
+            Node<T>* cursor = iterate(head, data, &direction);
 
             // Check if the node that was found by iterate is the desired one, or an adjacent one
             if (direction == 0)
