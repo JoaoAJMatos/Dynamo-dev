@@ -1,35 +1,19 @@
-#include "src/data-structures/queue/Queue.h"
-#include "src/data-structures/dictionary/Dictionary.h"
 #include <iostream>
-#include <vector>
+#include "src/system/time/Time.h"
 
 
-int compare_string_keys(Dict::Entry<char*, char*> entry_one, Dict::Entry<char*, char*> entry_two)
+
+int main()
 {
-    if (strcmp(entry_one.getKey(), entry_two.getKey()) > 0)
-    {
-        return 1;
-    }
-    else if (strcmp((char *)(entry_one.getKey()), (char *)(entry_two.getKey())) < 0)
-    {
-        return -1;
-    }
-    return 0;
-}
+    Time t;
 
-int main() {
-    DS::Dictionary<char*, char*> dict(&compare_string_keys);
+    t.startHighResClock();
 
-    char* key = "Hello";
-    char* val = "Bye";
+    for (int i=0; i<1000; ++i) std::cout << "*";
 
-    char* got = dict.searchInDict("Hello");
+    t.stopHighResClock();
 
-    std::string printable(dict.searchInDict("Hello"));
-
-    std::cout << printable;
-
-    //dict.insertInDict(key, val);
+    std::cout << t.getTimeElapsed();
 
     return 0;
 }
