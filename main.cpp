@@ -9,7 +9,7 @@ int main()
 
     t.startHighResClock();
 
-    for (int i=0; i<1000; ++i) std::cout << "*";
+    Time::sleep(2000);
 
     t.stopHighResClock();
 

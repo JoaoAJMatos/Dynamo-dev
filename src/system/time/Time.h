@@ -8,6 +8,7 @@
 
 #include <chrono>
 #include <ctime>
+#include <thread>
 
 class Time {
 private:
@@ -18,13 +19,17 @@ private:
 
 
 public:
+    /* CONSTRUCTOR */
+    Time();
+
     /* PUBLIC FUNCTIONS */
     void startHighResClock();
     void stopHighResClock();
+    static void sleep(int ms);
 
     /* GETTERS */
     std::chrono::duration<double>::rep getTimeElapsed();
-    std::time_t getTimestamp();
+    static std::time_t getTimestamp();
 };
 
 
