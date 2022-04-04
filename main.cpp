@@ -9,11 +9,11 @@ int main()
 
     t.startHighResClock();
 
-    Time::sleep(2000);
+    //Time::sleep(2000);
 
     t.stopHighResClock();
 
-    std::cout << t.getTimeElapsed();
+    std::cout << Time::getTimestamp();
 
     return 0;
 }
