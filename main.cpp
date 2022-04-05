@@ -11,7 +11,7 @@ int main()
 
     sys::ThreadPool tp(10);
 
-    for(auto i = 1; i <= 10; i++)
+    for(auto i = 1; i <= 1; i++)
         tp.do_work([&, i = i]()
                    {
                        {

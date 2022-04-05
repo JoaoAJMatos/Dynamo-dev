@@ -40,17 +40,21 @@ sys::ThreadPool::ThreadPool(std::size_t thread_count)
     }
 }
 
-
+// The destructor will push a shutdown signal into the work queue.
+// The worker threads will interpret a nullptr as a shutdown signal.
 sys::ThreadPool::~ThreadPool()
 {
     {
+        // Lock the queue
         std::unique_lock<std::mutex> guard(m_queue_lock);
+        // Push x shutdown signals to the queue, where x is the number of threads
         for(auto& t : m_threads)
         {
             m_queue.push(work_item_ptr_t{nullptr});
         }
     }
 
+    // Join the threads
     for(auto& t : m_threads)
     {
         t.join();
@@ -66,6 +70,7 @@ void sys::ThreadPool::do_work(work_item_t wi)
         std::unique_lock<std::mutex> guard(m_queue_lock);
         m_queue.push(std::move(work_item));
     }
+
     m_condition.notify_one();
 }
 

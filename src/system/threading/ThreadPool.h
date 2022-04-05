@@ -24,6 +24,8 @@ namespace sys
     public:
         /* CONSTRUCTOR/DESTRUCTOR */
         explicit ThreadPool(std::size_t thread_count = std::thread::hardware_concurrency());
+        // The destructor will push a shutdown signal into the work queue.
+        // The worker threads will interpret a nullptr as a shutdown signal and join with the main thread.
         ~ThreadPool();
 
         ThreadPool(const ThreadPool&) = delete;
@@ -35,6 +37,8 @@ namespace sys
         using work_item_t = std::function<void(void)>;
 
         /* PUBLIC FUNCTIONS */
+        // The do_work() function pushes a work_item onto the queue
+        // The worker threads will wake up and pick up the signal to execute the tasks
         void do_work(work_item_t wi);
 
     private:
@@ -49,6 +53,7 @@ namespace sys
         std::size_t number_of_threads;
 
         /* THREADS ARRAY */
+        // This vector will store all the worker threads
         using threads_t = std::vector<std::thread>;
         threads_t m_threads;
     };
