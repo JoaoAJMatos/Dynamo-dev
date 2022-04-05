@@ -33,9 +33,9 @@ namespace net {
 
     public:
         /* CONSTRUCTOR */
+        // The constructor for an HTTP request takes in
         explicit HTTP(char* request_string);
     };
-
 }
 
 

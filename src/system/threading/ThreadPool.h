@@ -41,6 +41,9 @@ namespace sys
         // The worker threads will wake up and pick up the signal to execute the tasks
         void do_work(work_item_t wi);
 
+        /* GETTERS */
+        std::size_t get_number_of_threads() const;
+
     private:
         /* MEMBER CUSTOM TYPES */
         using work_item_ptr_t = std::unique_ptr<work_item_t>;

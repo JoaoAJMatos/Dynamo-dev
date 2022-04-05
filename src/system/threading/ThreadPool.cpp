@@ -74,3 +74,8 @@ void sys::ThreadPool::do_work(work_item_t wi)
     m_condition.notify_one();
 }
 
+/* GETTERS */
+std::size_t sys::ThreadPool::get_number_of_threads() const {
+    return number_of_threads;
+}
+

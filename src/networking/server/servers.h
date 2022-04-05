@@ -5,6 +5,6 @@
 #ifndef DEV_DYNAMO_SERVERS_H
 #define DEV_DYNAMO_SERVERS_H
 
-#include "WebServer.h"
+#include "BasicServer.h"
 
 #endif //DEV_DYNAMO_SERVERS_H
