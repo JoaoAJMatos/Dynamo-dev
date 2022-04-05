@@ -7,6 +7,7 @@
 
 #include <cstring>
 #include <cstdlib>
+#include <map>
 
 namespace net {
     // Enum for HTTP methods
@@ -26,8 +27,8 @@ namespace net {
     class HTTP {
     private:
         /* MEMBER VARIABLES */
-        int method;
-        char* URI;
+        std::map<char*, int> method;
+        std::map<char*, char*> URI;
         float HTTP_Version;
 
     public:

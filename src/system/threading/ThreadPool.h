@@ -1,43 +1,59 @@
 //
-// Created by Matos on 4/3/2022.
+// Created by joaoa on 05/04/2022.
 //
 
 #ifndef DEV_DYNAMO_THREADPOOL_H
 #define DEV_DYNAMO_THREADPOOL_H
 
-#include <pthread.h>
+#include <iostream>
+#include <thread>
+#include <mutex>
+#include <queue>
+#include <memory>
+#include <vector>
+#include <utility>
+#include <functional>
+#include <condition_variable>
+#include <stdexcept>
+#include <cstdlib>
 
-#include "../../data-structures/queue/Queue.h"
-#include "common/ThreadJob.h"
-
-class ThreadPool
+namespace sys
 {
-private:
-    /* MEMBER VARIABLES */
-    int num_threads;
-    // A control switch for the thread pool
-    bool active;
-    // A queue to store work
-    DS::Queue<Threading::ThreadJob> work;
+    class ThreadPool
+    {
+    public:
+        /* CONSTRUCTOR/DESTRUCTOR */
+        explicit ThreadPool(std::size_t thread_count = std::thread::hardware_concurrency());
+        ~ThreadPool();
 
-    // Mutices for making the pool thread-safe
-    pthread_t* pool;
-    pthread_mutex_t lock;
-    pthread_cond_t signal;
+        ThreadPool(const ThreadPool&) = delete;
+        ThreadPool(ThreadPool&&) = delete;
+        ThreadPool& operator = (const ThreadPool&) = delete;
+        ThreadPool& operator = (ThreadPool&&) = delete;
 
-    static void* generic_thread_function(void* arg);
+        /* CUSTOM TYPES */
+        using work_item_t = std::function<void(void)>;
 
-public:
-    /* CONSTRUCTOR/DESTRUCTOR */
-    // The ThreadPool class needs a parameterized constructor that takes in the number of threads as an argument
-    // The constructor will create a thread pool with the desired number of threads
-    ThreadPool(int thread_count);
-    ~ThreadPool();
+        /* PUBLIC FUNCTIONS */
+        void do_work(work_item_t wi);
 
+    private:
+        /* MEMBER CUSTOM TYPES */
+        using work_item_ptr_t = std::unique_ptr<work_item_t>;
+        using work_queue_t = std::queue<work_item_ptr_t>;
 
-    // A function for safely adding work to the queue
-    void add_work(Threading::ThreadJob);
-};
+        /* MEMBER VARIABLES */
+        work_queue_t m_queue;
+        std::mutex m_queue_lock;
+        std::condition_variable m_condition;
+        std::size_t number_of_threads;
+
+        /* THREADS ARRAY */
+        using threads_t = std::vector<std::thread>;
+        threads_t m_threads;
+    };
+}
+
 
 
 #endif //DEV_DYNAMO_THREADPOOL_H

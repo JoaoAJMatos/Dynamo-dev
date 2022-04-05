@@ -1,47 +1,71 @@
 //
-// Created by Matos on 4/3/2022.
+// Created by joaoa on 05/04/2022.
 //
 
 #include "ThreadPool.h"
 
-/* CONSTRUCTOR */
-ThreadPool::ThreadPool(int thread_count)
+
+/* CONSTRUCTOR/DESTRUCTOR */
+sys::ThreadPool::ThreadPool(std::size_t thread_count)
 {
-    num_threads = thread_count;
-    active = true;
+    // Throw an exception if the user tries to create a pool with less than 0 worker threads
+    if(thread_count < 0) throw std::invalid_argument("Thread count must not be less than 0");
+    // If the thread count is value, update the `number_of_threads`. In case the value is 0, set the number of threads to the default value.
+    else if(thread_count == 0) number_of_threads = std::thread::hardware_concurrency();
+    else number_of_threads = thread_count;
 
-    // Initialize the pthread mutices
-    lock = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;
-    signal = (pthread_cond_t)PTHREAD_COND_INITIALIZER;
-    pthread_mutex_lock(&lock);
+    m_threads.reserve(number_of_threads);
 
-    for (int i = 0; i < num_threads; i++)
+    for(auto i = 0; i < number_of_threads; ++i)
     {
-        pthread_create(&pool[i], NULL, &ThreadPool::generic_thread_function, )
+        m_threads.push_back(std::thread(
+                [this](){
+                    while(true)
+                    {
+                        work_item_ptr_t work{nullptr};
+                        {
+                            std::unique_lock<std::mutex> guard(m_queue_lock);
+                            m_condition.wait(guard, [&]() { return !m_queue.empty(); });
+                            work = std::move(m_queue.front());
+                            m_queue.pop();
+                        }
+                        if(!work)
+                        {
+                            break;
+                        }
+
+                        (*work)();
+                    }
+                }));
     }
 }
 
-/* MEMBER FUNCTIONS */
-// The generic_thread_function() is required as the argument for creating each thread in the pool
-// It allows each thread to await a ThreadJob and execute its contents
-// This makes the pool dynamic - any function can be passed as a job
-void *ThreadPool::generic_thread_function(void *arg)
-{
-    while(active)
-    {
-        // Lock the work queue
-        pthread_mutex_lock(&lock);
-        pthread_cond_wait(&signal, &lock);
-        // Get the job from the queue
-        Threading::ThreadJob job = work.pop();
-        // Unlock the queue
-        pthread_mutex_unlock(&lock);
 
-        // Execute the job
-        if (job.job)
+sys::ThreadPool::~ThreadPool()
+{
+    {
+        std::unique_lock<std::mutex> guard(m_queue_lock);
+        for(auto& t : m_threads)
         {
-            job.job(job.arg);
+            m_queue.push(work_item_ptr_t{nullptr});
         }
     }
-    return nullptr;
+
+    for(auto& t : m_threads)
+    {
+        t.join();
+    }
 }
+
+
+/* PUBLIC FUNCTIONS */
+void sys::ThreadPool::do_work(work_item_t wi)
+{
+    auto work_item = std::make_unique<work_item_t>(std::move(wi));
+    {
+        std::unique_lock<std::mutex> guard(m_queue_lock);
+        m_queue.push(std::move(work_item));
+    }
+    m_condition.notify_one();
+}
+

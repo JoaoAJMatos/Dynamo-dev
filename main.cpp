@@ -1,19 +1,22 @@
 #include <iostream>
-#include "src/system/time/Time.h"
 
-
+#include "src/system/threading/ThreadPool.h"
 
 int main()
 {
-    Time t;
+    using namespace std;
+    mutex cout_guard;
 
-    t.startHighResClock();
+    cout << "main thread ID: " << this_thread::get_id() << endl;
 
-    //Time::sleep(2000);
+    sys::ThreadPool tp(10);
 
-    t.stopHighResClock();
-
-    std::cout << Time::getTimestamp();
-
-    return 0;
+    for(auto i = 1; i <= 10; i++)
+        tp.do_work([&, i = i]()
+                   {
+                       {
+                           unique_lock<std::mutex> guard(cout_guard);
+                           cout << "doing work " << i << "..." << endl;
+                       }
+                   });
 }

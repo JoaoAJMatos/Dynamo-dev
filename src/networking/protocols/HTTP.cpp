@@ -67,8 +67,8 @@ net::HTTP::HTTP(char *request_string)
     // Fill in the member variables
     // (sorry for the mess, there's prolly a more elegant way of doing this, but I need to take a shit, so...)
     char* _method = strtok(request_line, " ");
-    method = what_method(_method);
-    URI = strtok(nullptr, " ");
+    method.insert({"method", what_method(_method)});
+    URI.insert({"URI" ,strtok(nullptr, " ")});
     char* HTTP_Version_temp = strtok(nullptr, " ");
     HTTP_Version_temp = strtok(HTTP_Version_temp, "/");
     HTTP_Version_temp = strtok(nullptr, "/");

@@ -7,5 +7,6 @@
 
 #include "sockets/sockets.h"
 #include "server/servers.h"
+#include "protocols/HTTP.h"
 
 #endif //DEV_DYNAMO_NETWORKING_H
