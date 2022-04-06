@@ -4,7 +4,7 @@
 
 #include "DNS.h"
 
-/* CONSTRUCTOR */
+/* CONSTRUCTOR/DESTRUCTOR */
 servers::DNS::DNS(int domain, int service, int protocol, int port, unsigned long iface, int bklg, int thread_count)
 : net::BasicServer(domain, service, protocol, port, iface, bklg)
 {
@@ -21,7 +21,10 @@ servers::DNS::DNS(int domain, int service, int protocol, int port, unsigned long
     tp = new sys::ThreadPool(number_of_threads);
 }
 
-/* PUBLIC FUNCTIONS */
+servers::DNS::~DNS()
+{
+    delete tp;
+}
 
 
 /* GETTERS */

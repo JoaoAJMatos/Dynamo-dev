@@ -50,6 +50,7 @@
 #include "../../src/system/time/Time.h"
 #include "../../src/networking/sockets/common/Socket.h"
 #include "../../src/networking/server/servers.h"
+#include "../../src/networking/protocols/DNS.h"
 #include "../../src/util/uuid/uuid.h"
 
 namespace servers
@@ -93,10 +94,11 @@ namespace servers
         // defined in BasicServer.h, as well as the number of threads the server will have in the thread
         // pool. If the number of threads isn't specified, the default value is used.
         DNS(int domain, int service, int protocol, int port, unsigned long iface, int bklg, int thread_count = DEFAULT_THREAD_COUNT);
+        ~DNS() override;
 
         /* GETTERS */
-        std::map<boost::uuids::uuid, sockaddr_in> get_known_hosts();
-        std::map<boost::uuids::uuid, std::time_t> get_connection_table();
+        std::map<char*, sockaddr_in> get_known_hosts();
+        std::map<char*, std::time_t> get_connection_table();
     };
 }
 
