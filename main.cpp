@@ -2,21 +2,18 @@
 
 #include "src/system/threading/ThreadPool.h"
 
+
+void  hello()
+{
+    std::cout << "Hello" << std::endl;
+}
+
 int main()
 {
-    using namespace std;
-    mutex cout_guard;
+    sys::ThreadPool tp(1);
 
-    cout << "main thread ID: " << this_thread::get_id() << endl;
+    tp.do_work([&, hello = &hello]() {
+        hello();
+    });
 
-    sys::ThreadPool tp(10);
-
-    for(auto i = 1; i <= 1; i++)
-        tp.do_work([&, i = i]()
-                   {
-                       {
-                           unique_lock<std::mutex> guard(cout_guard);
-                           cout << "doing work " << i << "..." << endl;
-                       }
-                   });
 }

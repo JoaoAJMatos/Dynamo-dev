@@ -27,13 +27,19 @@ namespace net {
     class HTTP {
     private:
         /* MEMBER VARIABLES */
-        std::map<char*, int> method;
-        std::map<char*, char*> URI;
-        float HTTP_Version;
+        std::map<char*, char*> request_line;
+        std::map<char*, char*> header_fields;
+        std::map<char*, char*> body;
+
+        /* PRIVATE MEMBER FUNCTIONS */
+        // These functions extract the constituent elements from a request string
+        void extract_request_line_fields(char* input_request_line);
+        void extract_header_fields(char* input_header_fields);
+        void extract_body(char* input_body);
 
     public:
         /* CONSTRUCTOR */
-        // The constructor for an HTTP request takes in
+        // The constructor for an HTTP request takes in a string containing the full request
         explicit HTTP(char* request_string);
     };
 }

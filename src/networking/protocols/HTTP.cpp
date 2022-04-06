@@ -67,10 +67,44 @@ net::HTTP::HTTP(char *request_string)
     // Fill in the member variables
     // (sorry for the mess, there's prolly a more elegant way of doing this, but I need to take a shit, so...)
     char* _method = strtok(request_line, " ");
-    method.insert({"method", what_method(_method)});
-    URI.insert({"URI" ,strtok(nullptr, " ")});
+    //method.insert({"method", what_method(_method)});
+    //URI.insert({"URI" ,strtok(nullptr, " ")});
     char* HTTP_Version_temp = strtok(nullptr, " ");
     HTTP_Version_temp = strtok(HTTP_Version_temp, "/");
     HTTP_Version_temp = strtok(nullptr, "/");
-    HTTP_Version = (float)atof(HTTP_Version_temp);
+    //HTTP_Version = (float)atof(HTTP_Version_temp);
+}
+
+
+/* PRIVATE MEMBER FUNCTIONS */
+// These functions extract the constituent elements from a request string
+void net::HTTP::extract_request_line_fields(char *input_request_line)
+{
+    // Copy the string literal into a local instance
+    char fields[strlen(input_request_line)];
+    strcpy(fields, input_request_line);
+
+    // Separate the string on spaces for each section
+    char* method = strtok(fields, " ");
+    char* uri = strtok(nullptr, " ");
+    char* http_version = strtok(nullptr, "\0");
+
+    // Insert the results into the dictionary
+    request_line["method"] = method;
+    request_line["uri"] = uri;
+    request_line["http_version"] = http_version;
+
+}
+
+void net::HTTP::extract_header_fields(char *input_header_fields)
+{
+    // Copy the string literal into a local instance
+    char fields[strlen(input_header_fields)];
+    strcpy(fields, input_header_fields);
+
+}
+
+void net::HTTP::extract_body(char *input_body)
+{
+
 }

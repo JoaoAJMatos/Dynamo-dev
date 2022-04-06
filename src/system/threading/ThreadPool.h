@@ -17,13 +17,17 @@
 #include <stdexcept>
 #include <cstdlib>
 
+#define DEFAULT_THREAD_COUNT std::thread::hardware_concurrency()
+
+// TODO: Try to make the thread pool resizable according to the work load.
+
 namespace sys
 {
     class ThreadPool
     {
     public:
         /* CONSTRUCTOR/DESTRUCTOR */
-        explicit ThreadPool(std::size_t thread_count = std::thread::hardware_concurrency());
+        explicit ThreadPool(std::size_t thread_count = DEFAULT_THREAD_COUNT);
         // The destructor will push a shutdown signal into the work queue.
         // The worker threads will interpret a nullptr as a shutdown signal and join with the main thread.
         ~ThreadPool();

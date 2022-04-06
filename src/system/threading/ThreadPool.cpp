@@ -11,7 +11,7 @@ sys::ThreadPool::ThreadPool(std::size_t thread_count)
     // Throw an exception if the user tries to create a pool with less than 0 worker threads
     if(thread_count < 0) throw std::invalid_argument("Thread count must not be less than 0");
     // If the thread count is value, update the `number_of_threads`. In case the value is 0, set the number of threads to the default value.
-    else if(thread_count == 0) number_of_threads = std::thread::hardware_concurrency();
+    else if(thread_count == 0) number_of_threads = DEFAULT_THREAD_COUNT;
     else number_of_threads = thread_count;
 
     m_threads.reserve(number_of_threads);
