@@ -62,12 +62,12 @@ namespace servers
         // Dictionary of all the known hosts
         //    - Key: UUID of the node
         //    - Object: Socket object of the known hosts
-        std::map<boost::uuids::uuid, sockaddr_in> known_hosts;
+        std::map<char*, sockaddr_in> known_hosts;
 
         // Dictionary for timestamping connections
         //    - Key: UUID of the node
         //    - Object: Timestamp of the last connection made
-        std::map<boost::uuids::uuid, std::time_t> connection_table;
+        std::map<char*, std::time_t> connection_table;
 
         // Variables regarding the server
         int domain;
@@ -83,7 +83,7 @@ namespace servers
 
         /* VIRTUAL FUNCTION OVERRIDES */
         // TODO: Define the virtual functions
-        void accepter() override {};
+        void accepter() override;
         // The handler is used in a multi threaded environment to handle incoming connections
         void handler() override {};
         void responder() override {};
@@ -99,6 +99,10 @@ namespace servers
         /* GETTERS */
         std::map<char*, sockaddr_in> get_known_hosts();
         std::map<char*, std::time_t> get_connection_table();
+
+        /* PUBLIC FUNCTIONS */
+        // This function launches the server, pushing the thread jobs to the thread pool
+        void launch() override;
     };
 }
 

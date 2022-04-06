@@ -26,15 +26,31 @@ servers::DNS::~DNS()
     delete tp;
 }
 
+/* MEMBER FUNCTIONS */
+void servers::DNS::accepter()
+{
+}
+
+/* PUBLIC FUNCTIONS */
+// This function launches the server
+void servers::DNS::launch()
+{
+    tp->do_work([&]() {
+        accepter();
+    });
+}
 
 /* GETTERS */
 // Returns a dictionary containing all the known hosts
-std::map<boost::uuids::uuid, sockaddr_in> servers::DNS::get_known_hosts()
+std::map<char*, sockaddr_in> servers::DNS::get_known_hosts()
 {
     return known_hosts;
 }
 
 // Returns a dictionary containing all the active connections
-std::map<boost::uuids::uuid, std::time_t> servers::DNS::get_connection_table() {
+std::map<char*, std::time_t> servers::DNS::get_connection_table()
+{
     return connection_table;
 }
+
+
