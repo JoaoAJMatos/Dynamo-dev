@@ -17,7 +17,7 @@ net::SocketConnector::SocketConnector(int domain, int service, int protocol, int
 
 /* VIRTUAL FUNCTION OVERRIDES */
 // Definition of connect() virtual function declared in Socket.h
-int net::SocketConnector::sock_connect(int sock, struct sockaddr_in address) {
+void net::SocketConnector::sock_connect(int sock, struct sockaddr_in address) {
     // Sets the connection variable to the result of the connection. 0 if successful
     connection = connect(sock, (struct sockaddr*)&address, sizeof(address));
 }

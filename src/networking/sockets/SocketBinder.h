@@ -25,7 +25,7 @@ namespace net
 
         /* MEMBER FUNCTIONS */
         // Virtual function from parent
-        int sock_connect(int sock, struct sockaddr_in address) override;
+        void sock_connect(int sock, struct sockaddr_in address) override;
 
     public:
         /* CONSTRUCTOR */

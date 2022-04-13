@@ -22,7 +22,7 @@ namespace net
         SocketConnector(int domain, int service, int protocol, int port, unsigned long iface);
 
         /* VIRTUAL FUNCTION OVERRIDES */
-        int sock_connect(int sock, struct sockaddr_in address) override;
+        void sock_connect(int sock, struct sockaddr_in address) override;
 
         /* GETTERS */
         int get_connection() const;

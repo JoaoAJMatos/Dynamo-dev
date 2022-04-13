@@ -46,7 +46,7 @@ namespace net
     public:
         /* CONSTRUCTOR */
         // The constructor takes in a request string and parses it
-        DNS(char* request_string);
+        explicit DNS(char* request_string);
 
         /* GETTERS */
         int get_type() const;
