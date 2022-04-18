@@ -29,7 +29,6 @@ namespace net
     public:
         /* CONSTRUCTOR */
         BasicServer(int domain, int service, int protocol, int port, unsigned long iface, int bklg);
-        virtual ~BasicServer();
 
         /* VIRTUAL FUNCTIONS */
         // The launch function makes a call to the virtual member functions defined inside the child class.

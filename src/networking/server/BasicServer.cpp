@@ -10,12 +10,6 @@ net::BasicServer::BasicServer(int domain, int service, int protocol, int port, u
     socket = new SocketListener(domain, service, protocol, port, iface, bklg);
 }
 
-/* DESTRUCTOR */
-net::BasicServer::~BasicServer() {
-    // To prevent memory leaks, we can delete socket once the class is destructed
-    delete socket;
-}
-
 /* GETTERS */
 net::SocketListener *net::BasicServer::get_socket() {
     return socket;

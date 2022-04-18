@@ -3,7 +3,7 @@
 Dynamo's DNS servers provide a list of known addresses.
 They are the first point of contact of any new node attempting
 to connect to the network.
-
+ 
 Once a new node is started, it sends a DNS query to one of the
 predefined DNS servers in the Dynamo network. If that name server
 happens to be down, the node will attempt to establish a connection

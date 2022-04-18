@@ -37,3 +37,11 @@ std::time_t Time::getTimestamp() {
     return std::time(nullptr);
 }
 
+std::string Time::getCurrentDateTime() {
+    std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+    std::string s(20, '\0');
+    std::strftime(&s[0], s.size(), "%Y-%m-%d %H:%M:%S", std::localtime(&now));
+    return s;
+}
+

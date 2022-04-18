@@ -9,6 +9,7 @@
 #include <chrono>
 #include <ctime>
 #include <thread>
+#include <iostream>
 
 class Time {
 private:
@@ -30,6 +31,7 @@ public:
     /* GETTERS */
     std::chrono::duration<double>::rep getTimeElapsed();
     static std::time_t getTimestamp();
+    static std::string getCurrentDateTime();
 };
 
 
