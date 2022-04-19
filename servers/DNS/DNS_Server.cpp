@@ -15,23 +15,17 @@ void servers::DNS_Server::save_config(std::string config_file_path) const
     // Store the configurations and set the ENV variable
     std::string full_path = config_file_path + "\\ddns.conf";
 
-    // Create and open the file
-    std::ofstream config_file(full_path);
+    server_utils::set_config(full_path, "domain", (char*)(this->domain));
+    server_utils::set_config(full_path, "service", (char*)(this->service));
+    server_utils::set_config(full_path, "protocol", (char*)(this->protocol));
+    server_utils::set_config(full_path, "port", (char*)(this->port));
+    server_utils::set_config(full_path, "interface", this->ip_str);
+    server_utils::set_config(full_path, "backlog", (char*)(this->backlog));
+    server_utils::set_config(full_path, "threads", (char*)(this->number_of_threads));
 
-    // Write to the file
-    config_file << "domain=" << this->domain << std::endl;
-    config_file << "service=" << this->service << std::endl;
-    config_file << "protocol=" << this->protocol << std::endl;
-    config_file << "port=" << this->port << std::endl;
-    config_file << "interface=" << this->ip_str << std::endl;
-    config_file << "backlog=" << this->backlog << std::endl;
-    config_file << "threads=" << this->number_of_threads;
-
-    // Close the file
-    config_file.close();
 
     // Add config path to the ENV variables
-    server_utils::set_startup_config(CONF_PATH, full_path.data());
+    server_utils::set_config(STARTUP_CONFIG_PATH ,CONF_PATH, full_path.data());
 }
 
 /* CONSTRUCTOR/DESTRUCTOR */

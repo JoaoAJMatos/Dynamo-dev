@@ -27,7 +27,7 @@
 
 namespace server_utils
 {
-    int set_startup_config(const char* name, const char* value);
+    int set_config(const std::string& path ,const char* name, const char* value);
 }
 
 #endif //DEV_DYNAMO_STARTUPCONFMANAGER_H

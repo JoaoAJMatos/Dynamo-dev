@@ -4,10 +4,10 @@
 
 #include "StartupConfManager.h"
 
-int server_utils::set_startup_config(const char *name, const char *value)
+int server_utils::set_config(const std::string& path ,const char *name, const char *value)
 {
     // Create and open the file
-    std::ofstream startup_config_file(STARTUP_CONFIG_PATH);
+    std::ofstream startup_config_file(path);
 
     startup_config_file << name << "=" << value << std::endl;
 
