@@ -60,3 +60,6 @@ The following table contains a list of all the settings stored in the main confi
 | Interface | 192.168.0.1 |
 |  Backlog  |     100     |
 |  Threads  |      12     |
+
+If no startup file is found, the user is prompted to configure the server and boot it from scratch.
+The server has a default set of configurations defined in the code which are used if the user chooses so.
