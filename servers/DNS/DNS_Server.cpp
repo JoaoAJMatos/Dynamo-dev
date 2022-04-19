@@ -110,7 +110,75 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
         // Prompt the user for the server configs
         else if (config_flag == 'N' || config_flag == 'n')
         {
+            int temp;
+            std::cout << "[+] Address family [IPv4/IPv6] (Choose 1 or 2): ";
+            std::cin >> temp;
 
+            if(temp == 1)
+            {
+                this->domain = AF_INET;
+                std::cout << "[SERVER INFO] Server address family set to IPv4" << std::endl;
+            }
+            else if (temp == 2)
+            {
+                this->domain = AF_INET6;
+                std::cout << "[SERVER INFO] Server address family set to IPv6" << std::endl;
+            }
+
+
+            std::cout << "[+] Service [TCP/UDP] (Choose 1 or 2): ";
+            std::cin >> temp;
+
+            if(temp == 1)
+            {
+                this->service = SOCK_STREAM;
+                std::cout << "[SERVER INFO] Server service set to TCP" << std::endl;
+            }
+            else if(temp == 2)
+            {
+                this->service = SOCK_DGRAM;
+                std::cout << "[SERVER INFO] Server service set to UDP" << std::endl;
+            }
+
+            this->protocol = 0;
+
+            std::cout << "[+] Port: ";
+            std::cin >> this->port;
+
+            char ip[INET_ADDRSTRLEN];
+            std::cout << "[+] Enter the IP of the server: ";
+            std::cin >> ip;
+            std::cout << std::endl;
+
+            // Convert string to IP
+            inet_pton(AF_INET, ip, &(this->iface));
+
+            std::cout << "[+] Server backlog: ";
+            std::cin >> this->backlog;
+
+            std::cout << "[+] Thread count (enter 0 if you are not sure): ";
+            std::cin >> this->number_of_threads;
+
+            // Store the configurations and set the ENV variable
+            std::string full_path = config_file_path + "\\ddns.conf";
+
+            // Create and open the file
+            std::ofstream config_file(full_path);
+
+            // Write to the file
+            config_file << "domain=" << this->domain << std::endl;
+            config_file << "service=" << this->service << std::endl;
+            config_file << "protocol=" << this->protocol << std::endl;
+            config_file << "port=" << this->port << std::endl;
+            config_file << "interface=" << ip << std::endl;
+            config_file << "backlog=" << this->backlog << std::endl;
+            config_file << "threads=" << this->number_of_threads;
+
+            // Close the file
+            config_file.close();
+
+            // Add config path to the ENV variables
+            server_utils::set_startup_config(CONF_PATH, full_path.data());
         }
     }
 
@@ -164,6 +232,8 @@ void servers::DNS_Server::handler()
     {
         logger("Unable to create DNS query instance from incoming buffer");
     }
+
+    std::cout << buffer << std::endl;
 }
 
 // The responder will analyze the DNS query and respond accordingly

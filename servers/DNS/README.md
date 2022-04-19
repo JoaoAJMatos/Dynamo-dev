@@ -38,3 +38,25 @@ from the list, and all the name servers update their list.
 This workload can be distributed over all the name servers, meaning that a single name
 server doesn't need to be responsible for pinging every node once the TTL ends. If there
 are 2 name servers, the list will be split into 2, and so on...
+
+## Startup process
+
+On startup, the name server will fetch the file system for a startup config file.
+The default location of this file depends on the host OS: ``C:\dynamo\ddns\startup\startup.dycfg``
+for Windows, and ``/etc/dynamo/DDNS/startup.dycfg`` for Linux. 
+
+The startup config file (``startup.dycfg``) contains information regarding the startup
+of the server. It contains a variable that points to the main config file (``ddns.conf``). The
+main config file stores all the relevant information regarding the server.
+
+The following table contains a list of all the settings stored in the main config file:
+
+|   Name    |    Value    |
+|:---------:|:-----------:|
+|   Domain  |      2      |
+|  Service  |      1      |
+|  Protocol |      0      |
+|    Port   |     4524    |
+| Interface | 192.168.0.1 |
+|  Backlog  |     100     |
+|  Threads  |      12     |
