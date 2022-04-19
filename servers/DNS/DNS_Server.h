@@ -46,6 +46,7 @@ namespace servers
         int port;
         unsigned long iface;
         int backlog;
+        char ip_str[INET_ADDRSTRLEN];
 
         // An instance of a DNS protocol class
         net::DNS* DNS_query;
@@ -66,6 +67,9 @@ namespace servers
         // The handler is used in a multi threaded environment to handle incoming connections
         void handler() override;
         void responder() override;
+
+        // This function saves the server configs in the config file
+        void save_config(std::string file_path) const;
 
     public:
         /* CONSTRUCTOR */

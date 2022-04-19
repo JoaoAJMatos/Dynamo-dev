@@ -10,6 +10,30 @@ void logger(const std::string& text)
     std::cout << "[" << Time::getCurrentDateTime() << "][+] " << text << std::endl;
 }
 
+void servers::DNS_Server::save_config(std::string config_file_path) const
+{
+    // Store the configurations and set the ENV variable
+    std::string full_path = config_file_path + "\\ddns.conf";
+
+    // Create and open the file
+    std::ofstream config_file(full_path);
+
+    // Write to the file
+    config_file << "domain=" << this->domain << std::endl;
+    config_file << "service=" << this->service << std::endl;
+    config_file << "protocol=" << this->protocol << std::endl;
+    config_file << "port=" << this->port << std::endl;
+    config_file << "interface=" << this->ip_str << std::endl;
+    config_file << "backlog=" << this->backlog << std::endl;
+    config_file << "threads=" << this->number_of_threads;
+
+    // Close the file
+    config_file.close();
+
+    // Add config path to the ENV variables
+    server_utils::set_startup_config(CONF_PATH, full_path.data());
+}
+
 /* CONSTRUCTOR/DESTRUCTOR */
 servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port, unsigned long iface, int bklg, int thread_count)
 : net::BasicServer(domain, service, protocol, port, iface, bklg)
@@ -75,37 +99,17 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
             this->port = 4542;
 
             // Ask the user for the server's IP address
-            char ip[INET_ADDRSTRLEN];
             std::cout << "[+] Enter the IP of the server: ";
-            std::cin >> ip;
+            std::cin >> this->ip_str;
             std::cout << std::endl;
 
             // Convert string to IP
-            inet_pton(AF_INET, ip, &(this->iface));
+            inet_pton(AF_INET, this->ip_str, &(this->iface));
 
             this->backlog = 100;
             this->number_of_threads = 0;
 
-            // Store the configurations and set the ENV variable
-            std::string full_path = config_file_path + "\\ddns.conf";
-
-            // Create and open the file
-            std::ofstream config_file(full_path);
-
-            // Write to the file
-            config_file << "domain=" << this->domain << std::endl;
-            config_file << "service=" << this->service << std::endl;
-            config_file << "protocol=" << this->protocol << std::endl;
-            config_file << "port=" << this->port << std::endl;
-            config_file << "interface=" << ip << std::endl;
-            config_file << "backlog=" << this->backlog << std::endl;
-            config_file << "threads=" << this->number_of_threads;
-
-            // Close the file
-            config_file.close();
-
-            // Add config path to the ENV variables
-            server_utils::set_startup_config(CONF_PATH, full_path.data());
+            save_config(config_file_path);
         }
         // Prompt the user for the server configs
         else if (config_flag == 'N' || config_flag == 'n')
@@ -124,7 +128,6 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
                 this->domain = AF_INET6;
                 std::cout << "[SERVER INFO] Server address family set to IPv6" << std::endl;
             }
-
 
             std::cout << "[+] Service [TCP/UDP] (Choose 1 or 2): ";
             std::cin >> temp;
@@ -145,13 +148,12 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
             std::cout << "[+] Port: ";
             std::cin >> this->port;
 
-            char ip[INET_ADDRSTRLEN];
             std::cout << "[+] Enter the IP of the server: ";
-            std::cin >> ip;
+            std::cin >> this->ip_str;
             std::cout << std::endl;
 
             // Convert string to IP
-            inet_pton(AF_INET, ip, &(this->iface));
+            inet_pton(AF_INET, this->ip_str, &(this->iface));
 
             std::cout << "[+] Server backlog: ";
             std::cin >> this->backlog;
@@ -159,26 +161,7 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
             std::cout << "[+] Thread count (enter 0 if you are not sure): ";
             std::cin >> this->number_of_threads;
 
-            // Store the configurations and set the ENV variable
-            std::string full_path = config_file_path + "\\ddns.conf";
-
-            // Create and open the file
-            std::ofstream config_file(full_path);
-
-            // Write to the file
-            config_file << "domain=" << this->domain << std::endl;
-            config_file << "service=" << this->service << std::endl;
-            config_file << "protocol=" << this->protocol << std::endl;
-            config_file << "port=" << this->port << std::endl;
-            config_file << "interface=" << ip << std::endl;
-            config_file << "backlog=" << this->backlog << std::endl;
-            config_file << "threads=" << this->number_of_threads;
-
-            // Close the file
-            config_file.close();
-
-            // Add config path to the ENV variables
-            server_utils::set_startup_config(CONF_PATH, full_path.data());
+            save_config(config_file_path);
         }
     }
 
@@ -239,8 +222,6 @@ void servers::DNS_Server::handler()
 // The responder will analyze the DNS query and respond accordingly
 void servers::DNS_Server::responder()
 {
-    char* message_buffer;
-
     // If the server receives a SYNC-ME type query:
     // Create a message buffer containing all the known hosts and send it to the client
     if (DNS_query)
@@ -288,3 +269,4 @@ std::map<std::string, std::time_t> servers::DNS_Server::get_connection_table()
 {
     return connection_table;
 }
+

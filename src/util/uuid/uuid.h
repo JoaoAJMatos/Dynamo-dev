@@ -20,7 +20,10 @@ namespace Dynamo_UUID
 
     public:
         /* PUBLIC FUNCTIONS */
-        boost::uuids::uuid get_uuid();
+        boost::uuids::uuid get_uuid()
+        {
+            return uuid;
+        }
     };
 }
 
