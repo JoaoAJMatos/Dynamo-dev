@@ -25,7 +25,7 @@ namespace net
         void sock_connect(int sock, struct sockaddr_in address) override;
 
         /* GETTERS */
-        int get_connection() const;
+        [[nodiscard]] int get_connection() const;
     };
 }
 

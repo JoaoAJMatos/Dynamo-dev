@@ -23,7 +23,7 @@
 #include <fstream>
 #include <map>
 
-#include "ConfigParser.h"
+#include "../../src/util/file-handling/ConfigParser.h"
 
 namespace server_utils
 {

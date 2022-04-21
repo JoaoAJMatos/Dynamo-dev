@@ -13,10 +13,10 @@
 #include "../../src/system/threading/ThreadPool.h"
 #include "../../src/system/time/Time.h"
 #include "../../src/networking/sockets/common/Socket.h"
-#include "../../src/networking/server/servers.h"
+#include "../../src/networking/objects/servers.h"
 #include "../../src/networking/protocols/DNS.h"
 #include "../../src/util/uuid/uuid.h"
-#include "../util/ConfigParser.h"
+#include "../../src/util/file-handling/ConfigParser.h"
 #include "../util/StartupConfManager.h"
 #include "DNS_Server.h"
 
