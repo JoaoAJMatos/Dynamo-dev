@@ -31,7 +31,7 @@ net::Socket::Socket(int domain, int service, int protocol, int port, u_long ifac
 }
 
 /* PUBLIC FUNCTIONS */
-void net::Socket::test_connection(int item_to_test)
+void net::Socket::test_connection(unsigned long item_to_test)
 {
 #ifdef _WIN32
     // Confirms that either the socket or the connection have been properly established

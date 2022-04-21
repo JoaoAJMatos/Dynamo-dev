@@ -8,24 +8,15 @@
 #ifndef DEV_DYNAMO_STARTUPCONFMANAGER_H
 #define DEV_DYNAMO_STARTUPCONFMANAGER_H
 
-#define UNIX_STARTUP_CONFIG_PATH "/etc/dynamo/DDNS/startup.dycfg"
-#define WINDOWS_STARTUP_CONFIG_PATH "C:\\dynamo\\ddns\\startup\\startup.dycfg"
-
-#ifdef _WIN32
-#define STARTUP_CONFIG_PATH WINDOWS_STARTUP_CONFIG_PATH
-#else
-#define STARTUP_CONFIG_PATH UNIX_STARTUP_CONFIG_PATH
-#endif // _WIN32
-
 #include <cstdint>
 #include <cstdlib>
 #include <sstream>
 #include <fstream>
 #include <map>
 
-#include "../../src/util/file-handling/ConfigParser.h"
+#include "ConfigParser.h"
 
-namespace server_utils
+namespace config
 {
     int set_config(const std::string& path ,const char* name, const char* value);
 }

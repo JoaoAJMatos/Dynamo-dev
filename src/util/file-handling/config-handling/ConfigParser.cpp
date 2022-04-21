@@ -4,7 +4,7 @@
 
 #include "ConfigParser.h"
 
-std::map<std::string, std::string> server_utils::getConfigFromFile(const std::string &filePath)
+std::map<std::string, std::string> config::getConfigFromFile(const std::string &filePath)
 {
     // Create a map for the output
     std::map<std::string, std::string> configMap;
@@ -22,7 +22,7 @@ std::map<std::string, std::string> server_utils::getConfigFromFile(const std::st
 
             if(line[0] == '#' || line.empty()) continue;
 
-            auto delimiterPos = line.find("=");
+            auto delimiterPos = line.find('=');
             auto name = line.substr(0, delimiterPos);
             auto value = line.substr(delimiterPos + 1);
 

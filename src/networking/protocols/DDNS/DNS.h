@@ -49,7 +49,7 @@ namespace net
         explicit DNS(char* request_string);
 
         /* GETTERS */
-        int get_type() const;
+        [[nodiscard]] int get_type() const;
         char* get_source();
         char* get_body();
     };

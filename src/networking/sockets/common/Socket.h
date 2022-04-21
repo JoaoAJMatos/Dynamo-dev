@@ -47,11 +47,11 @@ namespace net
         /* TESTERS */
         // This function exits the program if the connection is not properly established.
         // This should be checked frequently.
-        static void test_connection(int);
+        static void test_connection(unsigned long);
 
         /* GETTERS */
         struct sockaddr_in get_address();
-        int get_sock() const;
+        [[nodiscard]] int get_sock() const;
     };
 }
 

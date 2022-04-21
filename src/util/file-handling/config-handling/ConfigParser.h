@@ -12,7 +12,7 @@
 #include <fstream>
 #include <algorithm>
 
-namespace server_utils
+namespace config
 {
     std::map<std::string, std::string> getConfigFromFile(const std::string& filePath);
 }

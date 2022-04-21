@@ -5,6 +5,18 @@
 #ifndef DEV_DYNAMO_DNS_SERVER_H
 #define DEV_DYNAMO_DNS_SERVER_H
 
+#define UNIX_STARTUP_CONFIG_PATH "/etc/dynamo/DDNS/startup.dycfg"
+#define WINDOWS_STARTUP_CONFIG_PATH "C:\\dynamo\\ddns\\startup\\startup.dycfg"
+
+#ifdef _WIN32
+#define STARTUP_CONFIG_PATH WINDOWS_STARTUP_CONFIG_PATH
+#else
+#define STARTUP_CONFIG_PATH UNIX_STARTUP_CONFIG_PATH
+#endif // _WIN32
+
+#define BUFFER_SIZE 30000
+#define CONF_PATH "DDNS_CONF_PATH"
+
 #include <map>
 #include <unistd.h>
 #include <sstream>
@@ -14,14 +26,12 @@
 #include "../../src/system/time/Time.h"
 #include "../../src/networking/sockets/common/Socket.h"
 #include "../../src/networking/objects/servers.h"
-#include "../../src/networking/protocols/DNS.h"
+#include "../../src/networking/protocols/DDNS/DNS.h"
 #include "../../src/util/uuid/uuid.h"
-#include "../../src/util/file-handling/ConfigParser.h"
-#include "../util/StartupConfManager.h"
+#include "../../src/util/std-out/logger.h"
+#include "../../src/util/file-handling/config-handling/ConfigParser.h"
+#include "../../src/util/file-handling/config-handling/StartupConfManager.h"
 #include "DNS_Server.h"
-
-#define BUFFER_SIZE 30000
-#define CONF_PATH "DDNS_CONF_PATH"
 
 namespace servers
 {
@@ -51,7 +61,7 @@ namespace servers
         // An instance of a DNS protocol class
         net::DNS* DNS_query;
 
-        int new_socket;
+        unsigned long new_socket;
 
         // Message buffer
         // This buffer will hold the request
@@ -69,7 +79,7 @@ namespace servers
         void responder() override;
 
         // This function saves the server configs in the config file
-        void save_config(std::string file_path) const;
+        void save_config(const std::string& file_path) const;
 
     public:
         /* CONSTRUCTOR */

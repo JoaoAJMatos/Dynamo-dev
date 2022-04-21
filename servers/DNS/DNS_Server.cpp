@@ -4,28 +4,22 @@
 
 #include "DNS_Server.h"
 
-/* HELPER FUNCTION */
-void logger(const std::string& text)
-{
-    std::cout << "[" << Time::getCurrentDateTime() << "][+] " << text << std::endl;
-}
-
-void servers::DNS_Server::save_config(std::string config_file_path) const
+void servers::DNS_Server::save_config(const std::string& config_file_path) const
 {
     // Store the configurations and set the ENV variable
     std::string full_path = config_file_path + "\\ddns.conf";
 
-    server_utils::set_config(full_path, "domain", (char*)(this->domain));
-    server_utils::set_config(full_path, "service", (char*)(this->service));
-    server_utils::set_config(full_path, "protocol", (char*)(this->protocol));
-    server_utils::set_config(full_path, "port", (char*)(this->port));
-    server_utils::set_config(full_path, "interface", this->ip_str);
-    server_utils::set_config(full_path, "backlog", (char*)(this->backlog));
-    server_utils::set_config(full_path, "threads", (char*)(this->number_of_threads));
+    config::set_config(full_path, "domain", (char*)(this->domain));
+    config::set_config(full_path, "service", (char*)(this->service));
+    config::set_config(full_path, "protocol", (char*)(this->protocol));
+    config::set_config(full_path, "port", (char*)(this->port));
+    config::set_config(full_path, "interface", this->ip_str);
+    config::set_config(full_path, "backlog", (char*)(this->backlog));
+    config::set_config(full_path, "threads", (char*)(this->number_of_threads));
 
 
     // Add config path to the ENV variables
-    server_utils::set_config(STARTUP_CONFIG_PATH ,CONF_PATH, full_path.data());
+    config::set_config(STARTUP_CONFIG_PATH ,CONF_PATH, full_path.data());
 }
 
 /* CONSTRUCTOR/DESTRUCTOR */
@@ -37,7 +31,7 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
 
     // Check if a path to a config file is specified in the startup config file
     std::map<std::string, std::string> startup_configs;
-    startup_configs = server_utils::getConfigFromFile(STARTUP_CONFIG_PATH);
+    startup_configs = config::getConfigFromFile(STARTUP_CONFIG_PATH);
 
     // If the path for the config file is found, fetch the config file and set the server settings
     if(startup_configs.find(CONF_PATH) != startup_configs.end())
@@ -47,7 +41,7 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
         logger("Fetching...");
 
         std::map<std::string, std::string> server_config;
-        server_config = server_utils::getConfigFromFile(startup_configs[CONF_PATH]);
+        server_config = config::getConfigFromFile(startup_configs[CONF_PATH]);
 
         logger("Done!");
         logger("Setting server variables...");

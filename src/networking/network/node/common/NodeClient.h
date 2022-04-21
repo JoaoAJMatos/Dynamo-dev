@@ -5,7 +5,7 @@
 #ifndef DEV_DYNAMO_NODECLIENT_H
 #define DEV_DYNAMO_NODECLIENT_H
 
-#include "../../BasicClient.h"
+#include "../../../objects/BasicClient.h"
 
 class NodeClient : public BasicClient
 {

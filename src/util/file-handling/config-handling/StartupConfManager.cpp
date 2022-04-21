@@ -4,7 +4,7 @@
 
 #include "StartupConfManager.h"
 
-int server_utils::set_config(const std::string& path ,const char *name, const char *value)
+int config::set_config(const std::string& path ,const char *name, const char *value)
 {
     // Create and open the file
     std::ofstream startup_config_file(path);
