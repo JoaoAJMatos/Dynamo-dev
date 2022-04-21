@@ -42,3 +42,28 @@ void NodeServer::accepter()
     // Read the incoming message and store it in the buffer
     recv(new_socket, buffer, BUFFER_SIZE, 0);
 }
+
+void NodeServer::handler() {
+
+}
+
+void NodeServer::responder() {
+
+}
+
+/* PUBLIC FUNCTIONS */
+// This function launches the server by adding work to the threading pool work queue
+void NodeServer::launch()
+{
+    logger("Server node launch sequence initiated");
+    std::cout << "[" << Time::getCurrentDateTime() << "][+] Server listening on port " << this->port << std::endl;
+
+    tp->do_work([&]() {
+        while(true)
+        {
+            accepter();
+            handler();
+            responder();
+        }
+    });
+}

@@ -5,8 +5,8 @@
 #ifndef DEV_DYNAMO_BLOCK_H
 #define DEV_DYNAMO_BLOCK_H
 
-
-class Block {
+class Block
+{
 
 };
 
