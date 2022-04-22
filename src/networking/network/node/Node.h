@@ -25,6 +25,8 @@
 #include "./common/NodeClient.h"
 #include "../../../util/file-handling/config-handling/ConfigParser.h"
 #include "../../../util/file-handling/config-handling/StartupConfManager.h"
+#include "../../../util/std-out/logger.h"
+
 
 #include <map>
 #include <iostream>
