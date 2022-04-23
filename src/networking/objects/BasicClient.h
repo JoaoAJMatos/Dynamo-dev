@@ -19,7 +19,7 @@ public:
     BasicClient(int domain, int service, int protocol, int port, unsigned long iface);
 
     /* VIRTUAL FUNCTIONS */
-    virtual void request() = 0;
+    virtual char* request(const char* server_ip, const char* request) = 0;
 
     /* GETTERS */
     net::SocketConnector* get_socket();
