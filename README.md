@@ -1,17 +1,6 @@
 # DynamoBlox
 
-Remote repository for the development of Dynamo Blox in C++
+DynamoBlox is a project that aims to implement the basis of a full scale cryptocurrency.
 
-## Compatibility
-
-DynamoBlox can be built either on Linux or Windows
-
-## Downloading
-
-``git clone https://github.com/JoaoAJMatos/Dynamo-dev.git``
-
-``cd Dynamo-dev``
-
-``cmake .``
-
-``make``
+The project contains everything from its own peer-to-peer network, peer discovery servers (DDNS), 
+transmission and syncing protocols, and of course, its own blockchain and cryptocurrency.
