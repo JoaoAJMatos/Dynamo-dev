@@ -4,15 +4,20 @@
 
 #include "DNS.h"
 
+#include <iostream>
+
 /* CONSTRUCTOR */
 net::DNS::DNS(char* request_string)
 {
     char requested[strlen(request_string)];
     strcpy(requested, request_string);
 
-    type = (int)* strtok(requested, "/");
+    type = atoi(strtok(requested, "/"));
+    std::cout << type << std::endl;
     source = strtok(nullptr, "/");
+    std::cout << source << std::endl;
     body = strtok(nullptr, "/");
+    std::cout << body << std::endl;
 }
 
 /* GETTERS */

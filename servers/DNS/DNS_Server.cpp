@@ -217,8 +217,8 @@ void servers::DNS_Server::responder()
         if (DNS_query->get_type() == SYNC_ME)
         {
             // Create message buffer
-            char* hello = "Hello from server";
-            write(new_socket, hello, strlen(hello));
+            char* hello = "Sync me";
+            send(new_socket, hello, strlen(hello), 0);
         }
     }
 
