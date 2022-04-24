@@ -224,7 +224,7 @@ void servers::DNS_Server::responder()
 
     char* hello = "Hello from server";
     send(new_socket, hello, strlen(hello), 0);
-    close(new_socket);
+    closesocket(new_socket);
 }
 
 /* PUBLIC FUNCTIONS */
