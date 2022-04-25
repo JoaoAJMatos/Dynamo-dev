@@ -52,7 +52,8 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
         this->port = atoi(server_config["port"].c_str());
 
         sockaddr_in sa{};
-        this->iface = inet_pton(AF_INET, server_config["interface"].c_str(), &(sa.sin_addr));
+        inet_pton(AF_INET, server_config["interface"].c_str(), &(sa.sin_addr));
+        this->iface = sa.sin_addr.s_addr;
 
         this->backlog = atoi(server_config["backlog"].c_str());
         this->number_of_threads = atoi(server_config["threads"].c_str());
@@ -83,16 +84,10 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
         {
             this->domain = AF_INET;
             this->service = SOCK_STREAM;
-            this->protocol = 0;
+            this->protocol = IPPROTO_TCP;
             this->port = 4542;
 
-            // Ask the user for the server's IP address
-            std::cout << "[+] Enter the IP of the server: ";
-            std::cin >> this->ip_str;
-            std::cout << std::endl;
-
-            // Convert string to IP
-            inet_pton(AF_INET, this->ip_str, &(this->iface));
+            this->iface = INADDR_ANY;
 
             this->backlog = 100;
             this->number_of_threads = 0;
@@ -136,12 +131,7 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
             std::cout << "[+] Port: ";
             std::cin >> this->port;
 
-            std::cout << "[+] Enter the IP of the server: ";
-            std::cin >> this->ip_str;
-            std::cout << std::endl;
-
-            // Convert string to IP
-            inet_pton(AF_INET, this->ip_str, &(this->iface));
+            this->iface = INADDR_ANY;
 
             std::cout << "[+] Server backlog: ";
             std::cin >> this->backlog;

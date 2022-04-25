@@ -1,6 +1,7 @@
 #include <iostream>
 #include "servers/DNS/DNS_Server.h"
 #include "src/networking/network/node/common/NodeClient.h"
+#include "src/networking/network/node/Node.h"
 #include "src/networking/sockets/common/Socket.h"
 #include <unistd.h>
 
@@ -42,8 +43,9 @@ int main()
 
     closesocket(sockfd);*/
 
-    NodeClient nc(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    /*NodeClient nc(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     nc.request("192.168.1.109", 80, "1/123e4567-e89b-12d3-a456-426614174000/\"\"");
-    nc.request("192.168.1.109", 80, "222222222");
+    nc.request("192.168.1.109", 80, "222222222");*/
 
+    Node n;
 }
