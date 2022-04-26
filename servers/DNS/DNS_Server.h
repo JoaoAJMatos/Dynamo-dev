@@ -7,11 +7,16 @@
 
 #define UNIX_STARTUP_CONFIG_PATH "/etc/dynamo/DDNS/startup.dycfg"
 #define WINDOWS_STARTUP_CONFIG_PATH "C:\\dynamo\\ddns\\startup\\startup.dycfg"
+#define DEFAULT_UNIX_CONFIG_PATH "/etc/dynamo/DDNS/server/config"
+#define DEFAULT_WINDOWS_CONFIG_PATH "C:\\dynamo\\ddns\\server\\config"
+
 
 #ifdef _WIN32
 #define STARTUP_CONFIG_PATH WINDOWS_STARTUP_CONFIG_PATH
+#define DEFAULT_CONFIG_PATH DEFAULT_WINDOWS_CONFIG_PATH
 #else
 #define STARTUP_CONFIG_PATH UNIX_STARTUP_CONFIG_PATH
+#define DEFAULT_CONFIG_PATH DEFAULT_UNIX_CONFIG_PATH
 #endif // _WIN32
 
 #define BUFFER_SIZE 30000

@@ -9,6 +9,8 @@ void servers::DNS_Server::save_config(const std::string& config_file_path) const
     // Store the configurations and set the ENV variable
     std::string full_path = config_file_path + "\\ddns.conf";
 
+    std::cout << full_path;
+
     config::set_config(full_path, "domain", (char*)(this->domain));
     config::set_config(full_path, "service", (char*)(this->service));
     config::set_config(full_path, "protocol", (char*)(this->protocol));
@@ -16,7 +18,6 @@ void servers::DNS_Server::save_config(const std::string& config_file_path) const
     config::set_config(full_path, "interface", this->ip_str);
     config::set_config(full_path, "backlog", (char*)(this->backlog));
     config::set_config(full_path, "threads", (char*)(this->number_of_threads));
-
 
     // Add config path to the ENV variables
     config::set_config(STARTUP_CONFIG_PATH ,CONF_PATH, full_path.data());
@@ -69,9 +70,6 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
 
         // Get path to the config file
         std::string config_file_path;
-        std::cout << std::endl << "[+] Enter path to store the config file (without file name): ";
-        std::cin >> config_file_path;
-        std::cout << std::endl;
 
         // Check if the user wants to use the default settings or not
         char config_flag;
@@ -92,11 +90,15 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
             this->backlog = 100;
             this->number_of_threads = 0;
 
-            save_config(config_file_path);
+            config_file_path = DEFAULT_CONFIG_PATH;
         }
         // Prompt the user for the server configs
         else if (config_flag == 'N' || config_flag == 'n')
         {
+            std::cout << std::endl << "[+] Enter path to store the config file (without file name): ";
+            std::cin >> config_file_path;
+            std::cout << std::endl;
+
             int temp;
             std::cout << "[+] Address family [IPv4/IPv6] (Choose 1 or 2): ";
             std::cin >> temp;
@@ -138,9 +140,10 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
 
             std::cout << "[+] Thread count (enter 0 if you are not sure): ";
             std::cin >> this->number_of_threads;
-
-            save_config(config_file_path);
         }
+
+        logger("Saving config");
+        save_config(config_file_path);
     }
 
     logger("Starting name server...");
