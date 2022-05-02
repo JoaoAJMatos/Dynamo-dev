@@ -12,13 +12,14 @@
 #include <cstdlib>
 #include <sstream>
 #include <fstream>
+#include <filesystem>
 #include <map>
 
 #include "ConfigParser.h"
 
 namespace config
 {
-    int set_config(const std::string& path ,const char* name, const char* value);
+    int set_config(const std::string& path, const std::string& filename, const std::string& name, const std::string& value);
 }
 
 #endif //DEV_DYNAMO_STARTUPCONFMANAGER_H

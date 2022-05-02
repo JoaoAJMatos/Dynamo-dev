@@ -31,5 +31,7 @@ std::map<std::string, std::string> config::getConfigFromFile(const std::string &
         }
     }
 
+    confFile.close();
+
     return configMap;
 }
