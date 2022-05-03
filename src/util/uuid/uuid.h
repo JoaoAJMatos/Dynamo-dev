@@ -24,6 +24,11 @@ namespace Dynamo_UUID
         {
             return uuid;
         }
+
+        const char* get_uuid_string()
+        {
+            return boost::uuids::to_string(uuid).c_str();
+        }
     };
 }
 

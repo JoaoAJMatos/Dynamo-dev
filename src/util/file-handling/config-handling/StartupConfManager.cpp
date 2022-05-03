@@ -10,13 +10,12 @@ int config::set_config(const std::string& path, const std::string& filename ,con
     // In order to write to the file and save the configs we must first check if the directory exists, and if not, create it
 
     // ======= CHECK IF DIRECTORY EXISTS =======
-    // Then check if the path refers to an existing file system object
+    // Check if the path refers to an existing file system object
     if (!(std::filesystem::exists(path)))
     {
         // Return if the directory couldn't be created
         if(!(std::filesystem::create_directory(path))) return -1;
     }
-    // =========================================
 
     // Create and open the file
     std::ofstream startup_config_file(path + "\\" + filename); // Append the filename to the path

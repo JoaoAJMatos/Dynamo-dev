@@ -5,10 +5,12 @@
 #ifndef DEV_DYNAMO_NODE_H
 #define DEV_DYNAMO_NODE_H
 
-#define UNIX_NODE_STARTUP_CONFIG_PATH "/etc/dynamo/Node/startup.dycfg"
-#define DEFAULT_UNIX_NODE_CONFIG_PATH "/etc/dynamo/Node/node.conf"
-#define WINDOWS_NODE_STARTUP_CONFIG_PATH "C:\\dynamo\\Node\\startup\\startup.dycfg"
-#define DEFAULT_WINDOWS_NODE_CONFIG_PATH "C:\\dynamo\\Node\\node.conf"
+#define STARTUP_CONFIG_FILE_NAME "startup.dycfg"
+#define NODE_CONFIG_FILE_NAME "node.conf"
+#define UNIX_NODE_STARTUP_CONFIG_PATH "/etc/dynamo/Node/startup"
+#define DEFAULT_UNIX_NODE_CONFIG_PATH "/etc/dynamo/Node"
+#define WINDOWS_NODE_STARTUP_CONFIG_PATH "C:\\dynamo\\Node\\startup"
+#define DEFAULT_WINDOWS_NODE_CONFIG_PATH "C:\\dynamo\\Node"
 #define CONFIG_PATH "NODE_CONFIG_FILE"
 
 #ifdef _WIN32
@@ -19,15 +21,16 @@
 #define DEFAULT_CONFIG_PATH DEFAULT_UNIX_NODE_CONFIG_PATH
 #endif // _WIN32
 
-
-
-#define NODE_CONF_PATH "NODE_CONF_PATH"
+#define DDNS1 "127.0.0.1" // Name server 1's IP
+#define DDNS1_PORT 4542
 
 #include "./common/NodeServer.h"
 #include "./common/NodeClient.h"
+#include "../../protocols/DDNS/DNS.h"
 #include "../../../util/file-handling/config-handling/ConfigParser.h"
 #include "../../../util/file-handling/config-handling/StartupConfManager.h"
 #include "../../../util/std-out/logger.h"
+#include "../../../util/uuid/uuid.h"
 #include "../../../system/time/Time.h"
 
 #include <map>
@@ -64,9 +67,11 @@ private:
     void save_config(const std::string& config_file_path) const;
 
 public:
-    /* CONSTRUCTOR */
+    /* CONSTRUCTOR/DESTRUCTOR */
     // The constructor takes in the configuration for the server and client instances
     Node();
+    ~Node();
+
 
     /* PUBLIC FUNCTIONS */
     // This function will fetch the known hosts list from the default name server

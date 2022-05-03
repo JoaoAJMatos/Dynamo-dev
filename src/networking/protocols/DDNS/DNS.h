@@ -27,6 +27,8 @@
 #include <map>
 #include <cstring>
 #include <cstdlib>
+#include <sstream>
+#include <string>
 
 #define SYNC_ME 1
 #define SYNC 2
@@ -40,18 +42,22 @@ namespace net
     private:
         /* MEMBER VARIABLES */
         int type;
-        char* source;
+        const char* source;
         char* body;
+        std::string query_string;
 
     public:
         /* CONSTRUCTOR */
         // The constructor takes in a request string and parses it
         explicit DNS(char* request_string);
+        DNS(int type, char* body);
+
 
         /* GETTERS */
         [[nodiscard]] int get_type() const;
-        char* get_source();
+        const char* get_source();
         char* get_body();
+        std::string get_query_string();
     };
 }
 

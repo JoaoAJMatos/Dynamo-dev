@@ -116,23 +116,49 @@ Node::Node()
     }
 }
 
+/* DESTRUCTOR */
+Node::~Node()
+{
+    delete client;
+    delete server;
+}
+
 /* PRIVATE FUNCTIONS */
 void Node::save_config(const std::string &config_file_path) const
 {
-    std::string full_path = config_file_path + "//node.conf";
+    // Store the configurations and set the ENV variable
+    std::string full_path = config_file_path + "\\node.conf";
 
-    config::set_config(full_path, "domain", (char*)(this->domain));
-    config::set_config(full_path, "service", (char*)(this->service));
-    config::set_config(full_path, "protocol", (char*)(this->protocol));
-    config::set_config(full_path, "port", (char*)(this->server_port));
-    config::set_config(full_path, "backlog", (char*)(this->backlog));
-    config::set_config(full_path, "threads", (char*)(this->number_of_threads));
+    // Create and open the file
+    std::ofstream config_file(full_path);
+
+    // Write to the file
+    config_file << "domain=" << this->domain << std::endl;
+    config_file << "service=" << this->service << std::endl;
+    config_file << "protocol=" << this->protocol << std::endl;
+    config_file << "port=" << this->server_port << std::endl;
+    config_file << "backlog=" << this->backlog << std::endl;
+    config_file << "threads=" << this->number_of_threads;
+
+    // Close the file
+    config_file.close();
+
+    config::set_config(NODE_STARTUP_CONFIG_PATH, STARTUP_CONFIG_FILE_NAME, CONFIG_PATH, full_path);
 }
 
 
 /* PUBLIC FUNCTIONS */
-// This function will send a DDNS query to one of the pre-defined
+// This function will send a DDNS query to one of the pre-defined name servers
 void Node::discover_peers()
 {
+    logger("Syncing known node's list...");
 
+    // Build the DNS query
+    // The Node queries the server for a list of known hosts
+    net::DNS dns_query(SYNC_ME, nullptr);
+
+    std::string request = dns_query.get_query_string();
+
+    // Send the request to the server and wait for a response
+    client->request(DDNS1, DDNS1_PORT, request.c_str());
 }

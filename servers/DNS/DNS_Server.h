@@ -5,10 +5,11 @@
 #ifndef DEV_DYNAMO_DNS_SERVER_H
 #define DEV_DYNAMO_DNS_SERVER_H
 
-#define UNIX_STARTUP_CONFIG_PATH "/etc/dynamo/DDNS/startup.dycfg"
-#define WINDOWS_STARTUP_CONFIG_PATH "C:\\dynamo\\ddns\\startup\\startup.dycfg"
-#define DEFAULT_UNIX_CONFIG_PATH "/etc/dynamo/DDNS/server/config"
-#define DEFAULT_WINDOWS_CONFIG_PATH "C:\\dynamo\\ddns\\server\\config"
+#define STARTUP_CONFIG_FILE_NAME "startup.dycfg"
+#define UNIX_STARTUP_CONFIG_PATH "/etc/dynamo/DDNS"
+#define WINDOWS_STARTUP_CONFIG_PATH "C:\\dynamo\\ddns\\startup"
+#define DEFAULT_UNIX_CONFIG_PATH "/etc/dynamo/DDNS"
+#define DEFAULT_WINDOWS_CONFIG_PATH "C:\\dynamo\\ddns"
 
 
 #ifdef _WIN32
