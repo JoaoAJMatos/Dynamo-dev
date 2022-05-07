@@ -214,12 +214,12 @@ void servers::DNS_Server::responder()
     // Create a message buffer containing all the known hosts and send it to the client
     if (DNS_query)
     {
-        /*if (DNS_query->get_type() == SYNC_ME)
+        if (DNS_query->get_type() == SYNC_ME)
         {
             // Create message buffer
             char* hello = "Sync me";
             send(new_socket, hello, strlen(hello), 0);
-        }*/
+        }
     }
 
     char* hello = "Hello from server";

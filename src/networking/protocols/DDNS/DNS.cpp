@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-/* CONSTRUCTOR */
+/* CONSTRUCTORS */
 net::DNS::DNS(char* request_string)
 {
     char requested[strlen(request_string)];
@@ -15,23 +15,31 @@ net::DNS::DNS(char* request_string)
     int type = atoi(strtok(requested, "/"));
     char* body = strtok(nullptr, "/");
 
-
+    this->query_string = request_string;
 }
 
-/* HELPER FUNCTION */
-std::string toString(int i) {
-    std::stringstream ss;
-    ss << i;
-
-    return ss.str();
-}
-
-net::DNS::DNS(int type, const char* body)
+net::DNS::DNS(int type, const std::string& body)
 {
-    //this->type = type;
-    //this->body = body;
+    this->type = type;
+    this->body = body;
 
-    //this->query_string = toString(type) + "/" +  body;
+    this->query_string = std::to_string(type) + "/" + body;
+}
+
+/* GETTERS */
+int net::DNS::get_type() const
+{
+    return type;
+}
+
+std::string net::DNS::get_body() const
+{
+    return body;
+}
+
+char *net::DNS::get_string()
+{
+    return this->query_string.data();
 }
 
 

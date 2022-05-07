@@ -151,15 +151,14 @@ int Node::discover_peers()
     int result; // Variable to store the result of the request function
     int i; // For loop iterator
 
-    const char *request;
-    std::string ss;
-    ss = std::to_string(SYNC_ME) + "/" + std::to_string(server_port);
+    // Build the DNS query
+    net::DNS query(SYNC_ME, std::to_string(this->server_port));
 
     // Make 3 attempts at making the request
     for (i = 1; i <= MAX_ATTEMPTS; i++)
     {
         // Send the request to the server and wait for a response
-        result = client->request("192.168.1.109", 4542, ss);
+        result = client->request("192.168.1.109", 4542, query.get_string());
         if (result == 0) break; // Exit the loop if the connection was successful
         if (result < 0 && i == MAX_ATTEMPTS) return -1; // Return if the connection wasn't successful and the maximum amount of tries was exceeded
         logger("Connection unsuccessful, trying again...");

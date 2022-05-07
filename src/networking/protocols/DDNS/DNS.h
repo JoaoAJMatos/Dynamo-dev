@@ -43,21 +43,21 @@ namespace net
     {
     private:
         /* MEMBER VARIABLES */
-        struct DDNS_query
-        {
-            int type;
-            char body[512];
-        };
+        int type;
+        std::string body;
+        std::string query_string;
 
     public:
         /* CONSTRUCTOR */
         // The constructor takes in a request string and parses it
         explicit DNS(char* request_string);
-        DNS(int type, const char* body);
+        DNS(int type, const std::string& body);
 
 
         /* GETTERS */
-        struct DDNS_query* get_query();
+        [[nodiscard]] int get_type() const;
+        [[nodiscard]] std::string get_body() const;
+        char* get_string();
     };
 }
 
