@@ -23,7 +23,7 @@ void servers::DNS_Server::save_config(const std::string& config_file_path) const
     // Close the file
     config_file.close();
 
-    // Add config path to the ENV variables
+    // Add config path to the startup config file
     config::set_config(STARTUP_CONFIG_PATH, STARTUP_CONFIG_FILE_NAME ,CONF_PATH, full_path);
 }
 
@@ -67,7 +67,7 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
         std::cout << std::endl;
     }
     // If the config file is not found, prompt the user for the path to the file, set the server variables and create a
-    // new ENV variable for the config file path
+    // new config variable for the config file path
     else
     {
         logger("No config file found, booting from scratch");
@@ -183,6 +183,9 @@ void servers::DNS_Server::accepter()
 
     logger("Client connected!");
 
+    char* connected_ip = inet_ntoa(address.sin_addr);
+    std::cout << connected_ip;
+
     // Read the incoming message and store it in the buffer
     recv(new_socket, buffer, BUFFER_SIZE, 0);
 }
@@ -211,12 +214,12 @@ void servers::DNS_Server::responder()
     // Create a message buffer containing all the known hosts and send it to the client
     if (DNS_query)
     {
-        if (DNS_query->get_type() == SYNC_ME)
+        /*if (DNS_query->get_type() == SYNC_ME)
         {
             // Create message buffer
             char* hello = "Sync me";
             send(new_socket, hello, strlen(hello), 0);
-        }
+        }*/
     }
 
     char* hello = "Hello from server";

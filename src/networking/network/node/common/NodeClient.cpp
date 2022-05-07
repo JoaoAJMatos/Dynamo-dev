@@ -24,7 +24,7 @@ NodeClient::NodeClient(int domain, int service, int protocol)
 
 
 /* PUBLIC FUNCTIONS */
-char* NodeClient::request(const char *server_ip, const int server_port, const char* buffer)
+int NodeClient::request(const char *server_ip, const int server_port, const std::string& buffer)
 {
     // Socket file descriptor
     int sock;
@@ -46,15 +46,35 @@ char* NodeClient::request(const char *server_ip, const int server_port, const ch
     // Check for errors
     if (connection == 0)
     {
-        send(sock, buffer, 30000, 0);
-        recv(sock, response_buffer, 30000, 0);
+        //write(sock, "buffer.data()", 3000);
+        send(sock, buffer.data(), buffer.size(), 0);
+
+        int res = recv(sock, response_buffer, 30000, 0);
+
+        if (res < 0)
+        {
+            std::cout << "[+] Error receiving response from server" << std::endl;
+            return -1;
+        }
+
         std::cout << response_buffer << std::endl;
     }
     else
     {
-        std::cout << "An error has occurred when attempting to connect to the server" << std::endl;
-        std::cout << WSAGetLastError();
+        std::cout << std::endl << "[ERROR] An error has occurred when attempting to connect to the server" << std::endl;
+
+#ifdef _WIN32
+        std::cout << "[ERROR] WSA error code: " << WSAGetLastError() << std::endl;
+#endif
+
+        return -1;
     }
 
-    return nullptr;
+    return 0;
+}
+
+/* GETTERS */
+char* NodeClient::get_response_buffer()
+{
+    return response_buffer;
 }

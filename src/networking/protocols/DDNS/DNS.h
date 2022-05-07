@@ -30,6 +30,8 @@
 #include <sstream>
 #include <string>
 
+#define MAX_BUFFER_LENGTH 512
+
 #define SYNC_ME 1
 #define SYNC 2
 #define IM_ALIVE 3
@@ -41,23 +43,21 @@ namespace net
     {
     private:
         /* MEMBER VARIABLES */
-        int type;
-        const char* source;
-        char* body;
-        std::string query_string;
+        struct DDNS_query
+        {
+            int type;
+            char body[512];
+        };
 
     public:
         /* CONSTRUCTOR */
         // The constructor takes in a request string and parses it
         explicit DNS(char* request_string);
-        DNS(int type, char* body);
+        DNS(int type, const char* body);
 
 
         /* GETTERS */
-        [[nodiscard]] int get_type() const;
-        const char* get_source();
-        char* get_body();
-        std::string get_query_string();
+        struct DDNS_query* get_query();
     };
 }
 

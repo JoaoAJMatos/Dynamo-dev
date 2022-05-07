@@ -7,7 +7,7 @@
 
 int main()
 {
-    /*servers::DNS_Server DNS(AF_INET, SOCK_STREAM, 0, 80, INADDR_ANY, 10, 5);
+    /*servers::DNS_Server DNS(AF_INET, SOCK_STREAM, 6, 4542, INADDR_ANY, 100, 0);
     DNS.launch();*/
 
     /*WSADATA wsa;
@@ -44,9 +44,9 @@ int main()
     closesocket(sockfd);*/
 
     /*NodeClient nc(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    nc.request("192.168.1.109", 80, "1/123e4567-e89b-12d3-a456-426614174000/\"\"");
-    nc.request("192.168.1.109", 80, "222222222");*/
+    nc.request("192.168.1.109", 4542, "1/123e4567-e89b-12d3-a456-426614174000/\"\"");
+    nc.request("192.168.1.109", 4542, "222222222");*/
 
     Node n;
-    n.discover_peers();
+    n.start();
 }

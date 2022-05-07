@@ -31,7 +31,10 @@ public:
     /* PUBLIC FUNCTIONS */
     // Takes in a server IP and a request, sends the request buffer to the server, waits for a response,
     // and stores it in the response buffer
-    char* request(const char* server_ip, const int server_port, const char* request);
+    int request(const char* server_ip, int server_port, const std::string& request);
+
+    /* GETTERS */
+    char* get_response_buffer();
 };
 
 
