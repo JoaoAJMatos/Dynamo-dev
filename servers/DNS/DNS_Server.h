@@ -5,19 +5,26 @@
 #ifndef DEV_DYNAMO_DNS_SERVER_H
 #define DEV_DYNAMO_DNS_SERVER_H
 
+#define WINDOWS_DIR_SEP "\\"
+#define UNIX_DIR_SEP "/"
 #define STARTUP_CONFIG_FILE_NAME "startup.dycfg"
 #define UNIX_STARTUP_CONFIG_PATH "/etc/dynamo/DDNS"
 #define WINDOWS_STARTUP_CONFIG_PATH "C:\\dynamo\\ddns\\startup"
 #define DEFAULT_UNIX_CONFIG_PATH "/etc/dynamo/DDNS"
 #define DEFAULT_WINDOWS_CONFIG_PATH "C:\\dynamo\\ddns"
-
+#define WINDOWS_KNOWN_HOSTS_LIST_PATH "C:\\dynamo\\ddns\\known_hosts.db"
+#define UNIX_KNOWN_HOSTS_LIST_PATH "/etc/dynamo/DDNS/known_hosts.db"
 
 #ifdef _WIN32
 #define STARTUP_CONFIG_PATH WINDOWS_STARTUP_CONFIG_PATH
 #define DEFAULT_CONFIG_PATH DEFAULT_WINDOWS_CONFIG_PATH
+#define KNOWN_HOSTS_LIST_PATH WINDOWS_KNOWN_HOSTS_LIST_PATH
+#define DIR_SEP WINDOWS_DIR_SEP
 #else
 #define STARTUP_CONFIG_PATH UNIX_STARTUP_CONFIG_PATH
 #define DEFAULT_CONFIG_PATH DEFAULT_UNIX_CONFIG_PATH
+#define KNOWN_HOSTS_LIST_PATH UNIX_KNOWN_HOSTS_LIST_PATH
+#define DIR_SEP WINDOWS_DIR_SEP
 #endif // _WIN32
 
 #define BUFFER_SIZE 30000
@@ -27,6 +34,7 @@
 #include <unistd.h>
 #include <sstream>
 #include <cstdlib>
+#include <algorithm>
 
 #include "../../src/system/threading/ThreadPool.h"
 #include "../../src/system/time/Time.h"
@@ -37,7 +45,7 @@
 #include "../../src/util/std-out/logger.h"
 #include "../../src/util/file-handling/config-handling/ConfigParser.h"
 #include "../../src/util/file-handling/config-handling/StartupConfManager.h"
-#include "DNS_Server.h"
+#include "../../src/util/file-handling/exprFinder.h"
 
 namespace servers
 {
@@ -45,15 +53,10 @@ namespace servers
     {
     private:
         /* MEMBER VARIABLES */
-        // Dictionary of all the known hosts
+        // Array of all the known hosts
         //    - Key: UUID of the node
         //    - Object: Socket object
-        std::unordered_map<std::string, std::string> known_hosts;
-
-        // Dictionary for timestamping connections
-        //    - Key: UUID of the node
-        //    - Object: Timestamp of the last connection made
-        std::map<std::string, std::time_t> connection_table;
+        std::map<std::string, std::string> known_hosts;
 
         // Variables regarding the server
         int domain;
@@ -63,9 +66,15 @@ namespace servers
         unsigned long iface;
         int backlog;
         char ip_str[INET_ADDRSTRLEN];
+        char* nodeIP;
+
+        // SQLite3 instance
+        sqlite3* db;
 
         // An instance of a DNS protocol class
         net::DNS* DNS_query;
+        char* zErrMsg = 0;
+        char* sql;
 
         unsigned long new_socket;
 
@@ -96,8 +105,7 @@ namespace servers
         ~DNS_Server();
 
         /* GETTERS */
-        std::unordered_map<std::string, std::string> get_known_hosts();
-        std::map<std::string, std::time_t> get_connection_table();
+        std::map<std::string, std::string> get_known_hosts();
 
         /* PUBLIC FUNCTIONS */
         // This function launches the server, pushing the thread jobs to the thread pool

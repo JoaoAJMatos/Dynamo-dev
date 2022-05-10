@@ -56,6 +56,7 @@ private:
     unsigned long server_interface;
     int backlog;
     int number_of_threads;
+    char uuid[38];
 
     // Map of all the known hosts
     // This map will store the IP address and port of all the server nodes

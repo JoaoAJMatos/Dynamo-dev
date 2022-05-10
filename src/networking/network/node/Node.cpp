@@ -49,6 +49,8 @@ Node::Node()
         this->backlog = atoi(node_config["backlog"].c_str());
         this->number_of_threads = atoi(node_config["threads"].c_str());
 
+        strcpy(this->uuid, node_config["uuid"].c_str());
+
         logger("Ready to launch!");
 
         // Create instances of NodeClient and NodeServer
@@ -102,6 +104,9 @@ Node::Node()
         this->protocol = IPPROTO_TCP;
         this->server_interface = INADDR_ANY;
 
+        // Create the Node UUID
+        Dynamo_UUID::uuidv4(this->uuid);
+
         logger("Server configured successfully");
 
         logger("Saving config");
@@ -133,7 +138,8 @@ void Node::save_config(const std::string &config_file_path) const
     config_file << "protocol=" << this->protocol << std::endl;
     config_file << "port=" << this->server_port << std::endl;
     config_file << "backlog=" << this->backlog << std::endl;
-    config_file << "threads=" << this->number_of_threads;
+    config_file << "threads=" << this->number_of_threads << std::endl;
+    config_file << "uuid=" << this->uuid;
 
     // Close the file
     config_file.close();
@@ -152,7 +158,7 @@ int Node::discover_peers()
     int i; // For loop iterator
 
     // Build the DNS query
-    net::DNS query(SYNC_ME, std::to_string(this->server_port));
+    net::DNS query(SYNC_ME, this->uuid, std::to_string(this->server_port));
 
     // Make 3 attempts at making the request
     for (i = 1; i <= MAX_ATTEMPTS; i++)
@@ -163,6 +169,8 @@ int Node::discover_peers()
         if (result < 0 && i == MAX_ATTEMPTS) return -1; // Return if the connection wasn't successful and the maximum amount of tries was exceeded
         logger("Connection unsuccessful, trying again...");
     }
+
+    return 0;
 }
 
 void Node::start()

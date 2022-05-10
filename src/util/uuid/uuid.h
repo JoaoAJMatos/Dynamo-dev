@@ -5,31 +5,15 @@
 #ifndef DEV_DYNAMO_UUID_H
 #define DEV_DYNAMO_UUID_H
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
+#include <cstdio>
+#include <cstdint>
+#include <openssl/rand.h>
 
 namespace Dynamo_UUID
 {
-    class uuid
-    {
-    private:
-        /* MEMBER VARIABLES */
-        // A UUID
-        boost::uuids::uuid uuid = boost::uuids::random_generator()();
-
-    public:
-        /* PUBLIC FUNCTIONS */
-        boost::uuids::uuid get_uuid()
-        {
-            return uuid;
-        }
-
-        const char* get_uuid_string()
-        {
-            return boost::uuids::to_string(uuid).c_str();
-        }
-    };
+    // Generate a version 4 UUID according to RFC-4122
+    // The output buffer must be at least 38 bytes long
+    int uuidv4(char* output_buffer);
 }
 
 #endif //DEV_DYNAMO_UUID_H

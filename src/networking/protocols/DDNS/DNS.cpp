@@ -12,18 +12,20 @@ net::DNS::DNS(char* request_string)
     char requested[strlen(request_string)];
     strcpy(requested, request_string);
 
-    int type = atoi(strtok(requested, "/"));
-    char* body = strtok(nullptr, "/");
+    type = atoi(strtok(requested, "/"));
+    source_node = strtok(nullptr, "/");
+    body = strtok(nullptr, "/");
 
     this->query_string = request_string;
 }
 
-net::DNS::DNS(int type, const std::string& body)
+net::DNS::DNS(int type, const std::string& source, const std::string& body)
 {
     this->type = type;
     this->body = body;
+    this->source_node = source;
 
-    this->query_string = std::to_string(type) + "/" + body;
+    this->query_string = std::to_string(type) + "/" + source + "/" + body;
 }
 
 /* GETTERS */
@@ -40,6 +42,10 @@ std::string net::DNS::get_body() const
 char *net::DNS::get_string()
 {
     return this->query_string.data();
+}
+
+std::string net::DNS::get_source() const {
+    return this->source_node;
 }
 
 

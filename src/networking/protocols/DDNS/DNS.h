@@ -44,18 +44,21 @@ namespace net
     private:
         /* MEMBER VARIABLES */
         int type;
+        std::string source_node;
         std::string body;
+
         std::string query_string;
 
     public:
         /* CONSTRUCTOR */
         // The constructor takes in a request string and parses it
         explicit DNS(char* request_string);
-        DNS(int type, const std::string& body);
+        DNS(int type, const std::string& source, const std::string& body);
 
 
         /* GETTERS */
         [[nodiscard]] int get_type() const;
+        [[nodiscard]] std::string get_source() const;
         [[nodiscard]] std::string get_body() const;
         char* get_string();
     };

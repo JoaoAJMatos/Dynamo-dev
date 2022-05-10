@@ -4,6 +4,7 @@
 
 #include "DNS_Server.h"
 
+/* HELPER FUNCTIONS */
 void servers::DNS_Server::save_config(const std::string& config_file_path) const
 {
     // Store the configurations and set the ENV variable
@@ -26,6 +27,16 @@ void servers::DNS_Server::save_config(const std::string& config_file_path) const
     // Add config path to the startup config file
     config::set_config(STARTUP_CONFIG_PATH, STARTUP_CONFIG_FILE_NAME ,CONF_PATH, full_path);
 }
+
+// Boolean comparator function to compare two pairs of item-value used to sort the dictionary of known hosts
+/*bool compare(const std::pair<std::string, servers::NodeInfo>& A, const std::pair<std::string, servers::NodeInfo>& B)
+{
+    // Compare the UUIDs if the connected peers value is equal
+    if (A.second.peerCount == B.second.peerCount) return A.first < B.first;
+
+    // Compare the values otherwise
+    return A.second.peerCount < B.second.peerCount;
+}*/
 
 /* CONSTRUCTOR/DESTRUCTOR */
 servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port, unsigned long iface, int bklg, int thread_count)
@@ -161,6 +172,32 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
     std::cout << "   - " << tp->get_number_of_threads() << " threads awaiting work" << std::endl << std::endl;
 
     logger("Name server successfully started");
+    logger("Opening database");
+
+    int res = sqlite3_open(KNOWN_HOSTS_LIST_PATH, &db);
+
+    if(res)
+    {
+        std::cout << "Unable to open the database: " << sqlite3_errmsg(db) << std::endl;
+        exit(1);
+    }
+
+    // Attempt to create the table if it as not been created
+    // TABLE STRUCTURE:
+    // ____________________________
+    // | UUID | IP | PORT | LINKS |
+    sql = "CREATE TABLE IF NOT EXISTS hosts(uuid CHAR(36) PRIMARY KEY NOT NULL, ip CHAR(15) NOT NULL, port INTEGER UNSIGNED NOT NULL, links INTEGER UNSIGNED)";
+
+    res = sqlite3_exec(db, sql, nullptr, nullptr, &zErrMsg);
+
+    if (res != SQLITE_OK)
+    {
+        std::cout << "SQL error: " << zErrMsg << std::endl;
+        sqlite3_free(zErrMsg);
+    }
+
+    // Get the list of the known hosts from the file
+   // this->known_hosts = config::getConfigFromFile(KNOWN_HOSTS_LIST_PATH )
 }
 
 servers::DNS_Server::~DNS_Server()
@@ -183,8 +220,7 @@ void servers::DNS_Server::accepter()
 
     logger("Client connected!");
 
-    char* connected_ip = inet_ntoa(address.sin_addr);
-    std::cout << connected_ip;
+    nodeIP = inet_ntoa(address.sin_addr);
 
     // Read the incoming message and store it in the buffer
     recv(new_socket, buffer, BUFFER_SIZE, 0);
@@ -210,16 +246,59 @@ void servers::DNS_Server::handler()
 // The responder will analyze the DNS query and respond accordingly
 void servers::DNS_Server::responder()
 {
-    // If the server receives a SYNC-ME type query:
-    // Create a message buffer containing all the known hosts and send it to the client
     if (DNS_query)
     {
+        std::string messageBuffer;
+
+        // If the server receives a SYNC-ME type query:
+        // Create a message buffer containing the hosts the node should be assigned to. Send the request, and update the known hosts list if needed
         if (DNS_query->get_type() == SYNC_ME)
         {
-            // Create message buffer
-            char* hello = "Sync me";
-            send(new_socket, hello, strlen(hello), 0);
+            /* NODE FETCHING */
+            // Look for the first 10 nodes with the least amount of connected peers
+            if(!known_hosts.empty())
+            {
+                // Sort array items
+                //std::sort(known_hosts.begin(), known_hosts.end(), compare);
+
+                // Get the top 10 least connected peers, or all the peers if length is less than 10
+                for (int i = 0; i < std::min((int)known_hosts.size(), 10); ++i)
+                {
+                    // Build the message buffer
+                    //
+                    // The message buffer should look something like:      192.168.1.109:1500;192.168.1.110:79;... (where ';' separates the nodes)
+                    //messageBuffer += known_hosts[i].second.nodeIP + ":" + std::to_string(known_hosts[i].second.port) + ";";
+                }
+            }
+            else
+            {
+                // If there are no previous nodes, it means the incoming node is the root node
+                messageBuffer = "root";
+            }
+
+            /* UPDATING KNOWN HOSTS LIST */
+            // Check if the incoming node has already been registered in the known hosts list, and if not, add it
+            //std::string full_path = KNOWN_HOSTS_LIST_PATH DIR_SEP KNOWN_HOSTS_FILE_NAME;
+
+            // The expression to look for is in the format: "node IP address=port"
+            std::string expression;
+            expression.append(nodeIP);
+            expression.append("=");
+            expression.append(DNS_query->get_body());
+
+            // Add the new node to the known hosts list
+            //if(!(exists_in_file(full_path.data(), expression.data())))
+            {
+                // Build the string to store in the file
+
+                //config::set_config(KNOWN_HOSTS_LIST_PATH, KNOWN_HOSTS_FILE_NAME, DNS_query->get_source(), DNS_query->get_body());
+            }
         }
+
+        // Send the response
+        send(new_socket, messageBuffer.data(), strlen(messageBuffer.data()), 0);
+        closesocket(new_socket);
+        return;
     }
 
     char* hello = "Hello from server";
@@ -245,16 +324,10 @@ void servers::DNS_Server::launch()
     });
 }
 
+
 /* GETTERS */
 // Returns a dictionary containing all the known hosts
-std::unordered_map<std::string, std::string> servers::DNS_Server::get_known_hosts()
+std::map<std::string, std::string> servers::DNS_Server::get_known_hosts()
 {
     return known_hosts;
 }
-
-// Returns a dictionary containing all the active connections
-std::map<std::string, std::time_t> servers::DNS_Server::get_connection_table()
-{
-    return connection_table;
-}
-
