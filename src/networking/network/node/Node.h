@@ -5,22 +5,14 @@
 #ifndef DEV_DYNAMO_NODE_H
 #define DEV_DYNAMO_NODE_H
 
-#define STARTUP_CONFIG_FILE_NAME "startup.dycfg"
 #define NODE_CONFIG_FILE_NAME "node.conf"
-#define UNIX_NODE_STARTUP_CONFIG_PATH "/etc/dynamo/Node/startup"
-#define DEFAULT_UNIX_NODE_CONFIG_PATH "/etc/dynamo/Node"
-#define WINDOWS_NODE_STARTUP_CONFIG_PATH "C:\\dynamo\\Node\\startup"
-#define FULL_STARTUP_PATH_WINDOWS "C:\\dynamo\\Node\\startup\\startup.dycfg"
-#define FULL_STARTUP_PATH_UNIX "/etc/dynamo/Node/startup.dycfg"
+#define DEFAULT_UNIX_NODE_CONFIG_PATH "/etc/dynamo/Node/"
 #define DEFAULT_WINDOWS_NODE_CONFIG_PATH "C:\\dynamo\\Node"
-#define CONFIG_PATH "NODE_CONFIG_FILE"
 
 #ifdef _WIN32
-#define NODE_STARTUP_CONFIG_PATH WINDOWS_NODE_STARTUP_CONFIG_PATH
 #define DEFAULT_CONFIG_PATH DEFAULT_WINDOWS_NODE_CONFIG_PATH
 #define FULL_STARTUP_PATH FULL_STARTUP_PATH_WINDOWS
 #else
-#define NODE_STARTUP_CONFIG_PATH UNIX_NODE_STARTUP_CONFIG_PATH
 #define DEFAULT_CONFIG_PATH DEFAULT_UNIX_NODE_CONFIG_PATH
 #define FULL_STARTUP_PATH FULL_STARTUP_PATH_UNIX
 #endif // _WIN32
@@ -41,6 +33,8 @@
 
 #include <map>
 #include <iostream>
+#include <sqlite3.h>
+#include <filesystem>
 
 class Node
 {
@@ -71,7 +65,7 @@ private:
 
     /* PRIVATE FUNCTIONS */
     // This function will save the server and client configurations
-    void save_config(const std::string& config_file_path) const;
+    void save_config() const;
 
 public:
     /* CONSTRUCTOR/DESTRUCTOR */

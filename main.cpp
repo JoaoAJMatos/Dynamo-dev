@@ -7,8 +7,8 @@
 
 int main()
 {
-    servers::DNS_Server DNS(AF_INET, SOCK_STREAM, 6, 4542, INADDR_ANY, 100, 0);
-    DNS.launch();
+    /*servers::DNS_Server DNS(AF_INET, SOCK_STREAM, 6, 4542, INADDR_ANY, 100, 0);
+    DNS.launch();*/
 
     /*WSADATA wsa;
     WORD wVersionRequired = MAKEWORD(2, 2);
@@ -47,6 +47,6 @@ int main()
     nc.request("192.168.1.109", 4542, "1/123e4567-e89b-12d3-a456-426614174000/\"\"");
     nc.request("192.168.1.109", 4542, "222222222");*/
 
-    /*Node n;
-    n.start();*/
+    Node n;
+    n.start();
 }

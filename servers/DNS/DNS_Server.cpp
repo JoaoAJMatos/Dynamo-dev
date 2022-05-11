@@ -5,6 +5,7 @@
 #include "DNS_Server.h"
 
 /* HELPER FUNCTIONS */
+// Saves the server config into a file at the default location
 void servers::DNS_Server::save_config() const
 {
     // Store the configurations and set the ENV variable
@@ -162,6 +163,9 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
     std::cout << "   - " << tp->get_number_of_threads() << " threads awaiting work" << std::endl << std::endl;
 
     logger("Name server successfully started");
+
+    /* OPENING DATABASE */
+
     logger("Opening database");
 
     int res = sqlite3_open(KNOWN_HOSTS_LIST_PATH, &db);

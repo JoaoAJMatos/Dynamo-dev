@@ -95,6 +95,7 @@ namespace servers
         void handler() override;
         void responder() override;
 
+        /* HELPER FUNCTIONS */
         // This function saves the server configs in the config file
         void save_config() const;
 

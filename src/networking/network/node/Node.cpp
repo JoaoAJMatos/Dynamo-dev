@@ -10,26 +10,19 @@ Node::Node()
     logger("Node startup sequence initiated");
     Time::sleep(500);
 
-    // Fetch the config file
-    std::map<std::string, std::string> startup_config;
-    startup_config = config::getConfigFromFile(FULL_STARTUP_PATH);
+    std::string full_path = DEFAULT_CONFIG_PATH NODE_CONFIG_FILE_NAME;
 
-    // Flags for startup verification
-    // True if the config file was found, and false otherwise
-    bool server_config_found = startup_config.find(CONFIG_PATH) != startup_config.end();
+    // Fetch the configs from the config file
+    std::map<std::string, std::string> node_config;
+    node_config = config::getConfigFromFile(full_path);
 
     // Check if the startup config was found, if not, boot from scratch
-    if(server_config_found)
+    if(!(node_config.empty()))
     {
         // Inform the user that the config files were found
         logger("Config files found...");
-        std::cout << "[" << Time::getCurrentDateTime() << "][+] Booting server using configuration found in " << startup_config[CONFIG_PATH] << std::endl;
+        std::cout << "[" << Time::getCurrentDateTime() << "][+] Booting server using configuration found in " << full_path << std::endl;
         logger("Fetching configs...");
-
-        // Fetch the path for the config file found inside the startup config file
-        std::map<std::string, std::string> node_config;
-
-        node_config = config::getConfigFromFile(startup_config[CONFIG_PATH]);
 
         logger("Done!");
         logger("Setting Node variables...");
@@ -61,11 +54,19 @@ Node::Node()
     {
         logger("No config files were found. Booting from scratch...");
 
+        logger("Creating config files");
+
+        /* Create config directories */
+        #ifdef _WIN32
+            if(!(std::filesystem::create_directory(DEFAULT_CONFIG_PATH))) exit(-1);
+        #else
+            if(int res = std::system("mkdir -p /etc/dynamo/Node/") < 0) exit(-1);
+        #endif
+
+
         // Ask the user if he wants to use the default configurations or not
         char use_default;
 
-        // Path to store the config file
-        std::string node_config_path;
 
         std::cout << "[+] Use default Node settings (recommended)? (y/n): ";
         std::cin >> use_default;
@@ -74,7 +75,6 @@ Node::Node()
         {
             // Use the default configuration
             logger("Using default configuration for the server");
-            node_config_path = DEFAULT_CONFIG_PATH;
 
             // Set server variables
             this->server_port = 1500;
@@ -85,9 +85,6 @@ Node::Node()
         {
             // Prompt the user for the settings and set the server configs
             logger("Using custom server configs...");
-
-            std::cout << "[+] Enter path to config file (configs will be saved here): ";
-            std::cin >> node_config_path;
 
             std::cout << "[+] Server port: ";
             std::cin >> this->server_port;
@@ -112,7 +109,7 @@ Node::Node()
         logger("Saving config");
 
         // Save the configs in the config file
-        save_config(node_config_path);
+        save_config();
     }
 }
 
@@ -124,28 +121,20 @@ Node::~Node()
 }
 
 /* PRIVATE FUNCTIONS */
-void Node::save_config(const std::string &config_file_path) const
+void Node::save_config() const
 {
-    // Store the configurations and set the ENV variable
-    std::string full_path = config_file_path + "\\node.conf";
+    std::string full_path = DEFAULT_CONFIG_PATH NODE_CONFIG_FILE_NAME;
 
-    // Create and open the file
-    std::ofstream config_file(full_path);
+    std::cout << full_path;
 
-    // Write to the file
-    config_file << "domain=" << this->domain << std::endl;
-    config_file << "service=" << this->service << std::endl;
-    config_file << "protocol=" << this->protocol << std::endl;
-    config_file << "port=" << this->server_port << std::endl;
-    config_file << "backlog=" << this->backlog << std::endl;
-    config_file << "threads=" << this->number_of_threads << std::endl;
-    config_file << "uuid=" << this->uuid;
-
-    // Close the file
-    config_file.close();
-
-    // TODO: Fix this!
-    //config::set_config(NODE_STARTUP_CONFIG_PATH, STARTUP_CONFIG_FILE_NAME, CONFIG_PATH, full_path);
+    // Write config to file
+    config::set_config(full_path, "domain", std::to_string(this->domain), true);
+    config::set_config(full_path, "service", std::to_string(this->service), true);
+    config::set_config(full_path, "protocol", std::to_string(this->protocol), true);
+    config::set_config(full_path, "port", std::to_string(this->server_port), true);
+    config::set_config(full_path, "port", std::to_string(this->server_port), true);
+    config::set_config(full_path, "threads", std::to_string(this->number_of_threads), true);
+    config::set_config(full_path, "uuid", this->uuid, true);
 }
 
 
@@ -165,7 +154,7 @@ int Node::discover_peers()
     for (i = 1; i <= MAX_ATTEMPTS; i++)
     {
         // Send the request to the server and wait for a response
-        result = client->request("192.168.1.109", 4542, query.get_string());
+        result = client->request("127.0.0.1", 4542, query.get_string());
         if (result == 0) break; // Exit the loop if the connection was successful
         if (result < 0 && i == MAX_ATTEMPTS) return -1; // Return if the connection wasn't successful and the maximum amount of tries was exceeded
         logger("Connection unsuccessful, trying again...");
