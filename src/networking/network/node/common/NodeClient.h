@@ -5,6 +5,10 @@
 #ifndef DEV_DYNAMO_NODECLIENT_H
 #define DEV_DYNAMO_NODECLIENT_H
 
+#ifndef _WIN32
+#include <arpa/inet.h>
+#endif
+
 #include <unistd.h>
 #include "../../../objects/BasicClient.h"
 

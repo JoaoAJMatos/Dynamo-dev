@@ -19,7 +19,8 @@
 
 namespace config
 {
-    int set_config(const std::string& path, const std::string& filename, const std::string& name, const std::string& value);
+    // Set a configuration in a file in the format name=data
+    int set_config(const std::string& path, const std::string& name, const std::string& value, bool append);
 }
 
 #endif //DEV_DYNAMO_STARTUPCONFMANAGER_H

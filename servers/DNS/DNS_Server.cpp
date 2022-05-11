@@ -5,38 +5,19 @@
 #include "DNS_Server.h"
 
 /* HELPER FUNCTIONS */
-void servers::DNS_Server::save_config(const std::string& config_file_path) const
+void servers::DNS_Server::save_config() const
 {
     // Store the configurations and set the ENV variable
-    std::string full_path = config_file_path + "\\ddns.conf";
-
-    // Create and open the file
-    std::ofstream config_file(full_path);
-
-    // Write to the file
-    config_file << "domain=" << this->domain << std::endl;
-    config_file << "service=" << this->service << std::endl;
-    config_file << "protocol=" << this->protocol << std::endl;
-    config_file << "port=" << this->port << std::endl;
-    config_file << "backlog=" << this->backlog << std::endl;
-    config_file << "threads=" << this->number_of_threads;
-
-    // Close the file
-    config_file.close();
-
-    // Add config path to the startup config file
-    config::set_config(STARTUP_CONFIG_PATH, STARTUP_CONFIG_FILE_NAME ,CONF_PATH, full_path);
+    std::string full_path = DEFAULT_CONFIG_PATH FILE_NAME;
+    
+    // Write the configs to the file
+    config::set_config(full_path, "domain", std::to_string(this->domain), true);
+    config::set_config(full_path, "service", std::to_string(this->service), true);
+    config::set_config(full_path, "protocol", std::to_string(this->protocol), true);
+    config::set_config(full_path, "port", std::to_string(this->port), true);
+    config::set_config(full_path, "backlog", std::to_string(this->backlog), true);
+    config::set_config(full_path, "threads", std::to_string(this->number_of_threads), true);
 }
-
-// Boolean comparator function to compare two pairs of item-value used to sort the dictionary of known hosts
-/*bool compare(const std::pair<std::string, servers::NodeInfo>& A, const std::pair<std::string, servers::NodeInfo>& B)
-{
-    // Compare the UUIDs if the connected peers value is equal
-    if (A.second.peerCount == B.second.peerCount) return A.first < B.first;
-
-    // Compare the values otherwise
-    return A.second.peerCount < B.second.peerCount;
-}*/
 
 /* CONSTRUCTOR/DESTRUCTOR */
 servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port, unsigned long iface, int bklg, int thread_count)
@@ -45,19 +26,17 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
     logger("Fetching config file");
     Time::sleep(500);
 
-    // Check if a path to a config file is specified in the startup config file
-    std::map<std::string, std::string> startup_configs;
-    startup_configs = config::getConfigFromFile(STARTUP_CONFIG_PATH);
+    std::string full_path = DEFAULT_CONFIG_PATH FILE_NAME;
 
-    // If the path for the config file is found, fetch the config file and set the server settings
-    if(startup_configs.find(CONF_PATH) != startup_configs.end())
+    std::map<std::string, std::string> server_config;
+    server_config = config::getConfigFromFile(full_path);
+
+    // Check if there are any saved configs
+    if(!(server_config.empty()))
     {
         logger("Config file found!");
-        std::cout << "[" << Time::getCurrentDateTime() << "][+] Using configuration found in " << STARTUP_CONFIG_PATH << std::endl;
+        std::cout << "[" << Time::getCurrentDateTime() << "][+] Using configuration found in " << full_path << std::endl;
         logger("Fetching...");
-
-        std::map<std::string, std::string> server_config;
-        server_config = config::getConfigFromFile(startup_configs[CONF_PATH]);
 
         logger("Done!");
         logger("Setting server variables...");
@@ -82,6 +61,17 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
     else
     {
         logger("No config file found, booting from scratch");
+
+        /* CREATE THE CONFIG DIRECTORIES */
+        logger("Creating config directories...");
+
+        #ifdef _WIN32
+            if(!(std::filesystem::create_directory(DEFAULT_CONFIG_PATH))) exit(-1);
+        #else
+            if(int res = std::system("mkdir -p /etc/dynamo/DDNS/") < 0) exit(-1);
+        #endif
+
+        logger("Config directories created!");
 
         // Get path to the config file
         std::string config_file_path;
@@ -158,7 +148,7 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
         }
 
         logger("Saving config");
-        save_config(config_file_path);
+        save_config();
     }
 
     logger("Starting name server...");
@@ -195,9 +185,6 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
         std::cout << "SQL error: " << zErrMsg << std::endl;
         sqlite3_free(zErrMsg);
     }
-
-    // Get the list of the known hosts from the file
-   // this->known_hosts = config::getConfigFromFile(KNOWN_HOSTS_LIST_PATH )
 }
 
 servers::DNS_Server::~DNS_Server()
@@ -297,13 +284,13 @@ void servers::DNS_Server::responder()
 
         // Send the response
         send(new_socket, messageBuffer.data(), strlen(messageBuffer.data()), 0);
-        closesocket(new_socket);
+        close(new_socket);
         return;
     }
 
     char* hello = "Hello from server";
     send(new_socket, hello, strlen(hello), 0);
-    closesocket(new_socket);
+    close(new_socket);
 }
 
 /* PUBLIC FUNCTIONS */

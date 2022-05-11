@@ -7,21 +7,17 @@
 
 #define WINDOWS_DIR_SEP "\\"
 #define UNIX_DIR_SEP "/"
-#define STARTUP_CONFIG_FILE_NAME "startup.dycfg"
-#define UNIX_STARTUP_CONFIG_PATH "/etc/dynamo/DDNS"
-#define WINDOWS_STARTUP_CONFIG_PATH "C:\\dynamo\\ddns\\startup"
-#define DEFAULT_UNIX_CONFIG_PATH "/etc/dynamo/DDNS"
+#define FILE_NAME "dynamo.dycfg"
+#define DEFAULT_UNIX_CONFIG_PATH "/etc/dynamo/DDNS/"
 #define DEFAULT_WINDOWS_CONFIG_PATH "C:\\dynamo\\ddns"
 #define WINDOWS_KNOWN_HOSTS_LIST_PATH "C:\\dynamo\\ddns\\known_hosts.db"
 #define UNIX_KNOWN_HOSTS_LIST_PATH "/etc/dynamo/DDNS/known_hosts.db"
 
 #ifdef _WIN32
-#define STARTUP_CONFIG_PATH WINDOWS_STARTUP_CONFIG_PATH
 #define DEFAULT_CONFIG_PATH DEFAULT_WINDOWS_CONFIG_PATH
 #define KNOWN_HOSTS_LIST_PATH WINDOWS_KNOWN_HOSTS_LIST_PATH
 #define DIR_SEP WINDOWS_DIR_SEP
 #else
-#define STARTUP_CONFIG_PATH UNIX_STARTUP_CONFIG_PATH
 #define DEFAULT_CONFIG_PATH DEFAULT_UNIX_CONFIG_PATH
 #define KNOWN_HOSTS_LIST_PATH UNIX_KNOWN_HOSTS_LIST_PATH
 #define DIR_SEP WINDOWS_DIR_SEP
@@ -35,6 +31,12 @@
 #include <sstream>
 #include <cstdlib>
 #include <algorithm>
+#include <sqlite3.h>
+#include <filesystem>
+
+#ifndef _WIN32
+#include <arpa/inet.h>
+#endif
 
 #include "../../src/system/threading/ThreadPool.h"
 #include "../../src/system/time/Time.h"
@@ -94,7 +96,7 @@ namespace servers
         void responder() override;
 
         // This function saves the server configs in the config file
-        void save_config(const std::string& file_path) const;
+        void save_config() const;
 
     public:
         /* CONSTRUCTOR */

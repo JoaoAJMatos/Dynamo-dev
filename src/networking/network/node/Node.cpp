@@ -144,7 +144,8 @@ void Node::save_config(const std::string &config_file_path) const
     // Close the file
     config_file.close();
 
-    config::set_config(NODE_STARTUP_CONFIG_PATH, STARTUP_CONFIG_FILE_NAME, CONFIG_PATH, full_path);
+    // TODO: Fix this!
+    //config::set_config(NODE_STARTUP_CONFIG_PATH, STARTUP_CONFIG_FILE_NAME, CONFIG_PATH, full_path);
 }
 
 
