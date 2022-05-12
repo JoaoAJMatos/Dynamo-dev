@@ -56,9 +56,8 @@ namespace servers
     private:
         /* MEMBER VARIABLES */
         // Array of all the known hosts
-        //    - Key: UUID of the node
-        //    - Object: Socket object
-        std::map<std::string, std::string> known_hosts;
+        // Each element conatins a string identifying the Node's IP and port, like: "192.168.1.109:1500"
+        std::vector<std::string> known_hosts;
 
         // Variables regarding the server
         int domain;

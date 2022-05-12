@@ -20,6 +20,20 @@ void servers::DNS_Server::save_config() const
     config::set_config(full_path, "threads", std::to_string(this->number_of_threads), true);
 }
 
+/* SQLITE3 CALLBACKS */
+static int get_known_hosts_callback(void* unused, int count, char** data, char** columns)
+{
+    for (int i = 0; i < count; i++)
+    {
+        //std::string temp = data[i] + ":" + data[];
+        //known_hosts.push_back();
+        std::cout << data[i] << " asdasdasd" << std::endl;
+    }
+
+    return 0;
+}
+
+
 /* CONSTRUCTOR/DESTRUCTOR */
 servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port, unsigned long iface, int bklg, int thread_count)
 : net::BasicServer(domain, service, protocol, port, iface, bklg)
@@ -246,43 +260,41 @@ void servers::DNS_Server::responder()
         if (DNS_query->get_type() == SYNC_ME)
         {
             /* NODE FETCHING */
+            // The following process will fetch the database for the 10 least connected peers in the network. 
+            // Finally, we add the new node if it does not already exist in the database
+
             // Look for the first 10 nodes with the least amount of connected peers
-            if(!known_hosts.empty())
-            {
-                // Sort array items
-                //std::sort(known_hosts.begin(), known_hosts.end(), compare);
 
-                // Get the top 10 least connected peers, or all the peers if length is less than 10
-                for (int i = 0; i < std::min((int)known_hosts.size(), 10); ++i)
-                {
-                    // Build the message buffer
-                    //
-                    // The message buffer should look something like:      192.168.1.109:1500;192.168.1.110:79;... (where ';' separates the nodes)
-                    //messageBuffer += known_hosts[i].second.nodeIP + ":" + std::to_string(known_hosts[i].second.port) + ";";
-                }
-            }
-            else
+            // Fetch the database for the 10 least connected peers and add the required data to the known hosts dictionary
+            // TODO: query the database for the hosts
+            //
+            // Query: SELECT ip, port FROM hosts WHERE uuid != (node uuid) ORDER BY links LIMIT 10;
+
+            std::stringstream query2;
+            query2 << "SELECT ip, port FROM hosts WHERE uuid != '" << DNS_query->get_source() << "' ORDER BY links LIMIT 10";
+
+            // Execute the code
+            int res = sqlite3_exec(db, query2.str().c_str(), get_known_hosts_callback, nullptr, &zErrMsg);
+
+            if (res != SQLITE_OK)
             {
-                // If there are no previous nodes, it means the incoming node is the root node
-                messageBuffer = "root";
+                std::cout << "SQL error: " << zErrMsg << std::endl;
+                sqlite3_free(zErrMsg);
             }
 
-            /* UPDATING KNOWN HOSTS LIST */
-            // Check if the incoming node has already been registered in the known hosts list, and if not, add it
-            //std::string full_path = KNOWN_HOSTS_LIST_PATH DIR_SEP KNOWN_HOSTS_FILE_NAME;
+            // Build the query
+            std::stringstream query;
+            query << "INSERT INTO hosts(uuid, ip, port, links) VALUES('" << DNS_query->get_source() << "','" << nodeIP << "'," << DNS_query->get_body() << "," << 0 << ")";
+            
+            std::cout << "   Query: " << query.str();
 
-            // The expression to look for is in the format: "node IP address=port"
-            std::string expression;
-            expression.append(nodeIP);
-            expression.append("=");
-            expression.append(DNS_query->get_body());
+            // Execute the code
+            int result = sqlite3_exec(db, query.str().c_str(), nullptr, nullptr, &zErrMsg);
 
-            // Add the new node to the known hosts list
-            //if(!(exists_in_file(full_path.data(), expression.data())))
+            if (result != SQLITE_OK)
             {
-                // Build the string to store in the file
-
-                //config::set_config(KNOWN_HOSTS_LIST_PATH, KNOWN_HOSTS_FILE_NAME, DNS_query->get_source(), DNS_query->get_body());
+                std::cout << "SQL error: " << zErrMsg << std::endl;
+                sqlite3_free(zErrMsg);
             }
         }
 
@@ -320,5 +332,5 @@ void servers::DNS_Server::launch()
 // Returns a dictionary containing all the known hosts
 std::map<std::string, std::string> servers::DNS_Server::get_known_hosts()
 {
-    return known_hosts;
+    //return known_hosts;
 }
