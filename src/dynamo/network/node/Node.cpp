@@ -111,6 +111,10 @@ Node::Node()
         // Save the configs in the config file
         save_config();
     }
+
+    // Set the list of known DDNS
+    known_DDNS.push_back({"192.168.1.120", 4542});
+    known_DDNS.push_back({"127.0.0.1", 4542});
 }
 
 /* DESTRUCTOR */
@@ -150,17 +154,36 @@ int Node::discover_peers()
     // Build the DNS query
     net::DNS query(SYNC_ME, this->uuid, std::to_string(this->server_port));
 
-    // Make 3 attempts at making the request
-    for (i = 1; i <= MAX_ATTEMPTS; i++)
+    // Attempt to fetch the list of known hosts from a server from the default list
+    for (auto const& [ip, port]: known_DDNS)
     {
-        // Send the request to the server and wait for a response
-        result = client->request("127.0.0.1", 4542, query.get_string());
-        if (result == 0) break; // Exit the loop if the connection was successful
-        if (result < 0 && i == MAX_ATTEMPTS) return -1; // Return if the connection wasn't successful and the maximum amount of tries was exceeded
-        logger("Connection unsuccessful, trying again...");
+        std::cout << "[+] Fetching from [" << ip << ":" << port << "]" << std::endl;
+
+        // Make 3 attempts at making the request
+        for (i = 1; i <= MAX_ATTEMPTS; i++)
+        {
+            // Send the request to the server and wait for a response
+            result = client->request(ip.c_str(), port, query.get_string());
+            if (result == 0) break; // Exit the loop if the connection was successful
+            if (result < 0 && i == MAX_ATTEMPTS) return -1; // Return if the connection wasn't successful and the maximum amount of tries was exceeded
+            logger("Connection unsuccessful, trying again...");
+        }
+        
+
+        if (result == 0) break;
     }
 
     return 0;
+}
+
+// This function will send a given message to all the known hosts
+int Node::broadcast(std::string message)
+{
+    // Loop through the list of known hosts and send the message
+    for (auto& node : known_hosts)
+    {
+        this->client->request(node.first.data(), node.second, message);
+    }
 }
 
 void Node::start()
@@ -181,5 +204,32 @@ void Node::start()
         logger("Unable to connect to the network");
         logger("Exiting");
         exit(-1);
+    }
+
+    /* RESPONSE PARSING */
+    // Parse the response buffer after the Syncronization request to get the list of known hosts
+    std::string tempResponse = this->client->get_response_buffer();
+
+    // If the response is "root" then we can start the blockchain and insert the Genesis Block
+    if (tempResponse == "root")
+    {
+        // TODO: Initialize blockchain
+    }
+    else // Else: Loop through the string and parse the request
+    {
+        std::string delimiter = ";"; // Delimiter for the body contents of the response
+        std::string ip_port_del = ":"; 
+        size_t pos = 0;
+
+        while ((pos = tempResponse.find(delimiter)) != std::string::npos)
+        {
+            std::string ip = tempResponse.substr(0, tempResponse.find(ip_port_del));
+            int port = atoi(tempResponse.substr(tempResponse.find(ip_port_del) + ip_port_del.length(), pos).data());
+            tempResponse.erase(0, pos + delimiter.length());
+
+            known_hosts.push_back({ip, port});
+        }
+
+        std::cout << "[+] Linking with " << known_hosts.size() << " nodes..." << std::endl;
     }
 }

@@ -11,8 +11,15 @@
 
 namespace Dynamo_UUID
 {
-    // Generate a version 4 UUID according to RFC-4122
-    // The output buffer must be at least 38 bytes long
+    /**
+     * @brief Generate a version 4 UUID according to RFC-4122
+     * 
+     * (The output buffer must be at least 38 bytes long)
+     * 
+     * @param output_buffer 
+     * @return int 
+     */
+    
     int uuidv4(char* output_buffer);
 }
 

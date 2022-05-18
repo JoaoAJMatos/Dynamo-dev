@@ -10,7 +10,7 @@
 
 #define BUFFER_SIZE 30000
 
-#include "../../../objects/BasicServer.h"
+#include "../../../../networking/objects/BasicServer.h"
 #include "../../../../system/threading/ThreadPool.h"
 #include "../../../../util/std-out/logger.h"
 

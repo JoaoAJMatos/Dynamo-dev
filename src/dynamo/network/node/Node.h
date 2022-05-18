@@ -24,7 +24,7 @@
 
 #include "./common/NodeServer.h"
 #include "./common/NodeClient.h"
-#include "../../protocols/DDNS/DNS.h"
+#include "../../../networking/protocols/DDNS/DNS.h"
 #include "../../../util/file-handling/config-handling/ConfigParser.h"
 #include "../../../util/file-handling/config-handling/StartupConfManager.h"
 #include "../../../util/std-out/logger.h"
@@ -52,10 +52,13 @@ private:
     int number_of_threads;
     char uuid[38];
 
-    // Map of all the known hosts
+    // Array of all the known hosts
     // This map will store the IP address and port of all the server nodes
     // This map will be filled in after the node syncs its state with the name server
-    std::map<std::string, int> known_hosts;
+    std::vector<std::pair<std::string, int>> known_hosts;
+
+    // Map of all the default DDNS servers
+    std::vector<std::pair<std::string, int>> known_DDNS;
 
     // Node Server & Client instances
     // These instances will be launched in separate threads
@@ -73,10 +76,11 @@ public:
     Node();
     ~Node();
 
-
     /* PUBLIC FUNCTIONS */
     // This function will fetch the known hosts list from the default name server
     int discover_peers();
+    // This function broadcasts a message to all the known hosts
+    int broadcast(std::string message);
 
     void start();
 };

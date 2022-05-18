@@ -7,25 +7,46 @@
 
 #include <ctime>
 #include <iostream>
+#include <vector>
+
+#include "../wallet/transaction/Transaction.h"
 
 class Block
 {
 private:
 
     /* MEMBER VARIABLES */
-    struct block_headers
-    {
-        std::time_t timestamp;
-        std::string hash;
-        std::string prev_hash;
-        unsigned long long int nonce;
-    };
+    std::time_t timestamp;
+    std::string hash;
+    std::string prev_hash;
+    size_t height;
+    size_t nonce;
+    int difficulty;
 
+    std::vector<Transaction> data; // Array of transactions
 
 
 
 public:
+    /* CONSTRUCTOR */
+    Block();
 
+    /* PUBLIC FUNCTIONS */
+    /**
+     * @brief Performs the POW to mine a block
+     * 
+     * @param lastBlock 
+     * @return Block* 
+     */
+    static Block* mineBlock(Block* lastBlock);
+
+    static int adjustDifficulty(Block* lastBlock, std::time_t timestamp);
+
+    /**
+     * @brief Prints the block's contentes to the standard-out
+     * 
+     */
+    void printBlock();
 };
 
 

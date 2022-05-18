@@ -97,6 +97,7 @@ namespace servers
         /* HELPER FUNCTIONS */
         // This function saves the server configs in the config file
         void save_config() const;
+        static int get_known_hosts_callback(void* unused, int count, char** data, char** columns);
 
     public:
         /* CONSTRUCTOR */

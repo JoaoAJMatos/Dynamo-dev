@@ -28,8 +28,8 @@ namespace net
         void sock_listen();
 
         /* GETTERS */
-        int get_backlog() const;
-        int get_listening() const;
+        [[nodiscard]] int get_backlog() const;
+        [[nodiscard]] int get_listening() const;
     };
 }
 

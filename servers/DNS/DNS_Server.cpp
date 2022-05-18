@@ -21,20 +21,42 @@ void servers::DNS_Server::save_config() const
 }
 
 /* SQLITE3 CALLBACKS */
-static int get_known_hosts_callback(void* unused, int count, char** data, char** columns)
+/**
+ * @brief The callback to the SQLite3 exec() function
+ * 
+ * @param known_hosts 
+ * @param count 
+ * @param data 
+ * @param columns 
+ * @return int 
+ */
+int servers::DNS_Server::get_known_hosts_callback(void* known_hosts, int count, char** data, char** columns)
 {
-    for (int i = 0; i < count; i++)
-    {
-        //std::string temp = data[i] + ":" + data[];
-        //known_hosts.push_back();
-        std::cout << data[i] << " asdasdasd" << std::endl;
-    }
+    std::stringstream temp;
+    temp << data[0] << ":" << data[1];
+
+    // Initialize a pointer to the known_hosts array
+    servers::DNS_Server* array = (servers::DNS_Server*) known_hosts;
+
+    // Add the elements to the array
+    array->known_hosts.push_back(temp.str());
 
     return 0;
 }
 
 
 /* CONSTRUCTOR/DESTRUCTOR */
+/**
+ * @brief Construct a new servers::DNS Server::DNS Server object
+ * 
+ * @param domain 
+ * @param service 
+ * @param protocol 
+ * @param port 
+ * @param iface 
+ * @param bklg 
+ * @param thread_count 
+ */
 servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port, unsigned long iface, int bklg, int thread_count)
 : net::BasicServer(domain, service, protocol, port, iface, bklg)
 {
@@ -205,6 +227,10 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
     }
 }
 
+/**
+ * @brief Destroy the servers::DNS Server::DNS Server object
+ * 
+ */
 servers::DNS_Server::~DNS_Server()
 {
     delete tp;
@@ -231,8 +257,11 @@ void servers::DNS_Server::accepter()
     recv(new_socket, buffer, BUFFER_SIZE, 0);
 }
 
-// The handler function is responsible for handling the incoming request and parsing it to create
-// a new DNS request class instance.
+/**
+ * @brief The handler function is responsible for handling the incoming request and parsing it to create
+ * a new DNS request class instance.
+ * 
+ */
 void servers::DNS_Server::handler()
 {
     // Try to create a DNS query instance from the incoming buffer
@@ -248,7 +277,10 @@ void servers::DNS_Server::handler()
     std::cout << buffer << std::endl;
 }
 
-// The responder will analyze the DNS query and respond accordingly
+/**
+ * @brief The responder will analyze the DNS query and respond accordingly
+ * 
+ */
 void servers::DNS_Server::responder()
 {
     if (DNS_query)
@@ -274,7 +306,7 @@ void servers::DNS_Server::responder()
             query2 << "SELECT ip, port FROM hosts WHERE uuid != '" << DNS_query->get_source() << "' ORDER BY links LIMIT 10";
 
             // Execute the code
-            int res = sqlite3_exec(db, query2.str().c_str(), get_known_hosts_callback, nullptr, &zErrMsg);
+            int res = sqlite3_exec(db, query2.str().c_str(), get_known_hosts_callback, this, &zErrMsg);
 
             if (res != SQLITE_OK)
             {
@@ -284,9 +316,7 @@ void servers::DNS_Server::responder()
 
             // Build the query
             std::stringstream query;
-            query << "INSERT INTO hosts(uuid, ip, port, links) VALUES('" << DNS_query->get_source() << "','" << nodeIP << "'," << DNS_query->get_body() << "," << 0 << ")";
-            
-            std::cout << "   Query: " << query.str();
+            query << "INSERT OR REPLACE INTO hosts(uuid, ip, port, links) VALUES('" << DNS_query->get_source() << "','" << nodeIP << "'," << DNS_query->get_body() << "," << 0 << ")";
 
             // Execute the code
             int result = sqlite3_exec(db, query.str().c_str(), nullptr, nullptr, &zErrMsg);
@@ -296,11 +326,21 @@ void servers::DNS_Server::responder()
                 std::cout << "SQL error: " << zErrMsg << std::endl;
                 sqlite3_free(zErrMsg);
             }
+
+            // Build the message buffer and update the database links
+            // For example: If a node has 0 links, and if it is mentioned in the messageBuffer, the links in the DB should be incremented by 1
+            // meaning that now 1 node knows it exists and has a link to it 
+            for (int i = 0; i < this->known_hosts.size(); ++i)
+            {
+                // Build the message buffer
+                messageBuffer += known_hosts[i] + ";";
+            }
         }
 
-        // Send the response
+        // Send the response and clear the list
         send(new_socket, messageBuffer.data(), strlen(messageBuffer.data()), 0);
         close(new_socket);
+        known_hosts.clear();
         return;
     }
 

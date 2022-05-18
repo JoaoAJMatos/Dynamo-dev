@@ -10,7 +10,7 @@
 #endif
 
 #include <unistd.h>
-#include "../../../objects/BasicClient.h"
+#include "../../../../networking/objects/BasicClient.h"
 
 class NodeClient
 {
