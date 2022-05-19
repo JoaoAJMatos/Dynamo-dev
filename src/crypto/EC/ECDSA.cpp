@@ -16,50 +16,6 @@ ECDSA::ECDSA()
     // Convert uint8_t to hex and set the hex buffers
     toHex(privateKeyHex, sizeof(privateKeyHex), privateKey, sizeof(privateKey));
     toHex(publicKeyHex, sizeof(publicKeyHex), publicKey, sizeof(publicKey));
-
-    /*uint8_t* hash;
-
-    const char* str = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
-
-    hash = hexToUint8(str);
-
-    char buf[sizeof(privateKey)*2+1];
-    char buf2[sizeof(publicKey)*2+1];
-
-    toHex(buf, sizeof(buf), privateKey, sizeof(privateKey));
-    toHex(buf2, sizeof(buf2), publicKey, sizeof(publicKey));
-
-    std::cout << "Private key: " << buf << std::endl;
-    std::cout << "Public key: " << buf2 << std::endl;
-
-    uint8_t signature[ECC_BYTES*2];
-
-    uint8_t* priva;
-    priva = hexToUint8(buf);
-
-    ecdsa_sign(priva, hash, signature);
-
-    char buf3[sizeof(signature)*2+1];
-
-    // Mess with the signature to test
-
-    toHex(buf3, sizeof(buf3), signature, sizeof(signature));
-
-    uint8_t* sig; 
-    sig = hexToUint8(buf3);
-
-    std::cout << "Signature: " << buf3 << std::endl;
-
-    // Mess with the signature to test
-    //sig[2] = 0; // This will output 0
-
-    int res2 = ecdsa_verify(publicKey, hash, sig);
-
-    std::cout << res2;
-*/
-    /*// Convert to hex and store the key pair
-    toHex(publicKeyHex, sizeof(publicKeyHex), publicKey, sizeof(publicKey));
-    toHex(privateKeyHex, sizeof(privateKeyHex), privateKey, sizeof(privateKey));*/  
 }
 
 /**
