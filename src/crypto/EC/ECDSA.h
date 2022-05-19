@@ -17,7 +17,7 @@
 #include <iostream>
 #include <cstring>
 
-#include "EC/ecc.h"
+#include "ecc.h"
 
 class ECDSA
 {
@@ -27,9 +27,21 @@ private:
     uint8_t publicKey[ECC_BYTES+1];
     uint8_t signature[ECC_BYTES*2];
 
+    // These pointers are used to store the private and public keys
+    // in case the ECDSA object is constructed given two Hex arrays for the keys.
+    // This has to do with the way the hex -> uint8_t conversion was implemented.
+    // Prolly not the best idea, but it works for now.
+    uint8_t* p_pubK;
+    uint8_t* p_privK;
+
     char privateKeyHex[sizeof(privateKey)*2+1];
     char publicKeyHex[sizeof(publicKey)*2+1];
     char signatureHex[sizeof(signature)*2+1];
+
+    // This flag indicates if the class was constructed from a hex string or not.
+    // This is because the signHash() method has to know which key pairs to use (uint8_t[ECC_BYTES] or uint8_t*)
+    // I know this is a mess I'm sorry
+    int useKeysPointer;
 
     /* HELPER FUNCTIONS */
     /**
@@ -87,15 +99,38 @@ public:
 
     /* PUBLIC FUNCTIONS */
     /**
-     * @brief Creates a new key pair
+     * @brief Signs a hash with the private key (SHA-2 family is recommended)
      * 
-     * @return int 
+     * @param hash 
+     * @return int
+     * 
+     * @details Returns 1 if the signature has been successful, 0 otherwise
      */
-    int genKeyPair();
-    
-    int sign();
+    int signHash(const char* hash);
 
-    int verifySignature();
+    /**
+     * @brief Verifies a digital signature given a public key and a hash
+     * 
+     * @param pubK 
+     * @param hash 
+     * @param signature 
+     * @return int
+     * 
+     * @details Returns 1 if the public key matches the signature, 0 otherwise
+     */
+    int verifySignature(const char* pubK, const char* hash, const char* signature);
+
+    /**
+     * @brief Prints the keys to the standard out
+     * 
+     */
+    void showKeys();
+
+    /**
+     * @brief Prints the signature to the standard out
+     * 
+     */
+    void showSignature();
 };
 
 #endif

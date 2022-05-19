@@ -60,12 +60,12 @@ add_executable(
         src/util/file-handling/exprFinder.h
         src/util/uuid/uuid.cpp
 
-        src/crypto/SHA256.cpp
-        src/crypto/SHA256.h
+        src/crypto/SHA-2/SHA256.cpp
+        src/crypto/SHA-2/SHA256.h
         src/crypto/EC/ecc.h
         src/crypto/EC/ecc.cpp
-        src/crypto/ECDSA.cpp
-        src/crypto/ECDSA.h
+        src/crypto/EC/ECDSA.cpp
+        src/crypto/EC/ECDSA.h
 
         servers/DNS/DNS_Server.h
         servers/DNS/DNS_Server.cpp
