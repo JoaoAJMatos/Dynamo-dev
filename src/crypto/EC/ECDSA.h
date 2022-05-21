@@ -43,35 +43,6 @@ private:
     // I know this is a mess I'm sorry
     int useKeysPointer;
 
-    /* HELPER FUNCTIONS */
-    /**
-     * @brief Converts a uint8_t buffer into a hexadecimal buffer
-     * 
-     * Output:
-     *  @param dest 
-     * 
-     * Input:
-     *  @param des_len 
-     *  @param uint_buf 
-     *  @param uint_buf_len 
-     * 
-     * @return int (0 if success, 1 otherwise) 
-     */
-    int toHex(char* dest, size_t dest_len, const uint8_t* uint_buf, size_t uint_buf_len);
-
-    /**
-     * @brief Converts a hex buffer into a uint8_t buffer
-     * 
-     * Output:
-     *  @param dest   - Pointer to the destination buffer
-     * 
-     * Input:
-     *  @param buffer - Hex buffer to convert
-     * 
-     * @return int (0 if success, 1 otherwise)
-     */
-    uint8_t* hexToUint8(const char* buffer);
-
 public:
     /* CONSTRUCTORS */
     /**
@@ -131,6 +102,35 @@ public:
      * 
      */
     void showSignature();
+
+    /* HELPER FUNCTIONS */
+    /**
+     * @brief Converts a uint8_t buffer into a hexadecimal buffer
+     * 
+     * Output:
+     *  @param dest 
+     * 
+     * Input:
+     *  @param des_len 
+     *  @param uint_buf 
+     *  @param uint_buf_len 
+     * 
+     * @return int (0 if success, 1 otherwise) 
+     */
+    static int toHex(char* dest, size_t dest_len, const uint8_t* uint_buf, size_t uint_buf_len);
+
+    /**
+     * @brief Converts a hex buffer into a uint8_t buffer
+     * 
+     * Output:
+     *  @param dest   - Pointer to the destination buffer
+     * 
+     * Input:
+     *  @param buffer - Hex buffer to convert
+     * 
+     * @return int (0 if success, 1 otherwise)
+     */
+    static uint8_t* hexToUint8(const char* buffer);
 };
 
 #endif

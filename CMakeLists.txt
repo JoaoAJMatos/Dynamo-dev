@@ -36,6 +36,8 @@ add_executable(
         src/dynamo/wallet/Wallet.cpp
         src/dynamo/wallet/transaction/Transaction.h
         src/dynamo/wallet/transaction/Transaction.cpp
+        src/dynamo/wallet/transaction/TransactionPool.h
+        src/dynamo/wallet/transaction/TransactionPool.cpp
         src/dynamo/network/node/common/NodeClient.cpp
         src/dynamo/network/node/common/NodeClient.h
         src/dynamo/network/node/common/NodeServer.cpp

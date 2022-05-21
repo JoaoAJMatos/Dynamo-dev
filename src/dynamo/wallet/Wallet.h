@@ -5,7 +5,7 @@
 #ifndef DEV_DYNAMO_WALLET_H
 #define DEV_DYNAMO_WALLET_H
 
-#include "openssl/ecdsa.h"
+#include "../../crypto/EC/ECDSA.h"
 #include "../blockchain/Blockchain.h"
 #include "transaction/Transaction.h"
 
@@ -13,6 +13,11 @@ class Wallet
 {
 private:
     /* MEMBER VARIABLES */
+
+    // A pointer to a ECDSA class instance for signing and verifying transactions
+    ECDSA* keyPair;
+
+    unsigned long long int balance;
 
 public:
     /* CONSTRUCTOR */
