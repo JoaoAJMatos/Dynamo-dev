@@ -5,11 +5,16 @@
 #ifndef DEV_DYNAMO_BLOCK_H
 #define DEV_DYNAMO_BLOCK_H
 
+#define MINE_RATE 1000
+
 #include <ctime>
 #include <iostream>
 #include <vector>
+#include <sstream>
+#include <cstring>
 
-#include "../wallet/transaction/Transaction.h"
+#include "../../crypto/SHA-2/SHA256.h"
+#include "../../system/time/Time.h"
 
 class Block
 {
@@ -17,14 +22,15 @@ private:
 
     /* MEMBER VARIABLES */
     std::time_t timestamp;
-    std::string hash;
-    std::string prev_hash;
+    uint8_t* hash;
+    uint8_t* prev_hash;
     size_t height;
     size_t nonce;
     int difficulty;
 
-    std::vector<Transaction> data; // Array of transactions
+    std::vector<std::string> data; // Array of transactions
 
+    SHA256 sha;
 
 public:
     /* CONSTRUCTOR */
@@ -38,7 +44,7 @@ public:
      * @param nonce 
      * @param difficulty 
      */
-    Block(std::time_t timestamp, std::string hash, std::string prev_hash, size_t height, size_t nonce, int difficulty);
+    Block(std::time_t timestamp, uint8_t* hash, uint8_t* prev_hash, size_t height, size_t nonce, int difficulty, std::vector<std::string> data);
 
     /* PUBLIC FUNCTIONS */
     /**
@@ -49,7 +55,7 @@ public:
      * 
      * @return Block* 
      */
-    static Block* mineBlock(Block* lastBlock, int log);
+    static Block* mineBlock(Block lastBlock, std::vector<std::string> data, int log);
 
     /**
      * @brief Adjusts the block mining difficulty in order to keep the mining rate between the defined boundries
@@ -58,7 +64,7 @@ public:
      * @param timestamp 
      * @return int 
      */
-    static int adjustDifficulty(Block* lastBlock, std::time_t timestamp);
+    static int adjustDifficulty(Block lastBlock, std::time_t timestamp);
 
     /**
      * @brief Prints the block's contentes to the standard-out

@@ -5,7 +5,7 @@
 #include <algorithm>
 
 #include "libs/msgpack11/msgpack11.hpp"
-
+#include "src/dynamo/block/Block.h"
 #include "servers/DNS/DNS_Server.h"
 #include "src/dynamo/network/node/Node.h"
 #include "src/crypto/EC/ECDSA.h"
@@ -64,11 +64,19 @@ int main()
 
     SHA256 sha;
     sha.update("123");
-    uint8_t* digest = sha.digest();
+    uint8_t* hash = sha.digest();
 
-    std::cout << SHA256::toString(digest) << std::endl;
+    sha.update("hey");
+    uint8_t* lastHash = sha.digest();
 
-    delete[] digest;
+    Block myBlock(178, hash, lastHash, 0, 10, 10, {"Hey"});
+
+    myBlock.printBlock();
+
+    Block* minedBlock;
+    minedBlock = Block::mineBlock(myBlock, {"123"}, 1);
+
+    minedBlock->printBlock();
 
     return 0;
 }

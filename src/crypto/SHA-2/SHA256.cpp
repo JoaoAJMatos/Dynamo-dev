@@ -40,7 +40,7 @@ void SHA256::update(const std::string &data)
 
 uint8_t * SHA256::digest() 
 {
-	uint8_t * hash = new uint8_t[32];
+	auto * hash = new uint8_t[32];
 
 	pad();
 	revert(hash);

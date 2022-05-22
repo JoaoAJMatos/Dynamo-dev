@@ -142,7 +142,7 @@ static void vli_clear(uint64_t *p_vli)
 }
 
 /* Returns 1 if p_vli == 0, 0 otherwise. */
-static int vli_isZero(uint64_t *p_vli)
+static int vli_isZero(const uint64_t *p_vli)
 {
     uint i;
     for(i = 0; i < NUM_ECC_DIGITS; ++i)
@@ -156,13 +156,13 @@ static int vli_isZero(uint64_t *p_vli)
 }
 
 /* Returns nonzero if bit p_bit of p_vli is set. */
-static uint64_t vli_testBit(uint64_t *p_vli, uint p_bit)
+static uint64_t vli_testBit(const uint64_t *p_vli, uint p_bit)
 {
     return (p_vli[p_bit/64] & ((uint64_t)1 << (p_bit % 64)));
 }
 
 /* Counts the number of 64-bit "digits" in p_vli. */
-static uint vli_numDigits(uint64_t *p_vli)
+static uint vli_numDigits(const uint64_t *p_vli)
 {
     int i;
     /* Search from the end until we find a non-zero digit.
@@ -196,7 +196,7 @@ static uint vli_numBits(uint64_t *p_vli)
 }
 
 /* Sets p_dest = p_src. */
-static void vli_set(uint64_t *p_dest, uint64_t *p_src)
+static void vli_set(uint64_t *p_dest, const uint64_t *p_src)
 {
     uint i;
     for(i=0; i<NUM_ECC_DIGITS; ++i)
@@ -206,7 +206,7 @@ static void vli_set(uint64_t *p_dest, uint64_t *p_src)
 }
 
 /* Returns sign of p_left - p_right. */
-static int vli_cmp(uint64_t *p_left, uint64_t *p_right)
+static int vli_cmp(const uint64_t *p_left, const uint64_t *p_right)
 {
     int i;
     for(i = NUM_ECC_DIGITS-1; i >= 0; --i)
@@ -224,7 +224,7 @@ static int vli_cmp(uint64_t *p_left, uint64_t *p_right)
 }
 
 /* Computes p_result = p_in << c, returning carry. Can modify in place (if p_result == p_in). 0 < p_shift < 64. */
-static uint64_t vli_lshift(uint64_t *p_result, uint64_t *p_in, uint p_shift)
+static uint64_t vli_lshift(uint64_t *p_result, const uint64_t *p_in, uint p_shift)
 {
     uint64_t l_carry = 0;
     uint i;
@@ -254,7 +254,7 @@ static void vli_rshift1(uint64_t *p_vli)
 }
 
 /* Computes p_result = p_left + p_right, returning carry. Can modify in place. */
-static uint64_t vli_add(uint64_t *p_result, uint64_t *p_left, uint64_t *p_right)
+static uint64_t vli_add(uint64_t *p_result, const uint64_t *p_left, const uint64_t *p_right)
 {
     uint64_t l_carry = 0;
     uint i;
@@ -271,7 +271,7 @@ static uint64_t vli_add(uint64_t *p_result, uint64_t *p_left, uint64_t *p_right)
 }
 
 /* Computes p_result = p_left - p_right, returning borrow. Can modify in place. */
-static uint64_t vli_sub(uint64_t *p_result, uint64_t *p_left, uint64_t *p_right)
+static uint64_t vli_sub(uint64_t *p_result, const uint64_t *p_left, const uint64_t *p_right)
 {
     uint64_t l_borrow = 0;
     uint i;
@@ -290,7 +290,7 @@ static uint64_t vli_sub(uint64_t *p_result, uint64_t *p_left, uint64_t *p_right)
 #if SUPPORTS_INT128
 
 /* Computes p_result = p_left * p_right. */
-static void vli_mult(uint64_t *p_result, uint64_t *p_left, uint64_t *p_right)
+static void vli_mult(uint64_t *p_result, const uint64_t *p_left, const uint64_t *p_right)
 {
     uint128_t r01 = 0;
     uint64_t r2 = 0;
@@ -316,7 +316,7 @@ static void vli_mult(uint64_t *p_result, uint64_t *p_left, uint64_t *p_right)
 }
 
 /* Computes p_result = p_left^2. */
-static void vli_square(uint64_t *p_result, uint64_t *p_left)
+static void vli_square(uint64_t *p_result, const uint64_t *p_left)
 {
     uint128_t r01 = 0;
     uint64_t r2 = 0;
@@ -701,7 +701,7 @@ static void vli_modSquare_fast(uint64_t *p_result, uint64_t *p_left)
     vli_mmod_fast(p_result, l_product);
 }
 
-#define EVEN(vli) (!(vli[0] & 1))
+#define EVEN(vli) (!((vli)[0] & 1))
 /* Computes p_result = (1 / p_input) % p_mod. All VLIs are the same size.
    See "From Euclid's GCD to Montgomery Multiplication to the Great Divide"
    https://labs.oracle.com/techrep/2001/smli_tr-2001-95.pdf */
@@ -1085,7 +1085,7 @@ int ecc_make_key(uint8_t p_publicKey[ECC_BYTES+1], uint8_t p_privateKey[ECC_BYTE
             vli_sub(l_private, l_private, curve_n);
         }
 
-        EccPoint_mult(&l_public, &curve_G, l_private, NULL);
+        EccPoint_mult(&l_public, &curve_G, l_private, nullptr);
     } while(EccPoint_isZero(&l_public));
     
     ecc_native2bytes(p_privateKey, l_private);
@@ -1213,7 +1213,7 @@ int ecdsa_sign(const uint8_t p_privateKey[ECC_BYTES], const uint8_t p_hash[ECC_B
         }
     
         /* tmp = k * G */
-        EccPoint_mult(&p, &curve_G, k, NULL);
+        EccPoint_mult(&p, &curve_G, k, nullptr);
     
         /* r = x1 (mod n) */
         if(vli_cmp(curve_n, p.x) != 1)
@@ -1279,7 +1279,7 @@ int ecdsa_verify(const uint8_t p_publicKey[ECC_BYTES+1], const uint8_t p_hash[EC
     apply_z(l_sum.x, l_sum.y, z);
     
     /* Use Shamir's trick to calculate u1*G + u2*Q */
-    EccPoint *l_points[4] = {NULL, &curve_G, &l_public, &l_sum};
+    EccPoint *l_points[4] = {nullptr, &curve_G, &l_public, &l_sum};
     uint l_numBits = umax(vli_numBits(u1), vli_numBits(u2));
     
     EccPoint *l_point = l_points[(!!vli_testBit(u1, l_numBits-1)) | ((!!vli_testBit(u2, l_numBits-1)) << 1)];

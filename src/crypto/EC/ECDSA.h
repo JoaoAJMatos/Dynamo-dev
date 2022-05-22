@@ -68,6 +68,9 @@ public:
      */
     ECDSA(uint8_t* publicKey, uint8_t* privateKey);
 
+    /* GETTERS */
+    std::string getPublic();
+
     /* PUBLIC FUNCTIONS */
     /**
      * @brief Signs a hash with the private key (SHA-2 family is recommended)

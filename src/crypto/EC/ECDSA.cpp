@@ -57,6 +57,12 @@ ECDSA::ECDSA(uint8_t* publicKey, uint8_t* privateKey)
     toHex(publicKeyHex, sizeof(publicKeyHex), publicKey, sizeof(publicKey));
 }
 
+/* GETTERS */
+std::string ECDSA::getPublic()
+{
+    return std::string(this->publicKeyHex);
+}
+
 /* PUBLIC FUNCTIONS */
 int ECDSA::signHash(const char* hash)
 {
