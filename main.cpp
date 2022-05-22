@@ -3,8 +3,10 @@
 #include <unistd.h>
 
 #include <algorithm>
+#include <bitset>
 
 #include "libs/msgpack11/msgpack11.hpp"
+#include "src/system/time/Time.h"
 #include "src/dynamo/block/Block.h"
 #include "servers/DNS/DNS_Server.h"
 #include "src/dynamo/network/node/Node.h"
@@ -69,7 +71,7 @@ int main()
     sha.update("hey");
     uint8_t* lastHash = sha.digest();
 
-    Block myBlock(178, hash, lastHash, 0, 10, 10, {"Hey"});
+    Block myBlock(Time::getTimestamp(), hash, lastHash, 0, 10, 10, {"Hey"});
 
     myBlock.printBlock();
 
@@ -77,6 +79,10 @@ int main()
     minedBlock = Block::mineBlock(myBlock, {"123"}, 1);
 
     minedBlock->printBlock();
+
+    /*uint8_t buffer[32];
+
+    setTarget2(buffer, sizeof(buffer), 13);*/
 
     return 0;
 }

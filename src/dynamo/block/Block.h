@@ -12,6 +12,8 @@
 #include <vector>
 #include <sstream>
 #include <cstring>
+#include <math.h>
+#include <cstdio>
 
 #include "../../crypto/SHA-2/SHA256.h"
 #include "../../system/time/Time.h"
@@ -31,6 +33,7 @@ private:
     std::vector<std::string> data; // Array of transactions
 
     SHA256 sha;
+    Time t;
 
 public:
     /* CONSTRUCTOR */
