@@ -59,12 +59,9 @@ int setTarget(uint8_t* destinationBuffer, int difficulty)
     leftBits -= 1;
 
     // Fill in the destination buffer's first X octets with zeros
-    for(int i = 0; i <= (int)fullOctets; ++i)
-    {
-        destinationBuffer[i] = 0x0;
-    }
+    memset(destinationBuffer, 0, (int)fullOctets);
 
-    destinationBuffer[(int)fullOctets+1] = 0xFF;
+    // Right shift the next octet (fullOctets + 1) by the amount of leading zeros needed 
     destinationBuffer[(int)fullOctets+1] >> (int)leftBits;
 
     return 0;
