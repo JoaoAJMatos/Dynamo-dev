@@ -71,12 +71,12 @@ int main()
     sha.update("hey");
     uint8_t* lastHash = sha.digest();
 
-    Block myBlock(Time::getTimestamp(), hash, lastHash, 0, 10, 10, {"Hey"});
+    Block myBlock(Time::getTimestamp(), hash, lastHash, 0, 10, 20, {"Hey"});
 
     myBlock.printBlock();
 
     Block* minedBlock;
-    minedBlock = Block::mineBlock(myBlock, {"123"}, 1);
+    minedBlock = Block::mineBlock(myBlock, {"123"}, 0);
 
     minedBlock->printBlock();
 

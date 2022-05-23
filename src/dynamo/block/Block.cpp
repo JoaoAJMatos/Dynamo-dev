@@ -38,9 +38,6 @@ Block::Block(std::time_t timestamp, uint8_t* hash, uint8_t* prev_hash, size_t he
  */
 int setTarget(uint8_t* destinationBuffer, int difficulty)
 {
-    double division, fullOctets, remainder, leftBits;
-
-    memset(destinationBuffer, 1, sizeof(destinationBuffer));
 
     // Devide the difficulty by the number of octets in the buffer
     // The integer part of the resulting division will correspond to the amount of octets that should be filled with zeros.
@@ -50,19 +47,16 @@ int setTarget(uint8_t* destinationBuffer, int difficulty)
     //  - For a difficulty of 13 bits, the resulting division will be 1.625. By filling the first octet of the buffer + 6
     //    left bits on the second octet we get a total number of 14 bits (8 + 6), which is not what we are looking for. To
     //    get the actual number of left bits we must subtract 1 to the amount of left bits indicated by the remainder. 
-    division = (double)difficulty / 8;
-
-    remainder = modf(division, &fullOctets); // The remainder will now hold 0.625, and the intpart will hold 1.
-                                             // To get the amount of left bits needed we can multiply the remainder by 10 and repeat the operation. Then subtract 1
     
-    modf(remainder*10, &leftBits);
-    leftBits -= 1;
+    int div = difficulty / 8; // Get the integer part of the division
+    int rem = difficulty % 8; // Get the remainder part
 
-    // Fill in the destination buffer's first X octets with zeros
-    memset(destinationBuffer, 0, (int)fullOctets);
+    memset(destinationBuffer, 0, div);    // Fill the amount of octets needed with zeros
 
-    // Right shift the next octet (fullOctets + 1) by the amount of leading zeros needed 
-    destinationBuffer[(int)fullOctets+1] >> (int)leftBits;
+    destinationBuffer[div] = 0xFF >> rem; // Set the octets bits to 1 and right shift them by the desired amount of zeros.
+                                          // The rest of the buffer can be left with random data since memcmp returns < 0
+                                          // when the first byte that does not match in both memory blocks has a lower value
+                                          // in ptr1 than in ptr2
 
     return 0;
 }
@@ -83,6 +77,7 @@ Block* Block::mineBlock(Block lastBlock, std::vector<std::string> data, int log)
     size_t height = lastBlock.height + 1;
     uint8_t* lastHash = lastBlock.hash;
     int difficulty = lastBlock.difficulty;
+    int newDifficulty;
     size_t nonce = 0;
 
     SHA256 sha;
@@ -104,7 +99,7 @@ Block* Block::mineBlock(Block lastBlock, std::vector<std::string> data, int log)
         std::stringstream blockBuffer;
         nonce++;
         timestamp = Time::getTimestamp();
-        difficulty = Block::adjustDifficulty(lastBlock, timestamp);
+        newDifficulty = Block::adjustDifficulty(lastBlock, timestamp);
 
         // Make the target buffer
         setTarget(target, difficulty);
