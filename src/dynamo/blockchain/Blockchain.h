@@ -13,11 +13,8 @@ private:
     /* MEMBER VARIABLES */
     std::vector<Block> chain;
 
-    Block* makeGenesis();
-
 public:
     /* CONSTRUCTOR */
-
     /**
      * @brief Construct a new Blockchain object
      * 
@@ -26,7 +23,6 @@ public:
     Blockchain(bool isRoot);
 
     /* PUBLIC FUNCTIONS */
-
     /**
      * @brief Replaces the current chain by an incomming one if the contents are valid
      * 
@@ -35,6 +31,8 @@ public:
     int replaceChain();
 
     int addBlock();
+
+    int validateBlockData();
 };
 
 #endif

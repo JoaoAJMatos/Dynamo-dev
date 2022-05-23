@@ -14,7 +14,7 @@
  * @param nonce 
  * @param difficulty 
  */
-Block::Block(std::time_t timestamp, uint8_t* hash, uint8_t* prev_hash, size_t height, size_t nonce, int difficulty, std::vector<std::string> data)
+Block::Block(std::time_t timestamp, uint8_t* hash, uint8_t* prev_hash, size_t height, size_t nonce, int difficulty, std::vector<Transaction> data)
 {
     this->timestamp = timestamp;
     this->hash = hash;
@@ -70,7 +70,7 @@ int setTarget(uint8_t* destinationBuffer, int difficulty)
  * 
  * @details This function performs the proof of work required to mine a block
  */
-Block* Block::mineBlock(Block lastBlock, std::vector<std::string> data, int log)
+Block* Block::mineBlock(Block lastBlock, std::vector<Transaction> data, int log)
 {
     uint8_t* hash;
     std::time_t timestamp;
@@ -87,9 +87,9 @@ Block* Block::mineBlock(Block lastBlock, std::vector<std::string> data, int log)
     
     // This buffer will contain the block contents that will be used to make the block's hash
     std::string dataToHash;
-    for (auto& dataElement : data)
+    for (auto& transaction : data)
     {
-        dataToHash.append(dataElement);
+        dataToHash.append(transaction.getTransactionDataBuffer());
     }
 
     t.startHighResClock();
@@ -107,10 +107,10 @@ Block* Block::mineBlock(Block lastBlock, std::vector<std::string> data, int log)
         // Make the block buffer to hash
         blockBuffer << timestamp << height << lastHash << dataToHash << difficulty << nonce << std::endl;
 
-        sha.update(blockBuffer.str().data());
+        sha.update(blockBuffer.str());
         hash = sha.digest();
 
-        if (log) std::cout  << "\r" << "Hash: " << sha.toString(hash) << " | Nonce: " << nonce << std::flush;
+        if (log) std::cout  << "\r" << "Hash: " << SHA256::toString(hash) << " | Nonce: " << nonce << std::flush;
 
     } while (memcmp(target, hash, sizeof(target)) < 0);
 
@@ -141,17 +141,17 @@ void Block::printBlock()
     std::cout << "Block " << height << std::endl;
     std::cout << "{" << std::endl;
     std::cout << "  Timestamp: " << this->timestamp << std::endl;
-    std::cout << "  Hash: " << sha.toString(this->hash) << std::endl;
-    std::cout << "  Previous hash: " << sha.toString(this->prev_hash) << std::endl;
+    std::cout << "  Hash: " << SHA256::toString(this->hash) << std::endl;
+    std::cout << "  Previous hash: " << SHA256::toString(this->prev_hash) << std::endl;
     std::cout << "  Height: " << this->height << std::endl;
     std::cout << "  Nonce: " << this->nonce << std::endl;
     std::cout << "  Difficulty: " << this->difficulty << std::endl;
     std::cout << "  Data:" << std::endl;
     std::cout << "  {" << std::endl;
 
-    for (auto& dataElement : this->data)
+    for (auto& transaction : this->data)
     {
-        std::cout << "      " << dataElement << std::endl;
+        transaction.showTransaction();
     }
 
     std::cout << "  }" << std::endl;

@@ -17,6 +17,7 @@
 
 #include "../../crypto/SHA-2/SHA256.h"
 #include "../../system/time/Time.h"
+#include "../wallet/transaction/Transaction.h"
 
 class Block
 {
@@ -30,7 +31,7 @@ private:
     size_t nonce;
     int difficulty;
 
-    std::vector<std::string> data; // Array of transactions
+    std::vector<Transaction> data; // Array of transactions
 
     SHA256 sha;
     Time t;
@@ -47,9 +48,9 @@ public:
      * @param nonce 
      * @param difficulty 
      */
-    Block(std::time_t timestamp, uint8_t* hash, uint8_t* prev_hash, size_t height, size_t nonce, int difficulty, std::vector<std::string> data);
+    Block(std::time_t timestamp, uint8_t* hash, uint8_t* prev_hash, size_t height, size_t nonce, int difficulty, std::vector<Transaction> data);
 
-    /* PUBLIC FUNCTIONS */
+    /* STATIC FUNCTIONS */
     /**
      * @brief Performs the POW to mine a block
      * 
@@ -58,7 +59,7 @@ public:
      * 
      * @return Block* 
      */
-    static Block* mineBlock(Block lastBlock, std::vector<std::string> data, int log);
+    static Block* mineBlock(Block lastBlock, std::vector<Transaction> data, int log);
 
     /**
      * @brief Adjusts the block mining difficulty in order to keep the mining rate between the defined boundries
@@ -69,6 +70,14 @@ public:
      */
     static int adjustDifficulty(Block lastBlock, std::time_t timestamp);
 
+    /**
+     * @brief Returns the genesis block
+     * 
+     * @return Block* 
+     */
+    static Block* genesis();
+
+    /* PUBLIC FUNCTIONS */
     /**
      * @brief Prints the block's contentes to the standard-out
      * 

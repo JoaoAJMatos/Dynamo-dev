@@ -8,6 +8,7 @@
 #include "libs/msgpack11/msgpack11.hpp"
 #include "src/system/time/Time.h"
 #include "src/dynamo/block/Block.h"
+#include "src/dynamo/wallet/transaction/Transaction.h"
 #include "servers/DNS/DNS_Server.h"
 #include "src/dynamo/network/node/Node.h"
 #include "src/crypto/EC/ECDSA.h"
@@ -64,7 +65,7 @@ int main()
     std::cout << "Uint8 hash: " << hash << " | size in bytes: " << sizeof(hash) << std::endl;
     std::cout << hexHash << std::endl;*/
 
-    SHA256 sha;
+    /*SHA256 sha;
     sha.update("123");
     uint8_t* hash = sha.digest();
 
@@ -79,10 +80,37 @@ int main()
     minedBlock = Block::mineBlock(myBlock, {"123"}, 0);
 
     minedBlock->printBlock();
-
+*/
     /*uint8_t buffer[32];
 
     setTarget2(buffer, sizeof(buffer), 13);*/
 
+    ECDSA ec;
+
+    SHA256 sha;
+    sha.update("123");
+    uint8_t* hash = sha.digest();
+
+    sha.update("hey");
+    uint8_t* lastHash = sha.digest();
+
+    std::string recipient = "you";
+    std::string sender = "me";
+
+    Transaction transaction(&ec, recipient, (size_t)2, sender, (size_t)10);
+
+    std::vector<Transaction> transactionArray;
+
+    transactionArray.push_back(transaction);
+
+    Block myBlock(Time::getTimestamp(), hash, lastHash, 0, 10, 19, transactionArray);
+
+    Block* minedBlock;
+    minedBlock = Block::mineBlock(myBlock, transactionArray, 1);
+
+    minedBlock->printBlock();
+
     return 0;
 }
+
+

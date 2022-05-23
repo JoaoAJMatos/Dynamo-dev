@@ -175,3 +175,13 @@ uint8_t* ECDSA::hexToUint8(const char* buffer)
 
     return data;
 }
+
+char* ECDSA::getPublicKeyHex()
+{
+    return this->publicKeyHex;
+}
+
+char* ECDSA::getSignatureHex()
+{
+    return this->signatureHex;
+}

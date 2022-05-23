@@ -134,6 +134,9 @@ public:
      * @return int (0 if success, 1 otherwise)
      */
     static uint8_t* hexToUint8(const char* buffer);
+
+    char* getPublicKeyHex();
+    char* getSignatureHex();
 };
 
 #endif
