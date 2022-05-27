@@ -1,17 +1,16 @@
 #ifndef DEV_DYNAMO_BLOCKCHAIN_H
 #define DEV_DYNAMO_BLOCKCHAIN_H
 
-#define REWARD_TO_ROOT 2000000000 // The reward of 2.000.000.000 Dynamos 
-                                  // will be given to the first person that joins the network
-
 #include "../block/Block.h"
+#include "../wallet/transaction/Transaction.h"
+#include "../consensus/consensus.hpp"
 #include <vector>
 
 class Blockchain
 {
 private:
     /* MEMBER VARIABLES */
-    std::vector<Block> chain;
+    std::vector<Block*> chain;
 
 public:
     /* CONSTRUCTOR */
@@ -20,7 +19,7 @@ public:
      * 
      * @param isRoot - Indicates if a new Blockchain should be created or not
      */
-    Blockchain(bool isRoot);
+    Blockchain(int isRoot, const std::string& firstNodeAddress);
 
     /* PUBLIC FUNCTIONS */
     /**
@@ -28,11 +27,48 @@ public:
      * 
      * @return int 
      */
-    int replaceChain();
+    int replaceChain(Blockchain chain);
 
-    int addBlock();
+    /**
+     * @brief Adds a new block to the chain by mining
+     * 
+     * @param data 
+     * @param log 
+     * @return int 
+     */
+    int addBlock(std::vector<Transaction> data, int log);
 
-    int validateBlockData();
+    /**
+     * @brief Validates the transactions inside the chain
+     * 
+     * @param chain 
+     * @return int 
+     */
+    int isTransactionDataValid(Blockchain chain);
+
+    /**
+     * @brief Validates the chain contents
+     * 
+     * @param chain 
+     * @return int 
+     */
+    int isValid(Blockchain chain);
+
+    /**
+     * @brief Prints the chain to the std out
+     * 
+     */
+    void printChain();
+
+    /**
+     * @brief Prints a block at a specified index
+     * 
+     * @param height 
+     */
+    void printBlock(int height);
+
+    /* GETTERS */
+    std::vector<Block*> getChain();
 };
 
 #endif
