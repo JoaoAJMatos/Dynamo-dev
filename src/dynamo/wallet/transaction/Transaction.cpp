@@ -44,22 +44,29 @@ int Transaction::createInput(ECDSA* keyPair, outputMap* outputMap)
     this->inMap.balance = outputMap->balance + outputMap->amount;
     this->inMap.address = outputMap->sender;
 
-    // Hash the output map and sign it with the sender's private key
-    // Create the string buffer with the output map data
-    std::string buffer = this->outMap.recipient 
-                         + std::to_string(this->outMap.amount) 
-                         + this->outMap.sender 
-                         + std::to_string(this->outMap.balance);
+    if (keyPair)
+    {
+        // Hash the output map and sign it with the sender's private key
+        // Create the string buffer with the output map data
+        std::string buffer = this->outMap.recipient 
+                            + std::to_string(this->outMap.amount) 
+                            + this->outMap.sender 
+                            + std::to_string(this->outMap.balance);
 
-    sha256.update(buffer);
-    
-    uint8_t* hash = sha256.digest();
+        sha256.update(buffer);
+        
+        uint8_t* hash = sha256.digest();
 
-    outputMapHash = SHA256::toString(hash);
+        outputMapHash = SHA256::toString(hash);
 
-    keyPair->signHash(outputMapHash.c_str());
+        int res = keyPair->signHash(outputMapHash.c_str());
 
-    this->inMap.signature = keyPair->getSignatureHex();
+        this->inMap.signature = keyPair->getSignatureHex();
+
+        return res;
+    }
+
+    this->inMap.signature = "Dynamo-Authorized-Signature";
 
     return 0;
 }
@@ -74,11 +81,14 @@ int Transaction::createInput(ECDSA* keyPair, outputMap* outputMap)
  */
 int Transaction::validTransaction(Transaction* transaction, ECDSA* keyPair)
 {
+    // Check if the transaction is comming from the Genesis block or is a reward transaction
+    if (transaction->inMap.address == "Genesis" || transaction->inMap.address == "dynamo-consensus-node-reward") return 1;
+    
     // Check if the signature is valid
-    if(!(keyPair->verifySignature(transaction->inMap.address.c_str(), transaction->outputMapHash.c_str(), transaction->inMap.signature.c_str()))) return 0;
+    if(keyPair->verifySignature(transaction->inMap.address.c_str(), transaction->outputMapHash.c_str(), transaction->inMap.signature.c_str())) return 1;
 
     // Check if the balance is sufficient
-    if(transaction->inMap.balance < transaction->outMap.amount) return 0;
+    if(transaction->inMap.balance >= transaction->outMap.amount) return 1;
 
     return 0;
 }
@@ -104,6 +114,40 @@ std::string Transaction::getTransactionDataBuffer()
 }
 
 /**
+* @brief Get the Block Subsidy for the mined block
+* 
+* @param height 
+* @param concensus_halving_interval 
+* @return int 
+* 
+* @details This function calculates the block subsidy based on the block height and the consensus halving interval
+*/
+int Transaction::getBlockSubsidy(int height)
+{
+    int halvings = height / CONSENSUS_HALVING_INTERVAL; // The amount of halvings that have taken place
+
+    if (halvings >= 64) return 0; // Force block reward to 0 when the right-shift is undefined, meaning no more halvings can take place
+
+    int subsidy = INITIAL_SUBSIDY * COIN; // Initial block subsidy in BLOX
+
+    // Subsidy will cut in half every 210,000 blocks
+    subsidy >>= halvings;
+    return subsidy;
+}
+
+/**
+ * @brief Creates a reward transaction
+ * 
+ * @return Transaction* 
+ */
+Transaction Transaction::rewardTransaction(size_t blockHeight, const std::string& recipient)
+{
+    int reward = getBlockSubsidy(blockHeight);
+
+    return Transaction(nullptr, recipient, reward, "dynamo-consensus-node-reward", reward);
+}
+
+/**
  * @brief Prints the transaction contents to the standard output
  * 
  */
@@ -126,4 +170,15 @@ void Transaction::showTransaction()
     std::cout << "              Signature: " << this->inMap.signature << std::endl;
     std::cout << "          }" << std::endl;
     std::cout << "      }" << std::endl;
+}
+
+/* GETTERS */
+inputMap Transaction::getInputMap()
+{
+    return this->inMap;
+}
+
+outputMap Transaction::getOutputMap()
+{
+    return this->outMap;
 }

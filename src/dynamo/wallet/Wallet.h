@@ -7,34 +7,26 @@
 
 #include "../../crypto/EC/ECDSA.h"
 #include "../blockchain/Blockchain.h"
+#include "../../crypto/SHA-2/SHA256.h"
 #include "transaction/Transaction.h"
 
 class Wallet
 {
 private:
     /* MEMBER VARIABLES */
-
     // A pointer to a ECDSA class instance for signing and verifying transactions
     ECDSA* keyPair;
 
-    unsigned long long int balance;
+    SHA256 sha;
 
-    // A pointer to a blockchain. This is needed in order to calculate the balance for the wallet
-    Blockchain* chain;
+    unsigned long long int balance;
 
 public:
     /* CONSTRUCTOR */
-    Wallet(Blockchain* chain, const char* address, const char* privateKey);
+    Wallet(char* address, char* privateKey);
+    Wallet();
 
     /* PUBLIC FUNCTIONS */
-    /**
-     * @brief Signs a string buffer using the wallet's private key
-     * 
-     * @param data 
-     * @return int 
-     */
-    int sign(const std::string& data);
-
     /**
      * @brief Create a Transaction object
      * 
@@ -56,6 +48,10 @@ public:
      * @return int 
      */
     static int calculateBalance(Blockchain chain, const std::string& address);
+
+    /* GETTERS */
+    char* getAddress();
+    char* getPrivate();
 };
 
 

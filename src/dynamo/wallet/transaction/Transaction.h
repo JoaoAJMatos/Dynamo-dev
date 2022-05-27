@@ -8,6 +8,7 @@
 #include <string>
 
 #include "../../../../src/util/uuid/uuid.h"
+#include "../../consensus/consensus.hpp"
 #include "../../../system/time/Time.h"
 #include "../../../crypto/EC/ECDSA.h"
 #include "../../../crypto/SHA-2/SHA256.h"
@@ -116,8 +117,12 @@ public:
      * @brief Creates a reward transaction
      * 
      * @return this 
+     * 
+     * @details This function creates a reward transaction for the miner given the height of the block
      */
-    static Transaction* rewardTransaction();
+    static Transaction rewardTransaction(size_t blockHeight, const std::string& recipient);
+
+    static int getBlockSubsidy(int blockHeight);
 
     /**
      * @brief Validates a transaction
@@ -129,6 +134,10 @@ public:
      *          Returns 1 if the transaction is valid and 0 if it is not.
      */
     static int validTransaction(Transaction* transaction, ECDSA* keyPair);
+
+    /* GETTERS */
+    inputMap getInputMap();
+    outputMap getOutputMap();
 };
 
 #endif //DEV_DYNAMO_TRANSACTION_H
