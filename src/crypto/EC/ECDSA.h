@@ -136,6 +136,7 @@ public:
     static uint8_t* hexToUint8(const char* buffer);
 
     char* getPublicKeyHex();
+    char* getPrivateKeyHex();
     char* getSignatureHex();
 };
 

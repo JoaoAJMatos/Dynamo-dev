@@ -185,3 +185,8 @@ char* ECDSA::getSignatureHex()
 {
     return this->signatureHex;
 }
+
+char* ECDSA::getPrivateKeyHex()
+{
+    return this->privateKeyHex;
+}
