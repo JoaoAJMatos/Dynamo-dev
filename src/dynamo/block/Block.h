@@ -5,8 +5,6 @@
 #ifndef DEV_DYNAMO_BLOCK_H
 #define DEV_DYNAMO_BLOCK_H
 
-#define MINE_RATE 1000
-
 #include <ctime>
 #include <iostream>
 #include <vector>
@@ -75,7 +73,7 @@ public:
      * 
      * @return Block* 
      */
-    static Block* genesis();
+    static Block* genesis(const std::string& first_node_wallet_address, int reward);
 
     /* PUBLIC FUNCTIONS */
     /**
@@ -83,6 +81,9 @@ public:
      * 
      */
     void printBlock();
+
+    /* GETTERS */
+    std::vector<Transaction> getData();
 };
 
 

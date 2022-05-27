@@ -133,6 +133,30 @@ int Block::adjustDifficulty(Block lastBlock, std::time_t timestamp)
 }
 
 /**
+ * @brief Returns the Genesis Block
+ * 
+ * @return Block* 
+ * 
+ * @details The genesis block sends a special transaction to the first node that joins the network and initiates the chain.
+ */
+Block* Block::genesis(const std::string& first_node_wallet_address, int reward)
+{
+    SHA256 sha;
+
+    std::time_t timestamp = Time::getTimestamp();
+    sha.update("dynamo");
+    uint8_t* hash = sha.digest();
+
+    std::string sender = "Genesis";
+
+    // Create transaction data
+    std::vector<Transaction> data;
+    data.push_back(Transaction(nullptr, first_node_wallet_address, reward, sender, reward));
+
+    return new Block(timestamp, hash, hash, 0, 0, INITIAL_DIFFICULTY, data);
+}
+
+/**
  * @brief This function prints the blocks content to the standard out
  * 
  */
@@ -156,4 +180,9 @@ void Block::printBlock()
 
     std::cout << "  }" << std::endl;
     std::cout << "}" << std::endl;
+}
+
+std::vector<Transaction> Block::getData()
+{
+    return this->data;
 }
