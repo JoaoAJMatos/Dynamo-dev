@@ -327,14 +327,22 @@ void servers::DNS_Server::responder()
                 sqlite3_free(zErrMsg);
             }
 
-            // Build the message buffer and update the database links
-            // For example: If a node has 0 links, and if it is mentioned in the messageBuffer, the links in the DB should be incremented by 1
-            // meaning that now 1 node knows it exists and has a link to it 
-            for (int i = 0; i < this->known_hosts.size(); ++i)
+            if (this->known_hosts.size() > 0)
             {
-                // Build the message buffer
-                messageBuffer += known_hosts[i] + ";";
+                // Build the message buffer and update the database links
+                // For example: If a node has 0 links, and if it is mentioned in the messageBuffer, the links in the DB should be incremented by 1
+                // meaning that now 1 node knows it exists and has a link to it 
+                for (int i = 0; i < this->known_hosts.size(); ++i)
+                {
+                    // Build the message buffer
+                    messageBuffer += known_hosts[i] + ";";
+                }
             }
+            else
+            {
+                messageBuffer = "root";
+            }
+            
         }
 
         // Send the response and clear the list
@@ -343,10 +351,6 @@ void servers::DNS_Server::responder()
         known_hosts.clear();
         return;
     }
-
-    char* hello = "Hello from server";
-    send(new_socket, hello, strlen(hello), 0);
-    close(new_socket);
 }
 
 /* PUBLIC FUNCTIONS */
