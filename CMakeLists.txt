@@ -32,6 +32,10 @@ add_executable(
 
         src/dynamo/block/Block.h
         src/dynamo/block/Block.cpp
+        src/dynamo/blockchain/Blockchain.h
+        src/dynamo/blockchain/Blockchain.cpp
+        src/dynamo/miner/Miner.cpp
+        src/dynamo/miner/Miner.h
         src/dynamo/wallet/Wallet.h
         src/dynamo/wallet/Wallet.cpp
         src/dynamo/wallet/transaction/Transaction.h
@@ -44,6 +48,7 @@ add_executable(
         src/dynamo/network/node/common/NodeServer.h
         src/dynamo/network/node/Node.cpp
         src/dynamo/network/node/Node.h
+        src/dynamo/consensus/consensus.hpp
 
         src/system/system.h
         src/system/time/Time.cpp
