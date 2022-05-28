@@ -186,6 +186,61 @@ int Node::broadcast(std::string message)
     }
 }
 
+int Node::createWallet()
+{
+    char hasWallet;
+    bool isWalletCreated = false;
+
+    logger("Creating wallet...");
+
+    while (!(isWalletCreated))
+    {
+        std::cout << std::endl << "[+] Do you already have a wallet? (y/n): ";
+        std::cin >> hasWallet;
+        std::cout << std::endl;
+
+        if (hasWallet == 'Y' || hasWallet == 'y') // Login to the wallet
+        {
+            std::string pubKey;
+            std::string privKey;
+
+            std::cout << "[+] Enter your wallet's address: ";
+            std::cin >> pubKey;
+
+            std::cout << "[+] Enter your wallet's private key: ";
+            std::cin >> privKey;
+
+            this->wallet = new Wallet(pubKey.data(), privKey.data());
+
+            std::cout << "[+] Login successful" << std::endl << std::endl;
+        
+            isWalletCreated = true;
+        }
+        else if (hasWallet == 'N' || hasWallet == 'n') // Create a new wallet
+        {
+            std::cout << "[+] Generating a new ECDSA key pair..." << std::endl;
+            this->wallet = new Wallet();
+
+            std::cout << "[+] Wallet created successfully!" << std::endl;
+            std::cout << "[+] Your wallet's address is: " << this->wallet->getAddress() << std::endl;
+            std::cout << "[+] Your wallet's private key is: " << this->wallet->getPrivate() << std::endl << std::endl;
+
+            std::cout << "[NOTE]  The above parameters must be saved in a safe place, as they are required to login to the wallet. \n" 
+                                 "\tDynamo is not responsible for recovering any lost login parameters. If you loose your private key,\n"
+                                 "\tWE CANNOT RECOVER YOUR WALLET." << std::endl << std::endl;
+
+            #ifdef _WIN32
+                system("pause");
+            #else
+                std::cout << "Press any key to continue..." << std::endl;
+                system("read");
+            #endif
+
+            isWalletCreated = true;
+        }
+    }
+}
+
 void Node::start()
 {
     logger("Initiating client and server instances");
@@ -193,6 +248,9 @@ void Node::start()
     // Create instances of NodeClient and NodeServer
     this->client = new NodeClient(this->domain, this->service, this->protocol);
     this->server = new NodeServer(this->domain, this->service, this->protocol, this->server_port, this->server_interface, this->backlog, this->number_of_threads);
+
+    // Create the node wallet
+    createWallet();
 
     // Sync the known hosts list
     int result = discover_peers();
@@ -213,7 +271,12 @@ void Node::start()
     // If the response is "root" then we can start the blockchain and insert the Genesis Block
     if (tempResponse == "root")
     {
-        // TODO: Initialize blockchain
+        logger("You are the network's root node!");
+        logger("Initializing the blockchain...");
+
+        this->blockchain = new Blockchain(1, this->wallet->getAddress());
+
+        this->blockchain->printChain();
     }
     else // Else: Loop through the string and parse the request
     {

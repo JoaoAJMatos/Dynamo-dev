@@ -27,6 +27,10 @@
 #include "../../../networking/protocols/DDNS/DNS.h"
 #include "../../../util/file-handling/config-handling/ConfigParser.h"
 #include "../../../util/file-handling/config-handling/StartupConfManager.h"
+#include "../../blockchain/Blockchain.h"
+#include "../../wallet/Wallet.h"
+#include "../../wallet/transaction/TransactionPool.h"
+#include "../../wallet/Wallet.h"
 #include "../../../util/std-out/logger.h"
 #include "../../../util/uuid/uuid.h"
 #include "../../../system/time/Time.h"
@@ -66,6 +70,9 @@ private:
     NodeClient* client;     // Launched on the main thread
     NodeServer* server;     // Launched on the second thread
 
+    Wallet* wallet; // Wallet instance
+    Blockchain* blockchain; // Blockchain instance
+
     /* PRIVATE FUNCTIONS */
     // This function will save the server and client configurations
     void save_config() const;
@@ -81,6 +88,8 @@ public:
     int discover_peers();
     // This function broadcasts a message to all the known hosts
     int broadcast(std::string message);
+
+    int createWallet();
 
     void start();
 };
