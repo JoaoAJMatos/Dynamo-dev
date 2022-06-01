@@ -29,12 +29,12 @@ private:
     size_t nonce;
     int difficulty;
 
-    std::vector<Transaction> data; // Array of transactions
-
     SHA256 sha;
     Time t;
 
 public:
+    std::vector<Transaction> data; // Array of transactions
+
     /* CONSTRUCTOR */
     /**
      * @brief Construct a new Block object
@@ -57,7 +57,7 @@ public:
      * 
      * @return Block* 
      */
-    static Block* mineBlock(Block lastBlock, std::vector<Transaction> data, int log);
+    static Block* mineBlock(Block* lastBlock, std::vector<Transaction> data, int log);
 
     /**
      * @brief Adjusts the block mining difficulty in order to keep the mining rate between the defined boundries
@@ -66,7 +66,7 @@ public:
      * @param timestamp 
      * @return int 
      */
-    static int adjustDifficulty(Block lastBlock, std::time_t timestamp);
+    static int adjustDifficulty(Block* lastBlock, std::time_t timestamp);
 
     /**
      * @brief Returns the genesis block
@@ -83,7 +83,13 @@ public:
     void printBlock();
 
     /* GETTERS */
-    std::vector<Transaction> getData();
+    std::time_t getTimestamp() const;
+    uint8_t* getHash();
+    uint8_t* getPrevHash();
+    size_t getHeight();
+    size_t getNonce();
+    int getDifficulty();
+    std::vector<Transaction>* getData();
 };
 
 

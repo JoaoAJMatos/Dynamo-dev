@@ -70,13 +70,13 @@ int setTarget(uint8_t* destinationBuffer, int difficulty)
  * 
  * @details This function performs the proof of work required to mine a block
  */
-Block* Block::mineBlock(Block lastBlock, std::vector<Transaction> data, int log)
+Block* Block::mineBlock(Block* lastBlock, std::vector<Transaction> data, int log)
 {
     uint8_t* hash;
     std::time_t timestamp;
-    size_t height = lastBlock.height + 1;
-    uint8_t* lastHash = lastBlock.hash;
-    int difficulty = lastBlock.difficulty;
+    size_t height = lastBlock->height + 1;
+    uint8_t* lastHash = lastBlock->hash;
+    int difficulty = lastBlock->difficulty;
     int newDifficulty;
     size_t nonce = 0;
 
@@ -94,10 +94,16 @@ Block* Block::mineBlock(Block lastBlock, std::vector<Transaction> data, int log)
 
     t.startHighResClock();
 
+    // These variables will be used to calculate the mining power of the node
+    std::time_t hashCountStart = Time::getTimestamp();
+    int hashCount = 0;
+    std::stringstream blockBuffer;
+
     do // POW
     {
-        std::stringstream blockBuffer;
+        blockBuffer.clear();
         nonce++;
+        hashCount++;
         timestamp = Time::getTimestamp();
         newDifficulty = Block::adjustDifficulty(lastBlock, timestamp);
 
@@ -110,7 +116,16 @@ Block* Block::mineBlock(Block lastBlock, std::vector<Transaction> data, int log)
         sha.update(blockBuffer.str());
         hash = sha.digest();
 
-        if (log) std::cout  << "\r" << "Hash: " << SHA256::toString(hash) << " | Nonce: " << nonce << std::flush;
+        if (log)
+        {
+            if ((Time::getTimestamp() - hashCountStart) >= 1)
+            {
+                hashCountStart = Time::getTimestamp();
+                hashCount = 0;
+            }
+
+            std::cout  << "\r" << "Hash: " << SHA256::toString(hash) << " | Nonce: " << nonce << " | Hash rate (hashes/s): " << hashCount << std::flush;
+        }
 
     } while (memcmp(target, hash, sizeof(target)) < 0);
 
@@ -121,12 +136,12 @@ Block* Block::mineBlock(Block lastBlock, std::vector<Transaction> data, int log)
     return new Block(timestamp, hash, lastHash, height, nonce, difficulty, data);
 }
 
-int Block::adjustDifficulty(Block lastBlock, std::time_t timestamp)
+int Block::adjustDifficulty(Block* lastBlock, std::time_t timestamp)
 {
-    const int difficulty = lastBlock.difficulty;
+    const int difficulty = lastBlock->difficulty;
 
     if (difficulty < 1) return 1;
-    if ((timestamp - lastBlock.timestamp) > MINE_RATE) return difficulty - 1;
+    if ((timestamp - lastBlock->timestamp) > MINE_RATE) return difficulty - 1;
     if (difficulty == 64) return 64;
 
     return difficulty + 1;
@@ -182,7 +197,37 @@ void Block::printBlock()
     std::cout << "}" << std::endl;
 }
 
-std::vector<Transaction> Block::getData()
+std::vector<Transaction>* Block::getData()
 {
-    return this->data;
+    return &this->data;
+}
+
+size_t Block::getHeight()
+{
+    return this->height;
+}
+
+uint8_t* Block::getHash()
+{
+    return this->hash;
+}
+
+uint8_t* Block::getPrevHash()
+{
+    return this->prev_hash;
+}
+
+std::time_t Block::getTimestamp() const
+{
+    return this->timestamp;
+}
+
+size_t Block::getNonce()
+{
+    return this->nonce;
+}
+
+int Block::getDifficulty()
+{
+    return this->difficulty;
 }

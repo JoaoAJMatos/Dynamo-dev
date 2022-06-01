@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <vector>
 #include <unistd.h>
 
@@ -8,6 +9,7 @@
 #include "libs/msgpack11/msgpack11.hpp"
 #include "src/system/time/Time.h"
 #include "src/dynamo/block/Block.h"
+#include "src/dynamo/blockchain/Blockchain.h"
 #include "src/dynamo/wallet/transaction/Transaction.h"
 #include "servers/DNS/DNS_Server.h"
 #include "src/dynamo/network/node/Node.h"
@@ -48,8 +50,8 @@ int main()
     /*servers::DNS_Server DNS(AF_INET, SOCK_STREAM, 6, 4542, INADDR_ANY, 100, 0);
     DNS.launch();*/
 
-    /*Node n;
-    n.start();*/
+    Node n;
+    n.start();
 
     /*uint8_t* hash;
 
@@ -85,7 +87,7 @@ int main()
 
     setTarget2(buffer, sizeof(buffer), 13);*/
 
-    ECDSA ec;
+    /*ECDSA ec;
 
     SHA256 sha;
     sha.update("123");
@@ -94,10 +96,20 @@ int main()
     sha.update("hey");
     uint8_t* lastHash = sha.digest();
 
+
+    char* pubKey = ec.getPublicKeyHex();
+    std::string publicKey(pubKey);
+
+    std::cout << publicKey << std::endl;
+
+    Blockchain myBlockchain(1, publicKey);
+
+    myBlockchain.printChain();
+
     std::string recipient = "you";
     std::string sender = "me";
 
-    Transaction transaction(&ec, recipient, (size_t)2, sender, (size_t)10);
+    Transaction transaction(nullptr, recipient, (size_t)2, sender, (size_t)10);
 
     std::vector<Transaction> transactionArray;
 
@@ -108,8 +120,13 @@ int main()
     Block* minedBlock;
     minedBlock = Block::mineBlock(myBlock, transactionArray, 1);
 
-    minedBlock->printBlock();
+    minedBlock->printBlock();*/
+/*
+    Block* genesis;
+    genesis = Block::genesis(recipient, 10);
 
+    genesis->printBlock();
+*/
     return 0;
 }
 

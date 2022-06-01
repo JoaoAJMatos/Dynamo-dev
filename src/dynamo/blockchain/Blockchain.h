@@ -4,15 +4,17 @@
 #include "../block/Block.h"
 #include "../wallet/transaction/Transaction.h"
 #include "../consensus/consensus.hpp"
+#include "../../crypto/EC/ECDSA.h"
+
 #include <vector>
+#include <map>
+#include <sstream>
 
 class Blockchain
 {
-private:
-    /* MEMBER VARIABLES */
+public:
     std::vector<Block*> chain;
 
-public:
     /* CONSTRUCTOR */
     /**
      * @brief Construct a new Blockchain object
@@ -67,8 +69,13 @@ public:
      */
     void printBlock(int height);
 
-    /* GETTERS */
-    std::vector<Block*> getChain();
+    /**
+     * @brief Calculates the balance of a specified address
+     * 
+     * @param address 
+     * @return int 
+     */
+    int calculateBalanceOfAddress(const std::string& address);
 };
 
 #endif
