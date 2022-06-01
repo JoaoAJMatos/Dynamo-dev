@@ -79,13 +79,15 @@ int Transaction::createInput(ECDSA* keyPair, outputMap* outputMap)
  * @param keyPair 
  * @return int 
  */
-int Transaction::validTransaction(Transaction* transaction, ECDSA* keyPair)
+int Transaction::validTransaction(Transaction* transaction)
 {
+    ECDSA keyPair;
+
     // Check if the transaction is comming from the Genesis block or is a reward transaction
     if (transaction->inMap.address == "Genesis" || transaction->inMap.address == "dynamo-consensus-node-reward") return 1;
     
     // Check if the signature is valid
-    if(keyPair->verifySignature(transaction->inMap.address.c_str(), transaction->outputMapHash.c_str(), transaction->inMap.signature.c_str())) return 1;
+    if(keyPair.verifySignature(transaction->inMap.address.c_str(), transaction->outputMapHash.c_str(), transaction->inMap.signature.c_str())) return 1;
 
     // Check if the balance is sufficient
     if(transaction->inMap.balance >= transaction->outMap.amount) return 1;
@@ -136,6 +138,35 @@ int Transaction::getBlockSubsidy(int height)
 }
 
 /**
+ * @brief Updates transactions and resigns them
+ * 
+ * @param keyPair 
+ * @param recipient 
+ * @param amount 
+ * @return int 
+ */
+int Transaction::update(ECDSA* keyPair, size_t amount)
+{
+    if (amount > this->outMap.balance) return 1;
+
+    if (amount > 0)
+    {
+        this->outMap.amount += amount;
+        this->outMap.balance -= amount;
+    }
+    else
+    {
+        this->outMap.amount -= amount;
+        this->outMap.balance += abs((int)amount);
+    }
+
+    // Resign the transaction
+    this->createInput(keyPair, &this->outMap);
+
+    return 0;
+}
+
+/**
  * @brief Creates a reward transaction
  * 
  * @return Transaction* 
@@ -181,4 +212,9 @@ inputMap Transaction::getInputMap()
 outputMap Transaction::getOutputMap()
 {
     return this->outMap;
+}
+
+char* Transaction::getID()
+{
+    return this->id;
 }

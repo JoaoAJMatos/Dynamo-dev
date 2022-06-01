@@ -97,7 +97,7 @@ public:
      * 
      * @return int 
      */
-    int update(ECDSA* keyPair, const std::string& recipient, size_t amount);
+    int update(ECDSA* keyPair, size_t amount);
 
     /**
      * @brief Returns a string buffer containing the transaction data to pass into the hashing function to create the block
@@ -133,11 +133,12 @@ public:
      * @details This function validates a transaction by checking the digital signature of the input map. 
      *          Returns 1 if the transaction is valid and 0 if it is not.
      */
-    static int validTransaction(Transaction* transaction, ECDSA* keyPair);
+    static int validTransaction(Transaction* transaction);
 
     /* GETTERS */
     inputMap getInputMap();
     outputMap getOutputMap();
+    char* getID();
 };
 
 #endif //DEV_DYNAMO_TRANSACTION_H

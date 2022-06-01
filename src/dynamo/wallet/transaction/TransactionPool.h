@@ -2,6 +2,8 @@
 #define DEV_DYNAMO_TRANSACTION_POOL_H
 
 #include <vector>
+#include <map>
+
 #include "Transaction.h"
 
 class TransactionPool
@@ -18,6 +20,8 @@ public:
      */
     void clear();
 
+    int setTransaction(Transaction transaction);
+
     /**
      * @brief Set this transaction pool to an incomming one
      * 
@@ -27,7 +31,7 @@ public:
     int set(std::vector<Transaction> pool);
 
     /**
-     * @brief Checks if there's a transaction with the same sender and recipient
+     * @brief Checks if there's a transaction with the same sender
      * 
      * @param sender 
      * @return int 
@@ -35,18 +39,18 @@ public:
     int existsTransaction(const std::string& sender);
 
     /**
+     * @brief Adds transactions to the valid transactions array
+     * 
+     * @param transaction 
+     */
+    std::vector<Transaction> getValidTransactions();
+
+    /**
      * @brief Add a transaction to the pool
      * 
      * @param transaction 
      */
     void addTransaction(Transaction transaction);
-
-    /**
-     * @brief Get the Transaction pool
-     * 
-     * @return std::vector<Transaction> 
-     */
-    std::vector<Transaction> getTransactions();
 };
 
 #endif 
