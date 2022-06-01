@@ -37,7 +37,7 @@ public:
      * 
      * @details This function should return a buffer containing the transaction information 
      */
-    Transaction* createTransaction(const std::string& recipient, int amount, Blockchain chain);
+    Transaction* createTransaction(const std::string& recipient, int amount, Blockchain* chain);
 
     /* STATIC FUNCTIONS */
     /**
@@ -47,7 +47,7 @@ public:
      * @param address 
      * @return int 
      */
-    static int calculateBalance(Blockchain chain, const std::string& address);
+    static int calculateBalance(Blockchain* chain, const std::string& address);
 
     /* GETTERS */
     char* getAddress();

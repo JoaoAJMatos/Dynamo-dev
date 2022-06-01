@@ -16,7 +16,7 @@ Wallet::Wallet(char* address, char* privateKey)
     this->balance = 0;
 }
 
-Transaction* Wallet::createTransaction(const std::string& recipient, int amount, Blockchain chain)
+Transaction* Wallet::createTransaction(const std::string& recipient, int amount, Blockchain* chain)
 {
     // Update the balance
     this->balance = Wallet::calculateBalance(chain, this->keyPair->getPublic());
@@ -31,22 +31,17 @@ Transaction* Wallet::createTransaction(const std::string& recipient, int amount,
     return new Transaction(this->keyPair, recipient, amount, this->keyPair->getPublic(), this->balance);
 }
 
-int Wallet::calculateBalance(Blockchain chain, const std::string& address)
+int Wallet::calculateBalance(Blockchain* chain, const std::string& address)
 {
-    bool hasConductedTransaction = false;
     int outputsTotal = 0;
 
-    for (auto& block : chain.getChain())
+    for (auto& block : chain->chain)
     {
-        for (auto& transaction : block->getData())
+        for (auto& transaction : block->data)
         {
-            // Check if the transaction has been conducted by the wallet
-            if (transaction.getInputMap().address == address) hasConductedTransaction = true;
-
-            outputsTotal += transaction.getOutputMap().balance;
+            if (transaction.getOutputMap().recipient == address) outputsTotal += transaction.getOutputMap().amount;
+            if (transaction.getOutputMap().sender == address) outputsTotal -= transaction.getOutputMap().amount;
         }
-    
-        if (hasConductedTransaction) break;
     }
 
     return outputsTotal;
