@@ -10,6 +10,8 @@ Node::Node()
     logger("Node startup sequence initiated");
     Time::sleep(500);
 
+    isChainLinked = false;
+
     std::string full_path = DEFAULT_CONFIG_PATH NODE_CONFIG_FILE_NAME;
 
     // Fetch the configs from the config file
@@ -195,7 +197,7 @@ int Node::createWallet()
 
     while (!(isWalletCreated))
     {
-        std::cout << std::endl << "[+] Do you already have a wallet? (y/n): ";
+        std::cout << std::endl << std::endl << "[+] Do you already have a wallet? (y/n): ";
         std::cin >> hasWallet;
         std::cout << std::endl;
 
@@ -241,6 +243,74 @@ int Node::createWallet()
     }
 }
 
+void Node::showBalance()
+{
+    int balance = Wallet::calculateBalance(this->blockchain, this->wallet->getAddress());
+    std::cout << "[+] Your balance: " << balance << " D¥N" << std::endl;
+}
+
+void Node::showKnownLinks()
+{
+    int count = known_hosts.size();
+
+    if (count > 0)
+    {
+        std::cout << "[+] Linked to " << count << " nodes:" << std::endl;
+
+        for (auto& node : known_hosts)
+        {
+            std::cout << "-> " << node.first << ":" << node.second << std::endl;
+        }
+
+        return;
+    }
+
+    std::cout << "[+] You are not connected to any nodes" << std::endl;
+}
+
+void Node::getInput()
+{
+    std::string input;
+    std::cout << std::endl << Time::getCurrentDateTime() << " | Dynamo v.1" <<std::endl;
+
+    while (true)
+    {
+        std::cout << "dynamo@" << this->uuid << ":~$ ";
+        std::cin >> input;
+
+        if (input == "clear") system("clear");
+        else if (input == "balance") showBalance();
+        else if (input == "known-links") showKnownLinks();
+        else if (input == "exit") exit(0);
+        else std::cout << "Unknown command '" << input << "'" << std::endl;
+    }
+}
+
+int Node::syncChains()
+{
+    // Keep asking the known nodes for an updated blockchain until one is received
+    for (auto& node : known_hosts)
+    {
+        int res = this->client->request(node.first.data(), node.second, "get-blockchain");
+
+        if (res == 0 && client->get_response_buffer() != "")
+        {
+            try
+            {
+                //this->blockchain = Blockchain::fromString(response);
+                this->isChainLinked = true;
+                return 0;
+            }
+            catch(const std::exception& e)
+            {
+                logger("Error while parsing blockchain");
+            }
+        }
+    }
+
+    return -1;
+}
+
 void Node::start()
 {
     logger("Initiating client and server instances");
@@ -248,6 +318,10 @@ void Node::start()
     // Create instances of NodeClient and NodeServer
     this->client = new NodeClient(this->domain, this->service, this->protocol);
     this->server = new NodeServer(this->domain, this->service, this->protocol, this->server_port, this->server_interface, this->backlog, this->number_of_threads);
+
+    // Start the server in a new thread
+    logger("Server node launch sequence initiated");
+    std::thread server_thread(&NodeServer::launch, this->server);
 
     // Create the node wallet
     createWallet();
@@ -275,8 +349,6 @@ void Node::start()
         logger("Initializing the blockchain...");
 
         this->blockchain = new Blockchain(1, this->wallet->getAddress());
-
-        this->blockchain->printChain();
     }
     else // Else: Loop through the string and parse the request
     {
@@ -294,5 +366,24 @@ void Node::start()
         }
 
         std::cout << "[+] Linking with " << known_hosts.size() << " nodes..." << std::endl;
+
+        logger("Syncing with the latest blockchain...");
+
+        while(!isChainLinked)
+        {
+            syncChains();
+            logger("Unable to sync with the network");
+            logger("Retrying...");
+        }
     }
+
+    if (isChainLinked)
+    {
+        logger("Blockchain synced successfully!");
+        
+        // Start the node's input loop
+        getInput();
+    }
+
+    
 }

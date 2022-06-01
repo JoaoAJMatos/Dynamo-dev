@@ -39,6 +39,7 @@
 #include <iostream>
 #include <sqlite3.h>
 #include <filesystem>
+#include <thread>
 
 class Node
 {
@@ -55,6 +56,8 @@ private:
     int backlog;
     int number_of_threads;
     char uuid[38];
+
+    bool isChainLinked;
 
     // Array of all the known hosts
     // This map will store the IP address and port of all the server nodes
@@ -77,6 +80,9 @@ private:
     // This function will save the server and client configurations
     void save_config() const;
 
+    void showBalance();
+    void showKnownLinks();
+
 public:
     /* CONSTRUCTOR/DESTRUCTOR */
     // The constructor takes in the configuration for the server and client instances
@@ -86,11 +92,24 @@ public:
     /* PUBLIC FUNCTIONS */
     // This function will fetch the known hosts list from the default name server
     int discover_peers();
+
     // This function broadcasts a message to all the known hosts
     int broadcast(std::string message);
 
+    int syncChains();
+
     int createWallet();
 
+    /**
+     * @brief This function is responsible for taking the input from the user and processing it
+     * 
+     */
+    void getInput();
+
+    /**
+     * @brief This function is responsible for the node's main loop
+     * 
+     */
     void start();
 };
 
