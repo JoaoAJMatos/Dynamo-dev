@@ -5,14 +5,17 @@
 #include <map>
 
 #include "Transaction.h"
+#include "../../blockchain/Blockchain.h"
+#include "../../../../libs/msgpack11/msgpack11.hpp"
 
 class TransactionPool
 {
 private:
-    std::vector<Transaction> pool;
+    std::map<char*, Transaction*> pool;
 
 public:
     TransactionPool();
+    TransactionPool(std::string transaction_pool_data_packet); // Build a transaction pool object from an incoming DTP packet
 
     /**
      * @brief Clear the transaction pool
@@ -20,7 +23,7 @@ public:
      */
     void clear();
 
-    int setTransaction(Transaction transaction);
+    int setTransaction(Transaction* transaction);
 
     /**
      * @brief Set this transaction pool to an incomming one
@@ -28,7 +31,7 @@ public:
      * @param pool 
      * @return int 
      */
-    int set(std::vector<Transaction> pool);
+    int set(std::map<char*, Transaction*> pool);
 
     /**
      * @brief Checks if there's a transaction with the same sender
@@ -45,12 +48,12 @@ public:
      */
     std::vector<Transaction> getValidTransactions();
 
-    /**
-     * @brief Add a transaction to the pool
-     * 
-     * @param transaction 
-     */
-    void addTransaction(Transaction transaction);
+    void clearBlockchainTransactions(Blockchain* chain);
+
+    static msgpack11::MsgPack serialize(TransactionPool* pool);
+
+    /* GETTERS */
+    std::map<char*, Transaction*> getPool();
 };
 
 #endif 

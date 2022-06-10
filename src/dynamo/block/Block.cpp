@@ -25,6 +25,37 @@ Block::Block(std::time_t timestamp, uint8_t* hash, uint8_t* prev_hash, size_t he
     this->data = data;
 }
 
+Block::Block(std::string block_packet)
+{
+    using namespace msgpack11;
+
+    // Deserialize the block packet
+    std::string err;
+    MsgPack block = MsgPack::parse(block_packet, err);
+
+    try
+    {
+        this->timestamp = block["timestamp"].int32_value();
+        this->hash = reinterpret_cast<uint8_t*>(const_cast<char*>(block["hash"].string_value().c_str()));               // I know this might look like a mess,
+        this->prev_hash = reinterpret_cast<uint8_t*>(const_cast<char*>(block["prev_hash"].string_value().c_str()));     // but it works
+        this->height = block["height"].int32_value();
+        this->nonce = block["nonce"].int32_value();
+        this->difficulty = block["difficulty"].int_value();
+
+        std::vector<Transaction> dataArray;
+
+        for (auto& transaction : block["data"].array_items())
+        {
+            Transaction transact(transaction.dump());
+            dataArray.push_back(transact);
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cout << "[ERROR] Unable to create a block instance from the incomming packet." << std::endl;
+    }
+}
+
 /* HELPER FUNCTION */
 /**
  * @brief Sets a target buffer for the proof of work
@@ -169,6 +200,35 @@ Block* Block::genesis(const std::string& first_node_wallet_address, int reward)
     data.push_back(Transaction(nullptr, first_node_wallet_address, reward, sender, reward));
 
     return new Block(timestamp, hash, hash, 0, 0, INITIAL_DIFFICULTY, data);
+}
+
+std::string Block::toString(uint8_t* str)
+{
+    return std::string((char *)str);
+}
+
+msgpack11::MsgPack Block::serialize(Block* block)
+{
+    using namespace msgpack11;
+
+    MsgPack::array tempData;
+
+    for (auto& transaction : block->data)
+    {
+        tempData.push_back(Transaction::serialize(&transaction));
+    }
+
+    MsgPack tempBlock = MsgPack::object {
+        {"timestamp", block->getTimestamp()},
+        {"hash", Block::toString(block->getHash())},
+        {"prev_hash", Block::toString(block->getPrevHash())},
+        {"height", block->getHeight()},
+        {"nonce", block->getNonce()},
+        {"difficulty", block->getDifficulty()},
+        {"data", tempData}
+    };
+
+    return tempBlock;
 }
 
 /**

@@ -12,6 +12,31 @@ Transaction::Transaction(ECDSA* keyPair, const std::string& recipient, size_t am
     createInput(keyPair, &this->outMap);
 }
 
+Transaction::Transaction(std::string transaction_packet)
+{
+    using namespace msgpack11;
+
+    // Deserialize the transaction packet
+    std::string err;
+    MsgPack transaction = MsgPack::parse(transaction_packet, err);
+
+    // Create a transaction object
+    try
+    {
+        strcpy(this->id, transaction["id"].string_value().c_str());
+        createOutput(transaction["outMap"]["recipient"].string_value(), (size_t)transaction["outMap"]["amount"].int32_value(), transaction["outMap"]["sender"].string_value(), (size_t)transaction["outMap"]["balance"].int32_value());
+
+        this->inMap.timestamp = transaction["inMap"]["timestamp"].int32_value();
+        this->inMap.balance = transaction["inMap"]["balance"].int32_value();
+        this->inMap.address = transaction["inMap"]["address"].string_value();
+        this->inMap.signature = transaction["inMap"]["signature"].string_value();
+    }
+    catch(const std::exception& e)
+    {
+        std::cout << "[ERROR] Unable to create a transaction instance from the incomming packet." << std::endl;
+    }
+}
+
 /**
  * @brief Creates an output map for the transaction
  * 
@@ -176,6 +201,29 @@ Transaction Transaction::rewardTransaction(size_t blockHeight, const std::string
     int reward = getBlockSubsidy(blockHeight);
 
     return Transaction(nullptr, recipient, reward, "dynamo-consensus-node-reward", reward);
+}
+
+msgpack11::MsgPack Transaction::serialize(Transaction* transaction)
+{
+    using namespace msgpack11;
+
+    MsgPack transaction_pack = MsgPack::object {
+        {"id", transaction->getID()},
+        {"outMap", MsgPack::object {
+            {"recipient", transaction->getOutputMap().recipient},
+            {"amount", transaction->getOutputMap().amount},
+            {"sender", transaction->getOutputMap().sender},
+            {"balance", transaction->getOutputMap().balance}
+        }},
+        {"inMap", MsgPack::object {
+            {"timestamp", transaction->getInputMap().timestamp},
+            {"balance", transaction->getInputMap().balance},
+            {"address", transaction->getInputMap().address},
+            {"signature", transaction->getInputMap().signature}
+        }}
+    };
+
+    return transaction_pack;
 }
 
 /**

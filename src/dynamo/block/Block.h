@@ -16,6 +16,7 @@
 #include "../../crypto/SHA-2/SHA256.h"
 #include "../../system/time/Time.h"
 #include "../wallet/transaction/Transaction.h"
+#include "../../../libs/msgpack11/msgpack11.hpp"
 
 class Block
 {
@@ -25,12 +26,16 @@ private:
     std::time_t timestamp;
     uint8_t* hash;
     uint8_t* prev_hash;
+    std::string hashString;
+    std::string prevHashString;
     size_t height;
     size_t nonce;
     int difficulty;
 
     SHA256 sha;
     Time t;
+
+    static std::string toString(uint8_t* str);
 
 public:
     std::vector<Transaction> data; // Array of transactions
@@ -47,6 +52,8 @@ public:
      * @param difficulty 
      */
     Block(std::time_t timestamp, uint8_t* hash, uint8_t* prev_hash, size_t height, size_t nonce, int difficulty, std::vector<Transaction> data);
+    
+    Block(std::string block_packet);
 
     /* STATIC FUNCTIONS */
     /**
@@ -74,6 +81,14 @@ public:
      * @return Block* 
      */
     static Block* genesis(const std::string& first_node_wallet_address, int reward);
+
+    /**
+     * @brief Serializes a block into a msgpack object
+     * 
+     * @param block 
+     * @return msgpack11::MsgPack 
+     */
+    static msgpack11::MsgPack serialize(Block* block);
 
     /* PUBLIC FUNCTIONS */
     /**

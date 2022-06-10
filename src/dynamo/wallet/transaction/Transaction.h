@@ -6,8 +6,10 @@
 #define DEV_DYNAMO_TRANSACTION_H
 
 #include <string>
+#include <cstring>
 
 #include "../../../../src/util/uuid/uuid.h"
+#include "../../../../libs/msgpack11/msgpack11.hpp"
 #include "../../consensus/consensus.hpp"
 #include "../../../system/time/Time.h"
 #include "../../../crypto/EC/ECDSA.h"
@@ -90,6 +92,9 @@ public:
      * @param amount 
      */
     Transaction(ECDSA* keyPair, const std::string& recipient, size_t amount, const std::string& sender, size_t balanceBeforeTransaction);
+    
+    // A transaction can also be build from an incoming serialized msgpack object 
+    Transaction(std::string transaction_packet);
 
     /* PUBLIC FUNCTIONS */
     /**
@@ -134,6 +139,8 @@ public:
      *          Returns 1 if the transaction is valid and 0 if it is not.
      */
     static int validTransaction(Transaction* transaction);
+
+    static msgpack11::MsgPack serialize(Transaction* transaction);
 
     /* GETTERS */
     inputMap getInputMap();

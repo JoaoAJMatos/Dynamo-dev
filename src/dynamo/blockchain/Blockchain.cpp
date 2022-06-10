@@ -5,6 +5,29 @@ Blockchain::Blockchain(int isRoot, const std::string& firstNodeAddress)
     if (isRoot) this->chain.push_back(Block::genesis(firstNodeAddress, GENESIS_TRANSACTION_REWARD));
 }
 
+Blockchain::Blockchain(std::string blockchain_packet)
+{
+    using namespace msgpack11;
+
+    // Deserialize the blockchain packet
+    std::string err;
+    MsgPack blockchain = MsgPack::parse(blockchain_packet, err);
+
+    try
+    {
+        for (auto& block : blockchain["chain"].array_items())
+        {
+            Block* newBlock = new Block(block.dump());
+            this->chain.push_back(newBlock);
+            delete newBlock;
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cout << "[ERROR] Unable to create a blockchain instance from the incomming packet." << std::endl;
+    }
+}
+
 int Blockchain::addBlock(std::vector<Transaction> data, int log)
 {
     Block* newBlock = Block::mineBlock(this->chain.back(), data, log);
@@ -22,6 +45,24 @@ int Blockchain::replaceChain(Blockchain chain)
 
     this->chain = chain.chain;
     return 0;
+}
+
+msgpack11::MsgPack Blockchain::serialize(Blockchain chain)
+{
+    using namespace msgpack11;
+
+    MsgPack::array tempChain;
+
+    for (auto& block : chain.chain)
+    {
+        tempChain.push_back(Block::serialize(block));
+    }
+
+    MsgPack tempBlockchain = MsgPack::object {
+        {"chain", tempChain}
+    };
+
+    return tempBlockchain;
 }
 
 void Blockchain::printChain() // Print the whole chain
