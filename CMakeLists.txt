@@ -48,6 +48,8 @@ add_executable(
         src/dynamo/network/node/common/NodeServer.h
         src/dynamo/network/node/Node.cpp
         src/dynamo/network/node/Node.h
+        src/dynamo/network/protocol/DTP.h
+        src/dynamo/network/protocol/DTP.cpp
         src/dynamo/consensus/consensus.hpp
 
         src/system/system.h
@@ -76,6 +78,9 @@ add_executable(
 
         servers/DNS/DNS_Server.h
         servers/DNS/DNS_Server.cpp
+
+        libs/msgpack11/msgpack11.hpp
+        libs/msgpack11/msgpack11.cpp
 )
 
 find_package(OpenSSL REQUIRED)
