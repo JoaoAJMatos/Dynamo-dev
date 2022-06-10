@@ -24,6 +24,7 @@
 
 #include "./common/NodeServer.h"
 #include "./common/NodeClient.h"
+#include "../protocol/DTP.h"
 #include "../../../networking/protocols/DDNS/DNS.h"
 #include "../../../util/file-handling/config-handling/ConfigParser.h"
 #include "../../../util/file-handling/config-handling/StartupConfManager.h"
@@ -73,8 +74,12 @@ private:
     NodeClient* client;     // Launched on the main thread
     NodeServer* server;     // Launched on the second thread
 
-    Wallet* wallet; // Wallet instance
-    Blockchain* blockchain; // Blockchain instance
+    Wallet* wallet;                   // Wallet instance
+    Blockchain* blockchain;           // Blockchain instance
+    TransactionPool* transactionPool; // Transaction pool instance
+
+    int broadcast_flag;           // Flag to indicate if the node is broadcasting
+    std::string broadcast_buffer; // The message to broadcast
 
     /* PRIVATE FUNCTIONS */
     // This function will save the server and client configurations
@@ -82,6 +87,7 @@ private:
 
     void showBalance();
     void showKnownLinks();
+    void showAddress();
 
 public:
     /* CONSTRUCTOR/DESTRUCTOR */

@@ -117,6 +117,12 @@ Node::Node()
     // Set the list of known DDNS
     known_DDNS.push_back({"192.168.1.120", 4542});
     known_DDNS.push_back({"127.0.0.1", 4542});
+
+    // Set broadcast flag to 0 and clear the broadcast buffer
+    broadcast_flag = 0;
+    broadcast_buffer.clear();
+
+    this->transactionPool = new TransactionPool();
 }
 
 /* DESTRUCTOR */
@@ -186,6 +192,8 @@ int Node::broadcast(std::string message)
     {
         this->client->request(node.first.data(), node.second, message);
     }
+
+    return 0;
 }
 
 int Node::createWallet()
@@ -241,6 +249,8 @@ int Node::createWallet()
             isWalletCreated = true;
         }
     }
+
+    return 0;
 }
 
 void Node::showBalance()
@@ -268,6 +278,26 @@ void Node::showKnownLinks()
     std::cout << "[+] You are not connected to any nodes" << std::endl;
 }
 
+void showHelp()
+{
+    std::cout << std::endl;
+    std::cout << "Dynamo (shell) | Node Interaction Interface" << std::endl;
+    std::cout << "Usage: [command] [options]" << std::endl;
+    std::cout << "Commands:" << std::endl;
+    std::cout << "  clear\t\tClear the console" << std::endl;
+    std::cout << "  help\t\tShow this help message" << std::endl;
+    std::cout << "  balance\tShow your wallet's balance" << std::endl;
+    std::cout << "  links\t\tList all known nodes" << std::endl;
+    std::cout << "  address\tShows your wallet's address" << std::endl;
+    std::cout << "  exit\t\tExits the program" << std::endl;
+    std::cout << std::endl;
+}
+
+void Node::showAddress()
+{
+    std::cout << "[+] Your wallet's address is: " << this->wallet->getAddress() << std::endl;
+}
+
 void Node::getInput()
 {
     std::string input;
@@ -280,8 +310,10 @@ void Node::getInput()
 
         if (input == "clear") system("clear");
         else if (input == "balance") showBalance();
-        else if (input == "known-links") showKnownLinks();
+        else if (input == "links") showKnownLinks();
+        else if (input == "address") showAddress();
         else if (input == "exit") exit(0);
+        else if (input == "help") showHelp();
         else std::cout << "Unknown command '" << input << "'" << std::endl;
     }
 }
@@ -291,15 +323,25 @@ int Node::syncChains()
     // Keep asking the known nodes for an updated blockchain until one is received
     for (auto& node : known_hosts)
     {
-        int res = this->client->request(node.first.data(), node.second, "get-blockchain");
+        DTP::Packet packet(1, this->uuid, node.first, node.second, std::string(""));
+
+        int res = this->client->request(node.first.data(), node.second, packet.buffer());
 
         if (res == 0 && client->get_response_buffer() != "")
         {
             try
             {
-                //this->blockchain = Blockchain::fromString(response);
-                this->isChainLinked = true;
-                return 0;
+                DTP::Packet response(client->get_response_buffer());
+
+                if (response.headers().type == 0)
+                {
+                    this->blockchain = new Blockchain(response.getPayload());
+                    this->isChainLinked = true;
+
+                    logger("Chain synced successfully");
+
+                    return 0;
+                }
             }
             catch(const std::exception& e)
             {
@@ -322,6 +364,7 @@ void Node::start()
     // Start the server in a new thread
     logger("Server node launch sequence initiated");
     std::thread server_thread(&NodeServer::launch, this->server);
+    server_thread.detach();
 
     // Create the node wallet
     createWallet();
@@ -349,6 +392,7 @@ void Node::start()
         logger("Initializing the blockchain...");
 
         this->blockchain = new Blockchain(1, this->wallet->getAddress());
+        isChainLinked = true;
     }
     else // Else: Loop through the string and parse the request
     {
@@ -362,7 +406,7 @@ void Node::start()
             int port = atoi(tempResponse.substr(tempResponse.find(ip_port_del) + ip_port_del.length(), pos).data());
             tempResponse.erase(0, pos + delimiter.length());
 
-            known_hosts.push_back({ip, port});
+            known_hosts.emplace_back(ip, port);
         }
 
         std::cout << "[+] Linking with " << known_hosts.size() << " nodes..." << std::endl;
@@ -374,6 +418,7 @@ void Node::start()
             syncChains();
             logger("Unable to sync with the network");
             logger("Retrying...");
+            Time::sleep(1000);
         }
     }
 
@@ -381,9 +426,11 @@ void Node::start()
     {
         logger("Blockchain synced successfully!");
         
+        this->server->set_working_blockchain(this->blockchain);
+        this->server->set_working_transaction_pool(this->transactionPool);
+        this->server->set_node_uuid(this->uuid);
+
         // Start the node's input loop
         getInput();
     }
-
-    
 }
