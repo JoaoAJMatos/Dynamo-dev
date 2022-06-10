@@ -10,9 +10,24 @@
 
 #define BUFFER_SIZE 30000
 
+#define BLOCKCHAIN_DATA_PACKET 0
+#define BLOCKCHAIN_REQUEST_PACKET 1
+#define TRANSACTION_PACKET 2
+#define TRANSACTION_POOL_DATA_PACKET 3
+#define TRANSACTION_POOL_REQUEST_PACKET 4
+
+#include <unistd.h>
+#ifndef _WIN32
+#include <arpa/inet.h>
+#endif
+
 #include "../../../../networking/objects/BasicServer.h"
+#include "../../../wallet/transaction/TransactionPool.h"
+#include "../../../blockchain/Blockchain.h"
+#include "../../protocol/DTP.h"
 #include "../../../../system/threading/ThreadPool.h"
 #include "../../../../util/std-out/logger.h"
+#include "../../../../../libs/msgpack11/msgpack11.hpp"
 
 class NodeServer : public net::BasicServer
 {
@@ -29,6 +44,17 @@ private:
     // Multi threading and thread pool instance
     int number_of_threads;
     sys::ThreadPool* tp;
+
+    DTP::Packet* packet;
+    char* nodeIP;
+    int nodePort;
+
+    // References to Node variables
+    int* broadcast_flag;
+    std::string* broadcast_buffer; 
+    Blockchain* blockchain;
+    TransactionPool* transactionPool;
+    char* uuid;
 
     // Buffer to store the request
     char buffer[BUFFER_SIZE];
@@ -52,7 +78,9 @@ public:
     void launch() override;
 
     /* GETTERS/SETTERS */
-
+    void set_working_blockchain(Blockchain* blockchain);
+    void set_working_transaction_pool(TransactionPool* transactionPool);
+    void set_node_uuid(char* uuid);
 };
 
 
