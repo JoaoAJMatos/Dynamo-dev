@@ -44,6 +44,11 @@ void NodeServer::accepter()
 
     // Read the incoming message and store it in the buffer
     recv(new_socket, buffer, BUFFER_SIZE, 0);
+
+    std::cout << "Client connected" << nodeIP << ":" << nodePort << std::endl;
+    std::cout << buffer << std::endl;
+
+    return;
 }
 
 void NodeServer::handler() // The handler will attempt to create a DTP packet instance from the incomming buffer 
@@ -56,6 +61,8 @@ void NodeServer::handler() // The handler will attempt to create a DTP packet in
     {
         std::cout << "[ERROR] Unable to create packet from buffer: " << e.what() << std::endl;
     }
+
+    return;
 }
 
 
@@ -117,6 +124,8 @@ void NodeServer::responder() // After responding to the incoming message the res
 // This function launches the server by adding work to the threading pool work queue
 void NodeServer::launch()
 {
+    std::cout << "[INFO] Node server launched" << std::endl;
+
     tp->do_work([&]() {
         while(true)
         {

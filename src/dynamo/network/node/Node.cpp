@@ -325,6 +325,8 @@ int Node::syncChains()
     {
         DTP::Packet packet(1, this->uuid, node.first, node.second, std::string(""));
 
+        std::cout << "Packet: " << packet.buffer() << std::endl;
+
         int res = this->client->request(node.first.data(), node.second, packet.buffer());
 
         if (res == 0 && client->get_response_buffer() != "")
@@ -348,6 +350,10 @@ int Node::syncChains()
                 logger("Error while parsing blockchain");
             }
         }
+        else 
+        {
+            logger("Error while syncing chain");
+        }
     }
 
     return -1;
@@ -364,7 +370,7 @@ void Node::start()
     // Start the server in a new thread
     logger("Server node launch sequence initiated");
     std::thread server_thread(&NodeServer::launch, this->server);
-    server_thread.detach();
+    //server_thread.join();
 
     // Create the node wallet
     createWallet();
