@@ -325,8 +325,6 @@ int Node::syncChains()
     {
         DTP::Packet packet(1, this->uuid, node.first, node.second, std::string(""));
 
-        std::cout << "Packet: " << packet.buffer() << std::endl;
-
         int res = this->client->request(node.first.c_str(), node.second, packet.buffer());
 
         if (res == 0 && client->get_response_buffer() != "")
@@ -335,16 +333,16 @@ int Node::syncChains()
             {
                 DTP::Packet response(std::string(client->get_response_buffer()));
 
-                std::string err;
-                msgpack11::MsgPack pack = msgpack11::MsgPack::parse(response.getPayload(), err);
-
-                std::cout << "Response: " << pack.dump() << std::endl;
+                std::cout << std::endl << "Response packet payload: " << response.getPayload() << std::endl;
 
                 if (response.getIndicator() == DTP_INDICATOR)
                 {
-                    if (response.headers().type == 0)
+                    if (response.headers().type == BLOCKCHAIN_DATA_PACKET)
                     {
                         this->blockchain = new Blockchain(response.getPayload());
+
+                        if (this->blockchain->chain.size() == 0) return -1;
+
                         this->isChainLinked = true;
 
                         logger("Chain synced successfully");

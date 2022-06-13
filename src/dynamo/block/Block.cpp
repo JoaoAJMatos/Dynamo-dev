@@ -44,9 +44,11 @@ Block::Block(std::string block_packet)
 
         std::vector<Transaction> dataArray;
 
-        for (auto& transaction : block["data"].array_items())
+        for (int i = 0; i < block["data"].array_items().size(); i++)
         {
-            Transaction transact(transaction.dump());
+            std::cout << "Block data dump: " << block["data"][i].dump() << std::endl;
+            Transaction transact(block["data"][i].dump());
+            std::cout << "In address: " << transact.getInputMap().address << std::endl;
             dataArray.push_back(transact);
         }
     }
@@ -211,12 +213,15 @@ msgpack11::MsgPack Block::serialize(Block* block)
 {
     using namespace msgpack11;
 
-    MsgPack::array tempData;
+    MsgPack tempData;
+    MsgPack::array tempDataArray;
 
     for (auto& transaction : block->data)
     {
-        tempData.push_back(Transaction::serialize(&transaction));
+        tempDataArray.push_back(Transaction::serialize(&transaction));
     }
+
+    tempData = tempDataArray;
 
     MsgPack tempBlock = MsgPack::object {
         {"timestamp", block->getTimestamp()},

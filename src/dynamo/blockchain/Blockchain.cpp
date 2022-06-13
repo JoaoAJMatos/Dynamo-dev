@@ -14,6 +14,8 @@ Blockchain::Blockchain(std::string blockchain_packet)
     std::string err;
     MsgPack blockchain = MsgPack::parse(blockchain_packet, err);
 
+    std::cout << "Chain dump: " << blockchain["chain"][0].dump() << std::endl;
+
     std::string addr = "hehe";
     Blockchain tempChain(0, addr);
 
@@ -21,9 +23,9 @@ Blockchain::Blockchain(std::string blockchain_packet)
     {
         std::cout << "Chain array size: " << blockchain["chain"].array_items().size() << std::endl;
 
-        for (auto& block : blockchain["chain"].array_items())
+        for (int i = 0; i < blockchain["chain"].array_items().size(); i++)
         {
-            Block* newBlock = new Block(block.dump());
+            Block* newBlock = new Block(blockchain["chain"][i].dump());
             tempChain.chain.push_back(newBlock);
         }
 
@@ -49,7 +51,7 @@ int Blockchain::replaceChain(Blockchain chain)
 {
     if (chain.chain.size() <= this->chain.size())
     {
-        std::cout << "[ERROR] The incomming chain is smaller than the current one" << std::endl;
+        std::cout << "[ERROR] The incomming chain is smaller or the same size as the current one" << std::endl;
         std::cout << "Incomming size: " << chain.chain.size() << " | Your size: " << this->chain.size() << std::endl; 
         return 1; // The incomming chain must be longer
     } 
@@ -85,6 +87,12 @@ msgpack11::MsgPack Blockchain::serialize(Blockchain chain)
     MsgPack tempBlockchain = MsgPack::object {
         {"chain", tempChain}
     };
+
+    std::cout << "Array size: " << tempBlockchain["chain"].array_items().size() << std::endl;
+
+    Block tempBlock(tempBlockchain["chain"][0].dump());
+
+    tempBlock.printBlock();
 
     return tempBlockchain;
 }
