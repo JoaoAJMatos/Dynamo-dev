@@ -3,6 +3,7 @@
 Blockchain::Blockchain(int isRoot, const std::string& firstNodeAddress)
 {
     if (isRoot) this->chain.push_back(Block::genesis(firstNodeAddress, GENESIS_TRANSACTION_REWARD));
+    std::cout << "Root chain size: " << this->chain.size() << std::endl;
 }
 
 Blockchain::Blockchain(std::string blockchain_packet)
@@ -13,14 +14,21 @@ Blockchain::Blockchain(std::string blockchain_packet)
     std::string err;
     MsgPack blockchain = MsgPack::parse(blockchain_packet, err);
 
+    std::string addr = "hehe";
+    Blockchain tempChain(0, addr);
+
     try
     {
+        std::cout << "Chain array size: " << blockchain["chain"].array_items().size() << std::endl;
+
         for (auto& block : blockchain["chain"].array_items())
         {
             Block* newBlock = new Block(block.dump());
-            this->chain.push_back(newBlock);
-            delete newBlock;
+            tempChain.chain.push_back(newBlock);
         }
+
+        int res = this->replaceChain(tempChain);
+        std::cout << "Replace chain result: " << res << std::endl;
     }
     catch(const std::exception& e)
     {
@@ -39,9 +47,22 @@ int Blockchain::addBlock(std::vector<Transaction> data, int log)
 
 int Blockchain::replaceChain(Blockchain chain)
 {
-    if (chain.chain.size() <= this->chain.size()) return 1; // The incomming chain must be longer
-    if (!Blockchain::isValid(chain)) return 1; // The blocks contained in the chain must be valid
-    if (!Blockchain::isTransactionDataValid(chain)) return 1; // The transactions contained in the chain must be valid
+    if (chain.chain.size() <= this->chain.size())
+    {
+        std::cout << "[ERROR] The incomming chain is smaller than the current one" << std::endl;
+        std::cout << "Incomming size: " << chain.chain.size() << " | Your size: " << this->chain.size() << std::endl; 
+        return 1; // The incomming chain must be longer
+    } 
+    if (!Blockchain::isValid(chain))
+    {
+        std::cout << "[ERROR] The incomming chain is invalid" << std::endl;
+        return 1; // The blocks contained in the chain must be valid
+    }
+    if (!Blockchain::isTransactionDataValid(chain))
+    {
+        std::cout << "[ERROR] The incomming chain contains invalid transactions" << std::endl;
+        return 1; // The transactions contained in the chain must be valid
+    }
 
     this->chain = chain.chain;
     return 0;
@@ -51,12 +72,15 @@ msgpack11::MsgPack Blockchain::serialize(Blockchain chain)
 {
     using namespace msgpack11;
 
-    MsgPack::array tempChain;
+    MsgPack tempChain;
+    MsgPack::array tempChainArray;
 
     for (auto& block : chain.chain)
     {
-        tempChain.push_back(Block::serialize(block));
+        tempChainArray.push_back(Block::serialize(block));
     }
+
+    tempChain = tempChainArray;
 
     MsgPack tempBlockchain = MsgPack::object {
         {"chain", tempChain}

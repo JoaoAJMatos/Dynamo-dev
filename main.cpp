@@ -78,6 +78,20 @@ int main()
 
     std::cout << msgpack_unpacked["hey"]["ola"] << std::endl;*/
 
+    /*using namespace msgpack11;
+
+    MsgPack arr = MsgPack::array({1, 2, 3});
+
+    MsgPack pack1 = MsgPack::object {
+        {"array", arr}
+    };
+
+    std::string ser = pack1.dump();
+
+    std::string err;
+    MsgPack pack2 = MsgPack::parse(ser, err);
+
+    std::cout << pack2["array"][0].int_value() << std::endl;*/
 
     /*uint8_t* hash;
 

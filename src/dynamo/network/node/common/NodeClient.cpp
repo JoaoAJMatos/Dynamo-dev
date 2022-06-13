@@ -46,7 +46,6 @@ int NodeClient::request(const char *server_ip, const int server_port, const std:
     // Check for errors
     if (connection == 0)
     {
-        std::cout << "Sending: " << buffer << std::endl;
         send(sock, buffer.data(), buffer.size(), 0);
 
         int res = recv(sock, response_buffer, 30000, 0);
@@ -56,8 +55,6 @@ int NodeClient::request(const char *server_ip, const int server_port, const std:
             std::cout << "[+] Error receiving response from server" << std::endl;
             return -1;
         }
-
-        std::cout << response_buffer << std::endl;
     }
     else
     {

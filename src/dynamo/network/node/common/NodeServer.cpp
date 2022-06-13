@@ -82,7 +82,8 @@ void NodeServer::responder() // After responding to the incoming message the res
             msgpack = Blockchain::serialize(*this->blockchain);
             payload = msgpack.dump();
 
-            response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, payload); 
+            response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, payload);
+            response->show();
         }
         else if (this->packet->headers().type == BLOCKCHAIN_DATA_PACKET)
         {

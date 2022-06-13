@@ -287,6 +287,7 @@ void showHelp()
     std::cout << "  balance\tShow your wallet's balance" << std::endl;
     std::cout << "  links\t\tList all known nodes" << std::endl;
     std::cout << "  address\tShows your wallet's address" << std::endl;
+    std::cout << "  show-chain\tPrints the blockchain" << std::endl;
     std::cout << "  exit\t\tExits the program" << std::endl;
     std::cout << std::endl;
 }
@@ -334,14 +335,22 @@ int Node::syncChains()
             {
                 DTP::Packet response(std::string(client->get_response_buffer()));
 
-                if (response.headers().type == 0)
+                std::string err;
+                msgpack11::MsgPack pack = msgpack11::MsgPack::parse(response.getPayload(), err);
+
+                std::cout << "Response: " << pack.dump() << std::endl;
+
+                if (response.getIndicator() == DTP_INDICATOR)
                 {
-                    this->blockchain = new Blockchain(response.getPayload());
-                    this->isChainLinked = true;
+                    if (response.headers().type == 0)
+                    {
+                        this->blockchain = new Blockchain(response.getPayload());
+                        this->isChainLinked = true;
 
-                    logger("Chain synced successfully");
+                        logger("Chain synced successfully");
 
-                    return 0;
+                        return 0;
+                    }
                 }
             }
             catch(const std::exception& e)
