@@ -36,7 +36,9 @@ void NodeServer::accepter()
     int addrlen = sizeof(address);
 
     // Store the new socket descriptor
+    fcntl(get_socket()->get_sock(), F_SETFL, fcntl(get_socket()->get_sock(), F_GETFL) | O_NONBLOCK);
     new_socket = accept(get_socket()->get_sock(), (struct sockaddr *)&address, (socklen_t *)&addrlen);
+
     net::Socket::test_connection(new_socket);
 
     nodeIP = inet_ntoa(address.sin_addr);
@@ -44,9 +46,6 @@ void NodeServer::accepter()
 
     // Read the incoming message and store it in the buffer
     recv(new_socket, buffer, BUFFER_SIZE, 0);
-
-    std::cout << "Client connected" << nodeIP << ":" << nodePort << std::endl;
-    std::cout << buffer << std::endl;
 
     return;
 }
@@ -75,49 +74,52 @@ void NodeServer::responder() // After responding to the incoming message the res
 
     DTP::Packet* response;
 
-    if (this->packet->headers().type == BLOCKCHAIN_REQUEST_PACKET)
+    if (this->packet->getIndicator() == DTP_INDICATOR)
     {
-        // Send the blockchain to the client
-        msgpack = Blockchain::serialize(*this->blockchain);
-        payload = msgpack.dump();
-
-        response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, payload); 
-    }
-    else if (this->packet->headers().type == BLOCKCHAIN_DATA_PACKET)
-    {
-        // Create a new Blockchain from the incomming packet payload
-        // validate it and replace the current blockchain with the new one
-    
-        Blockchain new_chain(this->packet->getPayload());
-        if(this->blockchain->replaceChain(new_chain) == 0)
+        if (this->packet->headers().type == BLOCKCHAIN_REQUEST_PACKET)
         {
-            std::cout << "[INFO] Blockchain instance updated to " << nodeIP << " node state" << std::endl;
+            // Send the blockchain to the client
+            msgpack = Blockchain::serialize(*this->blockchain);
+            payload = msgpack.dump();
+
+            response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, payload); 
         }
-    }
-    else if (this->packet->headers().type == TRANSACTION_POOL_REQUEST_PACKET)
-    {
-        // Send the transaction pool to the client
-        msgpack = TransactionPool::serialize(this->transactionPool);
-        payload = msgpack.dump();
+        else if (this->packet->headers().type == BLOCKCHAIN_DATA_PACKET)
+        {
+            // Create a new Blockchain from the incomming packet payload
+            // validate it and replace the current blockchain with the new one
+        
+            Blockchain new_chain(this->packet->getPayload());
+            if(this->blockchain->replaceChain(new_chain) == 0)
+            {
+                std::cout << "[INFO] Blockchain instance updated to " << nodeIP << " node state" << std::endl;
+            }
+        }
+        else if (this->packet->headers().type == TRANSACTION_POOL_REQUEST_PACKET)
+        {
+            // Send the transaction pool to the client
+            msgpack = TransactionPool::serialize(this->transactionPool);
+            payload = msgpack.dump();
 
-        response = new DTP::Packet(TRANSACTION_POOL_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, payload);
-    }
-    else if (this->packet->headers().type == TRANSACTION_PACKET)
-    {
-        // Accept the new transaction and add it to the transaction pool
-        Transaction transaction(this->packet->getPayload());
-        this->transactionPool->setTransaction(&transaction);
+            response = new DTP::Packet(TRANSACTION_POOL_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, payload);
+        }
+        else if (this->packet->headers().type == TRANSACTION_PACKET)
+        {
+            // Accept the new transaction and add it to the transaction pool
+            Transaction transaction(this->packet->getPayload());
+            this->transactionPool->setTransaction(&transaction);
 
-        std::cout << "[INFO] New transaction received from " << this->nodeIP << ":" << this->nodePort << " with ID " << transaction.getID() << std::endl;
-    }
-    else
-    {
-        std::cout << "[ERROR] Unknown packet type: " << this->packet->headers().type << std::endl;
-    }
+            std::cout << "[INFO] New transaction received from " << this->nodeIP << ":" << this->nodePort << " with ID " << transaction.getID() << std::endl;
+        }
+        else
+        {
+            std::cout << "[ERROR] Unknown packet type: " << this->packet->headers().type << std::endl;
+        }
 
-    send(new_socket, response->buffer().data(), strlen(response->buffer().data()), 0);
-    close(new_socket);
-    return;
+        send(new_socket, response->buffer().data(), strlen(response->buffer().data()), 0);
+        close(new_socket);
+        return;
+    }
 }
 
 /* PUBLIC FUNCTIONS */

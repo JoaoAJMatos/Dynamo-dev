@@ -2,6 +2,7 @@
 
 DTP::Packet::Packet(int type, std::string origin, std::string destination, int port, std::string payload)
 {
+    this->indicator = DTP_INDICATOR;
     this->packetHeader.type = type;
     this->packetHeader.origin = origin;
     this->packetHeader.destination = destination;
@@ -13,6 +14,9 @@ DTP::Packet::Packet(std::string buffer)
 {
     int pos = 0;
     std::string delimiter = "|";
+
+    this->indicator = atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());
+    pos += buffer.find(delimiter) + delimiter.length();
 
     this->packetHeader.type = atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());
     pos += buffer.find(delimiter) + delimiter.length();
@@ -32,7 +36,7 @@ DTP::Packet::Packet(std::string buffer)
 std::string DTP::Packet::buffer()
 {
     std::stringstream ss;
-    ss << this->packetHeader.type << "|" << this->packetHeader.origin << "|" << this->packetHeader.destination << "|" << this->packetHeader.port << "|" << this->payload;
+    ss << this->indicator << "|" << this->packetHeader.type << "|" << this->packetHeader.origin << "|" << this->packetHeader.destination << "|" << this->packetHeader.port << "|" << this->payload;
     return ss.str();
 }
 
@@ -40,6 +44,7 @@ void DTP::Packet::show()
 {
     std::cout << std::endl;
     std::cout << " ===== HEADERS =====" << std::endl;
+    std::cout << " - Indicator: " << this->indicator << std::endl;
     std::cout << " - Type: " << this->packetHeader.type << std::endl;
     std::cout << " - Origin: " << this->packetHeader.origin << std::endl;
     std::cout << " - Destination: " << this->packetHeader.destination << std::endl;
@@ -56,4 +61,9 @@ DTP::header DTP::Packet::headers()
 std::string DTP::Packet::getPayload()
 {
     return this->payload;
+}
+
+int DTP::Packet::getIndicator()
+{
+    return this->indicator;
 }

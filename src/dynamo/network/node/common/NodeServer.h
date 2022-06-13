@@ -17,9 +17,12 @@
 #define TRANSACTION_POOL_REQUEST_PACKET 4
 
 #include <unistd.h>
+
 #ifndef _WIN32
 #include <arpa/inet.h>
 #endif
+
+#include <fcntl.h>
 
 #include "../../../../networking/objects/BasicServer.h"
 #include "../../../wallet/transaction/TransactionPool.h"

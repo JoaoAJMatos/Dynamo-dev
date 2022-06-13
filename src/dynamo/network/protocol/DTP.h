@@ -14,6 +14,8 @@
 #ifndef __DTP_H__
 #define __DTP_H__
 
+#define DTP_INDICATOR 10
+
 #include <iostream>
 
 #include "../../../../libs/msgpack11/msgpack11.hpp"
@@ -32,6 +34,8 @@ namespace DTP
     {
     private:
         /* MEMBER VARIABLES */
+        int indicator;              // The indicator of the packet (specifies the protocol)
+        
         header packetHeader;
         
         std::string payload;        // The payload of the packet
@@ -60,6 +64,8 @@ namespace DTP
 
         /* GETTERS */
         header headers();
+
+        int getIndicator();
 
         std::string getPayload();
     };
