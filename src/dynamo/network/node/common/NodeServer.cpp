@@ -36,7 +36,7 @@ void NodeServer::accepter()
     int addrlen = sizeof(address);
 
     // Store the new socket descriptor
-    fcntl(get_socket()->get_sock(), F_SETFL, fcntl(get_socket()->get_sock(), F_GETFL) | O_NONBLOCK);
+    //fcntl(get_socket()->get_sock(), F_SETFL, fcntl(get_socket()->get_sock(), F_GETFL) | O_NONBLOCK);
     new_socket = accept(get_socket()->get_sock(), (struct sockaddr *)&address, (socklen_t *)&addrlen);
 
     net::Socket::test_connection(new_socket);
@@ -45,7 +45,7 @@ void NodeServer::accepter()
     nodePort = htons(address.sin_port);
 
     // Read the incoming message and store it in the buffer
-    recv(new_socket, buffer, BUFFER_SIZE, 0);
+    int res = recv(new_socket, buffer, BUFFER_SIZE, 0);
 
     return;
 }
@@ -120,6 +120,10 @@ void NodeServer::responder() // After responding to the incoming message the res
         close(new_socket);
         return;
     }
+
+    send(new_socket, "null", strlen("null"), 0);
+    close(new_socket);
+    return;
 }
 
 /* PUBLIC FUNCTIONS */

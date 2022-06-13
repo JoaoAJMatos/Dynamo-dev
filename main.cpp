@@ -13,6 +13,7 @@
 #include "src/dynamo/wallet/transaction/Transaction.h"
 #include "servers/DNS/DNS_Server.h"
 #include "src/dynamo/network/node/Node.h"
+#include "src/dynamo/network/protocol/DTP.h"
 #include "src/crypto/EC/ECDSA.h"
 #include "src/crypto/SHA-2/SHA256.h"
 
@@ -52,6 +53,31 @@ int main()
 
     Node n;
     n.start();
+/*
+    std::vector<std::string> params = {"1", "2", "3"};
+
+    std::vector<Transaction> pool;
+
+    std::string me = "me";
+    std::string you = "you";
+
+    ECDSA ec;
+
+    Transaction t(&ec ,me, (size_t)10, you, (size_t)20);
+
+    pool.push_back(t);
+
+    int one = 1;
+*/
+/*
+    std::string msgpack_bytes = msgpack.dump();
+    std::cout << msgpack_bytes << std::endl;
+
+    std::string err;
+    msgpack11::MsgPack msgpack_unpacked = msgpack11::MsgPack::parse(msgpack_bytes, err);
+
+    std::cout << msgpack_unpacked["hey"]["ola"] << std::endl;*/
+
 
     /*uint8_t* hash;
 
@@ -127,7 +153,11 @@ int main()
 
     genesis->printBlock();
 */
-    return 0;
+    /*DTP::Packet packet(0, std::string("me"), std::string("you"), 10, std::string("123"));
+
+    packet.show();
+
+    std::string buffer = packet.buffer();
+
+    std::cout << buffer << std::endl;*/
 }
-
-

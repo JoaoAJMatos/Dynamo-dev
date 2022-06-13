@@ -26,8 +26,6 @@ NodeClient::NodeClient(int domain, int service, int protocol)
 /* PUBLIC FUNCTIONS */
 int NodeClient::request(const char *server_ip, const int server_port, const std::string& buffer)
 {
-    std::cout << "Client connecting to " << server_ip << ":" << server_port << std::endl;
-
     // Socket file descriptor
     int sock;
 

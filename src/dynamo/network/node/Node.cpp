@@ -50,7 +50,6 @@ Node::Node()
 
         // Create instances of NodeClient and NodeServer
         this->client = new NodeClient(this->domain, this->service, this->protocol);
-        this->server = new NodeServer(this->domain, this->service, this->protocol, this->server_port, this->server_interface, this->backlog, this->number_of_threads);
     }
     else
     {
@@ -79,7 +78,7 @@ Node::Node()
             logger("Using default configuration for the server");
 
             // Set server variables
-            this->server_port = 1500;
+            this->server_port = 4568;
             this->backlog = 100;
             this->number_of_threads = 0;
         }
@@ -143,7 +142,6 @@ void Node::save_config() const
     config::set_config(full_path, "domain", std::to_string(this->domain), true);
     config::set_config(full_path, "service", std::to_string(this->service), true);
     config::set_config(full_path, "protocol", std::to_string(this->protocol), true);
-    config::set_config(full_path, "port", std::to_string(this->server_port), true);
     config::set_config(full_path, "port", std::to_string(this->server_port), true);
     config::set_config(full_path, "threads", std::to_string(this->number_of_threads), true);
     config::set_config(full_path, "uuid", this->uuid, true);
@@ -312,6 +310,7 @@ void Node::getInput()
         else if (input == "balance") showBalance();
         else if (input == "links") showKnownLinks();
         else if (input == "address") showAddress();
+        else if (input == "show-chain") this->blockchain->printChain();
         else if (input == "exit") exit(0);
         else if (input == "help") showHelp();
         else std::cout << "Unknown command '" << input << "'" << std::endl;
@@ -327,13 +326,13 @@ int Node::syncChains()
 
         std::cout << "Packet: " << packet.buffer() << std::endl;
 
-        int res = this->client->request(node.first.data(), node.second, packet.buffer());
+        int res = this->client->request(node.first.c_str(), node.second, packet.buffer());
 
         if (res == 0 && client->get_response_buffer() != "")
         {
             try
             {
-                DTP::Packet response(client->get_response_buffer());
+                DTP::Packet response(std::string(client->get_response_buffer()));
 
                 if (response.headers().type == 0)
                 {
@@ -370,7 +369,7 @@ void Node::start()
     // Start the server in a new thread
     logger("Server node launch sequence initiated");
     std::thread server_thread(&NodeServer::launch, this->server);
-    //server_thread.join();
+    server_thread.detach();
 
     // Create the node wallet
     createWallet();
