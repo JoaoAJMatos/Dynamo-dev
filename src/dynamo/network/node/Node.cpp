@@ -327,11 +327,15 @@ int Node::syncChains()
 
         int res = this->client->request(node.first.c_str(), node.second, packet.buffer());
 
+        std::cout << "Packet length: " << packet.buffer().length() << std::endl;
+
         if (res == 0)
         {
             try
             {
                 DTP::Packet response(std::string(client->get_response_buffer()));
+
+                std::cout << "Response length: " << std::string(client->get_response_buffer()).length() << std::endl;
 
                 std::cout << "Got response buffer size: " << response.buffer().size() << std::endl;
                 std::cout << std::endl << "Response packet payload: " << response.getPayload() << std::endl;

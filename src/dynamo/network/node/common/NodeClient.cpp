@@ -46,7 +46,9 @@ int NodeClient::request(const char *server_ip, const int server_port, const std:
     // Check for errors
     if (connection == 0)
     {
-        send(sock, buffer.data(), buffer.size(), 0);
+        int bytes = send(sock, buffer.data(), buffer.size(), 0);
+
+        std::cout << "Bytes received: " << bytes << std::endl;
 
         int res = recv(sock, response_buffer, 300000, 0);
 
