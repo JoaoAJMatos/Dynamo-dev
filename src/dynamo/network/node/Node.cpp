@@ -114,8 +114,8 @@ Node::Node()
     }
 
     // Set the list of known DDNS
-    known_DDNS.push_back({"192.168.1.120", 4542});
-    known_DDNS.push_back({"127.0.0.1", 4542});
+    known_DDNS.emplace_back("192.168.1.120", 4542);
+    known_DDNS.emplace_back("127.0.0.1", 4542);
 
     // Set broadcast flag to 0 and clear the broadcast buffer
     broadcast_flag = 0;
@@ -183,7 +183,7 @@ int Node::discover_peers()
 }
 
 // This function will send a given message to all the known hosts
-int Node::broadcast(std::string message)
+int Node::broadcast(const std::string& message)
 {
     // Loop through the list of known hosts and send the message
     for (auto& node : known_hosts)
@@ -327,7 +327,7 @@ int Node::syncChains()
 
         int res = this->client->request(node.first.c_str(), node.second, packet.buffer());
 
-        if (res == 0 && client->get_response_buffer() != "")
+        if (res == 0)
         {
             try
             {
@@ -341,7 +341,7 @@ int Node::syncChains()
                     {
                         this->blockchain = new Blockchain(response.getPayload());
 
-                        if (this->blockchain->chain.size() == 0) return -1;
+                        if (this->blockchain->chain.empty()) return -1;
 
                         this->isChainLinked = true;
 

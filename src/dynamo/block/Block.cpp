@@ -29,6 +29,8 @@ Block::Block(std::string block_packet)
 {
     using namespace msgpack11;
 
+    std::cout << "Block packet: " << block_packet << std::endl;
+
     // Deserialize the block packet
     std::string err;
     MsgPack block = MsgPack::parse(block_packet, err);
@@ -47,7 +49,7 @@ Block::Block(std::string block_packet)
         for (int i = 0; i < block["data"].array_items().size(); i++)
         {
             std::cout << "Block data dump: " << block["data"][i].dump() << std::endl;
-            Transaction transact(block["data"][i].dump());
+            Transaction transact(block["data"][i].string_value());
             std::cout << "In address: " << transact.getInputMap().address << std::endl;
             dataArray.push_back(transact);
         }
@@ -213,15 +215,12 @@ msgpack11::MsgPack Block::serialize(Block* block)
 {
     using namespace msgpack11;
 
-    MsgPack tempData;
-    MsgPack::array tempDataArray;
+    MsgPack::array tempData;
 
     for (auto& transaction : block->data)
     {
-        tempDataArray.push_back(Transaction::serialize(&transaction));
+        tempData.push_back(Transaction::serialize(&transaction).dump());
     }
-
-    tempData = tempDataArray;
 
     MsgPack tempBlock = MsgPack::object {
         {"timestamp", block->getTimestamp()},

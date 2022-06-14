@@ -1,34 +1,38 @@
 #include "DTP.h"
 
+#include <utility>
+
 DTP::Packet::Packet(int type, std::string origin, std::string destination, int port, std::string payload)
 {
     this->indicator = DTP_INDICATOR;
     this->packetHeader.type = type;
-    this->packetHeader.origin = origin;
-    this->packetHeader.destination = destination;
+    this->packetHeader.origin = std::move(origin);
+    this->packetHeader.destination = std::move(destination);
     this->packetHeader.port = port;
-    this->payload = payload;
+    this->payload = std::move(payload);
 }
 
-DTP::Packet::Packet(std::string buffer)
+DTP::Packet::Packet(const std::string& _buffer)
 {
     int pos = 0;
     std::string delimiter = "|";
 
+    std::string buffer = _buffer;
+
     this->indicator = atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());
-    pos += buffer.find(delimiter) + delimiter.length();
+    buffer.erase(0, buffer.find(delimiter) + delimiter.length());
 
     this->packetHeader.type = atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());
-    pos += buffer.find(delimiter) + delimiter.length();
+    buffer.erase(0, buffer.find(delimiter) + delimiter.length());
 
     this->packetHeader.origin = buffer.substr(pos, buffer.find(delimiter));
-    pos += buffer.find(delimiter) + delimiter.length();
+    buffer.erase(0, buffer.find(delimiter) + delimiter.length());
 
     this->packetHeader.destination = buffer.substr(pos, buffer.find(delimiter));
-    pos += buffer.find(delimiter) + delimiter.length();
+    buffer.erase(0, buffer.find(delimiter) + delimiter.length());
 
     this->packetHeader.port = atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());
-    pos += buffer.find(delimiter) + delimiter.length();
+    buffer.erase(0, buffer.find(delimiter) + delimiter.length());
 
     this->payload = buffer.substr(pos, buffer.length());
 }

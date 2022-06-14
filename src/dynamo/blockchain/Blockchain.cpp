@@ -6,15 +6,23 @@ Blockchain::Blockchain(int isRoot, const std::string& firstNodeAddress)
     std::cout << "Root chain size: " << this->chain.size() << std::endl;
 }
 
-Blockchain::Blockchain(std::string blockchain_packet)
+Blockchain::Blockchain(const std::string& blockchain_packet)
 {
     using namespace msgpack11;
+
+    std::cout << "Blockchain constructor string: " << blockchain_packet << std::endl;
 
     // Deserialize the blockchain packet
     std::string err;
     MsgPack blockchain = MsgPack::parse(blockchain_packet, err);
 
-    std::cout << "Chain dump: " << blockchain["chain"][0].dump() << std::endl;
+    std::cout << "Err blockchain constructor: " << err << std::endl;
+    std::cout << "Is array: " << blockchain.is_array() << std::endl;
+
+    Block test(blockchain["chain"].array_items()[0].dump());
+    test.printBlock();
+
+    std::cout << "Chain dump: " << blockchain["chain"].array_items()[0] << std::endl;
 
     std::string addr = "hehe";
     Blockchain tempChain(0, addr);
@@ -25,7 +33,7 @@ Blockchain::Blockchain(std::string blockchain_packet)
 
         for (int i = 0; i < blockchain["chain"].array_items().size(); i++)
         {
-            Block* newBlock = new Block(blockchain["chain"][i].dump());
+            auto* newBlock = new Block(blockchain["chain"][i].string_value());
             tempChain.chain.push_back(newBlock);
         }
 
@@ -47,26 +55,26 @@ int Blockchain::addBlock(std::vector<Transaction> data, int log)
     return 0;
 }
 
-int Blockchain::replaceChain(Blockchain chain)
+int Blockchain::replaceChain(const Blockchain& _chain)
 {
-    if (chain.chain.size() <= this->chain.size())
+    if (_chain.chain.size() <= this->chain.size())
     {
-        std::cout << "[ERROR] The incomming chain is smaller or the same size as the current one" << std::endl;
-        std::cout << "Incomming size: " << chain.chain.size() << " | Your size: " << this->chain.size() << std::endl; 
-        return 1; // The incomming chain must be longer
+        std::cout << "[ERROR] The incoming _chain is smaller or the same size as the current one" << std::endl;
+        std::cout << "Incoming size: " << _chain.chain.size() << " | Your size: " << this->chain.size() << std::endl;
+        return 1; // The incoming _chain must be longer
     } 
-    if (!Blockchain::isValid(chain))
+    if (!Blockchain::isValid(_chain))
     {
-        std::cout << "[ERROR] The incomming chain is invalid" << std::endl;
-        return 1; // The blocks contained in the chain must be valid
+        std::cout << "[ERROR] The incoming _chain is invalid" << std::endl;
+        return 1; // The blocks contained in the _chain must be valid
     }
-    if (!Blockchain::isTransactionDataValid(chain))
+    if (!Blockchain::isTransactionDataValid(_chain))
     {
-        std::cout << "[ERROR] The incomming chain contains invalid transactions" << std::endl;
-        return 1; // The transactions contained in the chain must be valid
+        std::cout << "[ERROR] The incoming _chain contains invalid transactions" << std::endl;
+        return 1; // The transactions contained in the _chain must be valid
     }
 
-    this->chain = chain.chain;
+    this->chain = _chain.chain;
     return 0;
 }
 
@@ -74,15 +82,12 @@ msgpack11::MsgPack Blockchain::serialize(Blockchain chain)
 {
     using namespace msgpack11;
 
-    MsgPack tempChain;
-    MsgPack::array tempChainArray;
+    MsgPack::array tempChain;
 
     for (auto& block : chain.chain)
     {
-        tempChainArray.push_back(Block::serialize(block));
+        tempChain.push_back(Block::serialize(block).dump());
     }
-
-    tempChain = tempChainArray;
 
     MsgPack tempBlockchain = MsgPack::object {
         {"chain", tempChain}

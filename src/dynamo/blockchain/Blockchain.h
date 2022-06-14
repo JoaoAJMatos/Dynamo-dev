@@ -24,15 +24,15 @@ public:
      */
     Blockchain(int isRoot, const std::string& firstNodeAddress);
 
-    Blockchain(std::string blockchain_packet); // Build a Blockchain class from an incomming messagepack 
+    Blockchain(const std::string& blockchain_packet); // Build a Blockchain class from an incomming messagepack
 
     /* PUBLIC FUNCTIONS */
     /**
-     * @brief Replaces the current chain by an incomming one if the contents are valid
+     * @brief Replaces the current _chain by an incomming one if the contents are valid
      * 
      * @return int 
      */
-    int replaceChain(Blockchain chain);
+    int replaceChain(const Blockchain& _chain);
 
     /**
      * @brief Adds a new block to the chain by mining

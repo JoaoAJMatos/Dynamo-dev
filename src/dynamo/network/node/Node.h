@@ -100,7 +100,7 @@ public:
     int discover_peers();
 
     // This function broadcasts a message to all the known hosts
-    int broadcast(std::string message);
+    int broadcast(const std::string& message);
 
     int syncChains();
 

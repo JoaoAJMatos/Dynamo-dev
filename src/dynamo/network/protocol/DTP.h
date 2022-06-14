@@ -46,7 +46,7 @@ namespace DTP
         /* CONSTRUCTOR */
         Packet(int type, std::string origin, std::string destination, int port, std::string payload);
         
-        Packet(std::string buffer);
+        Packet(const std::string& buffer);
 
         /* PUBLIC FUNCTIONS */
         /**
