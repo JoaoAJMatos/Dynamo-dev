@@ -17,7 +17,7 @@ Blockchain::Blockchain(std::string blockchain_packet)
     MsgPack blockchain = MsgPack::parse(blockchain_packet, err);
 
     std::cout << "Err blockchain constructor: " << err << std::endl;
-    std::cout << "Is object: " << blockchain["chain"].is_array() << std::endl;
+    std::cout << "Is object: " << blockchain.is_object() << std::endl;
 
     /*Block test(blockchain["chain"].array_items()[0].string_value());
     test.printBlock();*/
@@ -97,6 +97,7 @@ msgpack11::MsgPack Blockchain::serialize(Blockchain chain)
     };
 
     std::cout << "Array size: " << tempBlockchain["chain"].array_items().size() << std::endl;
+    std::cout << "Is array? : " << tempBlockchain["chain"].is_array() << std::endl;
 
     Block tempBlock(tempBlockchain["chain"][0].dump());
 

@@ -49,7 +49,7 @@ Block::Block(std::string block_packet)
         for (int i = 0; i < block["data"].array_items().size(); i++)
         {
             std::cout << "Block data dump: " << block["data"][i].dump() << std::endl;
-            Transaction transact(block["data"][i].string_value());
+            Transaction transact(block["data"][i].dump());
             std::cout << "In address: " << transact.getInputMap().address << std::endl;
             dataArray.push_back(transact);
         }

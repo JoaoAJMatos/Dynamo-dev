@@ -45,7 +45,7 @@ void NodeServer::accepter()
     nodePort = htons(address.sin_port);
 
     // Read the incoming message and store it in the buffer
-    int res = recv(new_socket, buffer, BUFFER_SIZE, 0);
+    recv(new_socket, buffer, BUFFER_SIZE, 0);
 
     return;
 }
@@ -84,6 +84,7 @@ void NodeServer::responder() // After responding to the incoming message the res
 
             response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, payload);
             response->show();
+            std::cout << "Buffer size: " << response->buffer().size() << std::endl;
         }
         else if (this->packet->headers().type == BLOCKCHAIN_DATA_PACKET)
         {
