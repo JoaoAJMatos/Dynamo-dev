@@ -29,6 +29,8 @@ int NodeClient::request(const char *server_ip, const int server_port, const std:
     // Socket file descriptor
     int sock;
 
+    response_string.clear();
+
     // Create the socket
     sock = socket(this->domain, this->service, this->protocol);
 
@@ -47,16 +49,26 @@ int NodeClient::request(const char *server_ip, const int server_port, const std:
     if (connection == 0)
     {
         int bytes = send(sock, buffer.data(), buffer.size(), 0);
+        int res = 1;
 
-        std::cout << "Bytes received: " << bytes << std::endl;
+        std::cout << "Bytes sent: " << bytes << std::endl;
 
-        int res = recv(sock, response_buffer, 300000, 0);
-
-        if (res < 0)
+        do
         {
-            std::cout << "[+] Error receiving response from server" << std::endl;
-            return -1;
-        }
+            res = recv(sock, response_buffer, 300000, 0);
+
+            std::cout << "Bytes received: " << res << std::endl;
+
+            if (res < 0)
+            {
+                std::cout << "[+] Error receiving response from server" << std::endl;
+                return -1;
+            }
+
+            response_string.append(std::string(response_buffer));
+        } while ((res > 0));
+
+        std::cout << "[+] Response received: " << response_string << std::endl;
     }
     else
     {

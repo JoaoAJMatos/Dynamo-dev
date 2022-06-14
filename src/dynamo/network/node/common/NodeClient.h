@@ -23,6 +23,7 @@ private:
 
     // Buffer for the incoming server's response
     char response_buffer[300000];
+    std::string response_string;
 
     // Variables regarding the connection with the server
     // The connection will store the return value of the connect() function. (Should be 0)
