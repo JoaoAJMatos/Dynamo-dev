@@ -118,8 +118,7 @@ void NodeServer::responder() // After responding to the incoming message the res
             std::cout << "[ERROR] Unknown packet type: " << this->packet->headers().type << std::endl;
         }
 
-        int bytes = send(new_socket, response->buffer().data(), 3000, 0);
-        std::cout << "[INFO] Size of response buffer in bytes: " << sizeof(response->buffer().data()) << std::endl;
+        int bytes = send(new_socket, response->buffer().data(), 300000, 0);
         std::cout << "[INFO] Sent " << bytes << " bytes to " << this->nodeIP << ":" << this->nodePort << std::endl;
         close(new_socket);
         return;
