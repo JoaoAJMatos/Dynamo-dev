@@ -51,8 +51,8 @@ int main()
     /*servers::DNS_Server DNS(AF_INET, SOCK_STREAM, 6, 4542, INADDR_ANY, 100, 0);
     DNS.launch();*/
 
-    /*Node n;
-    n.start();*/
+    Node n;
+    n.start();
 /*
     std::vector<std::string> params = {"1", "2", "3"};
 
@@ -78,7 +78,7 @@ int main()
 
     std::cout << msgpack_unpacked["hey"]["ola"] << std::endl;*/
 
-    using namespace msgpack11;
+    /*using namespace msgpack11;
 
     MsgPack pack = MsgPack::object {{"key1", "value2"}};
     MsgPack pack10 = MsgPack::object {{"key2", "value3"}};
@@ -114,7 +114,7 @@ int main()
     std::cout << "Payload: " << packet.getPayload() << std::endl;
 
     MsgPack parsed = MsgPack::parse(packet.getPayload(), err);
-    std::cout << parsed["object"]["array"][2]["key11"].int_value() << std::endl;
+    std::cout << parsed["object"]["array"][2]["key11"].int_value() << std::endl;*/
 
     /*uint8_t* hash;
 
