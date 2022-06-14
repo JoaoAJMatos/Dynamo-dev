@@ -118,7 +118,7 @@ void NodeServer::responder() // After responding to the incoming message the res
             std::cout << "[ERROR] Unknown packet type: " << this->packet->headers().type << std::endl;
         }
 
-        send(new_socket, response->buffer().data(), strlen(response->buffer().data()), 0);
+        send(new_socket, response->buffer().data(), sizeof(response->buffer().data()), 0);
         close(new_socket);
         return;
     }

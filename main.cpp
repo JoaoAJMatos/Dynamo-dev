@@ -34,9 +34,119 @@ int bind_param(std::string* str, const std::vector<std::string>& vector)
 
     return 0;
 }
+/*
+class Person
+{
+private:
+    std::string name;
+    int age;
+
+public:
+    Person(std::string name, int age)
+    {
+        this->name = name;
+        this->age = age;
+    }
+
+    Person(std::string serializedBuffer) // Constructs a person from a serialized buffer
+    {
+        std::string err;
+        msgpack11::MsgPack msgpk = msgpack11::MsgPack::parse(serializedBuffer, err);
+        
+        this->name = msgpk["name"].string_value();
+        this->age = msgpk["age"].int_value();
+    }
+
+
+    msgpack11::MsgPack serialize()
+    {
+        using namespace msgpack11;
+
+        MsgPack data = MsgPack::object {
+            {"name", this->name},
+            {"age", this->age}
+        };
+
+        return data;
+    }
+
+
+    std::string getName() {
+        return this->name;
+    }
+
+    int getAge() {
+        return this->age;
+    }
+};
+
+class Company
+{
+private:
+    std::vector<Person> employees;
+
+public:
+    Company(std::vector<Person> people)
+    {
+        this->employees = people;
+    }
+
+    Company(std::string serializedBuffer) // Constructs a company from a serialized buffer
+    {
+        std::string err;
+
+        msgpack11::MsgPack msgpk = msgpack11::MsgPack::parse(serializedBuffer, err);
+        for (auto& element : msgpk["employees"].array_items())
+        {
+            this->employees.push_back(Person(element.dump())); // Creates a new Person object from the serialized buffer
+        }
+    }
+
+
+    msgpack11::MsgPack serialize()
+    {
+        using namespace msgpack11;
+
+        MsgPack::array temp;
+
+        for (auto& person : employees)
+        {
+            temp.push_back(person.serialize());
+        }
+
+        MsgPack pack = MsgPack::object {
+            {"employees", temp}
+        };
+
+        return pack;
+    }
+
+    void printEmployees()
+    {
+        for (auto& person : employees)
+        {
+            std::cout << person.getName() << " " << person.getAge() << std::endl;
+        }
+    }
+};*/
 
 int main()
 {
+    /*using namespace msgpack11;
+    std::string err;
+
+    Person person1("John", 30);
+    Person person2("Rita", 25);
+    Person person3("Pedro", 34);
+
+    Company myCompany({person1, person2, person3});
+
+    std::string serializedCompany = myCompany.serialize().dump();
+    std::cout << "Serialized company: " << serializedCompany << std::endl;
+
+    Company myNewCompany(serializedCompany);
+    myNewCompany.printEmployees();*/
+
     //ECDSA ec;
 
     //ec.showKeys();
