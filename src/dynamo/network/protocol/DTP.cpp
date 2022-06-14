@@ -34,13 +34,13 @@ DTP::Packet::Packet(const std::string& _buffer)
     this->packetHeader.port = atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());
     buffer.erase(0, buffer.find(delimiter) + delimiter.length());
 
-    this->payload = buffer.substr(pos, buffer.length());
+    this->payload = buffer.substr(pos, buffer.find(delimiter));
 }
 
 std::string DTP::Packet::buffer()
 {
     std::stringstream ss;
-    ss << this->indicator << "|" << this->packetHeader.type << "|" << this->packetHeader.origin << "|" << this->packetHeader.destination << "|" << this->packetHeader.port << "|" << this->payload;
+    ss << this->indicator << "|" << this->packetHeader.type << "|" << this->packetHeader.origin << "|" << this->packetHeader.destination << "|" << this->packetHeader.port << "|" << this->payload << "|";
     return ss.str();
 }
 

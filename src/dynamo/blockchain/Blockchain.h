@@ -24,7 +24,7 @@ public:
      */
     Blockchain(int isRoot, const std::string& firstNodeAddress);
 
-    Blockchain(const std::string& blockchain_packet); // Build a Blockchain class from an incomming messagepack
+    Blockchain(std::string blockchain_packet); // Build a Blockchain class from an incomming messagepack
 
     /* PUBLIC FUNCTIONS */
     /**

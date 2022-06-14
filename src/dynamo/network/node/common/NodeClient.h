@@ -22,7 +22,7 @@ private:
     int protocol;
 
     // Buffer for the incoming server's response
-    char response_buffer[30000];
+    char response_buffer[300000];
 
     // Variables regarding the connection with the server
     // The connection will store the return value of the connect() function. (Should be 0)

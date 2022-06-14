@@ -6,7 +6,7 @@ Blockchain::Blockchain(int isRoot, const std::string& firstNodeAddress)
     std::cout << "Root chain size: " << this->chain.size() << std::endl;
 }
 
-Blockchain::Blockchain(const std::string& blockchain_packet)
+Blockchain::Blockchain(std::string blockchain_packet)
 {
     using namespace msgpack11;
 
@@ -17,12 +17,12 @@ Blockchain::Blockchain(const std::string& blockchain_packet)
     MsgPack blockchain = MsgPack::parse(blockchain_packet, err);
 
     std::cout << "Err blockchain constructor: " << err << std::endl;
-    std::cout << "Is array: " << blockchain.is_array() << std::endl;
+    std::cout << "Is object: " << blockchain["chain"].is_array() << std::endl;
 
-    Block test(blockchain["chain"].array_items()[0].dump());
-    test.printBlock();
+    /*Block test(blockchain["chain"].array_items()[0].string_value());
+    test.printBlock();*/
 
-    std::cout << "Chain dump: " << blockchain["chain"].array_items()[0] << std::endl;
+    //std::cout << "Chain dump: " << blockchain["chain"].array_items()[0] << std::endl;
 
     std::string addr = "hehe";
     Blockchain tempChain(0, addr);
@@ -33,7 +33,7 @@ Blockchain::Blockchain(const std::string& blockchain_packet)
 
         for (int i = 0; i < blockchain["chain"].array_items().size(); i++)
         {
-            auto* newBlock = new Block(blockchain["chain"][i].string_value());
+            auto* newBlock = new Block(blockchain["chain"][i].dump());
             tempChain.chain.push_back(newBlock);
         }
 
@@ -82,15 +82,18 @@ msgpack11::MsgPack Blockchain::serialize(Blockchain chain)
 {
     using namespace msgpack11;
 
+    MsgPack chainData;
     MsgPack::array tempChain;
 
     for (auto& block : chain.chain)
     {
-        tempChain.push_back(Block::serialize(block).dump());
+        tempChain.push_back(Block::serialize(block));
     }
 
+    chainData = tempChain;
+
     MsgPack tempBlockchain = MsgPack::object {
-        {"chain", tempChain}
+        {"chain", chainData}
     };
 
     std::cout << "Array size: " << tempBlockchain["chain"].array_items().size() << std::endl;

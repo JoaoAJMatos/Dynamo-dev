@@ -37,11 +37,11 @@ Block::Block(std::string block_packet)
 
     try
     {
-        this->timestamp = block["timestamp"].int32_value();
+        this->timestamp = block["timestamp"].int_value();
         this->hash = reinterpret_cast<uint8_t*>(const_cast<char*>(block["hash"].string_value().c_str()));               // I know this might look like a mess,
         this->prev_hash = reinterpret_cast<uint8_t*>(const_cast<char*>(block["prev_hash"].string_value().c_str()));     // but it works
-        this->height = block["height"].int32_value();
-        this->nonce = block["nonce"].int32_value();
+        this->height = block["height"].int_value();
+        this->nonce = block["nonce"].int_value();
         this->difficulty = block["difficulty"].int_value();
 
         std::vector<Transaction> dataArray;
@@ -53,6 +53,8 @@ Block::Block(std::string block_packet)
             std::cout << "In address: " << transact.getInputMap().address << std::endl;
             dataArray.push_back(transact);
         }
+
+        this->data = dataArray;
     }
     catch(const std::exception& e)
     {
@@ -215,12 +217,15 @@ msgpack11::MsgPack Block::serialize(Block* block)
 {
     using namespace msgpack11;
 
+    MsgPack data;
     MsgPack::array tempData;
 
     for (auto& transaction : block->data)
     {
-        tempData.push_back(Transaction::serialize(&transaction).dump());
+        tempData.push_back(Transaction::serialize(&transaction));
     }
+
+    data = tempData;
 
     MsgPack tempBlock = MsgPack::object {
         {"timestamp", block->getTimestamp()},
@@ -229,7 +234,7 @@ msgpack11::MsgPack Block::serialize(Block* block)
         {"height", block->getHeight()},
         {"nonce", block->getNonce()},
         {"difficulty", block->getDifficulty()},
-        {"data", tempData}
+        {"data", data}
     };
 
     return tempBlock;

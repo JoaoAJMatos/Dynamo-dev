@@ -51,8 +51,8 @@ int main()
     /*servers::DNS_Server DNS(AF_INET, SOCK_STREAM, 6, 4542, INADDR_ANY, 100, 0);
     DNS.launch();*/
 
-    Node n;
-    n.start();
+    /*Node n;
+    n.start();*/
 /*
     std::vector<std::string> params = {"1", "2", "3"};
 
@@ -78,20 +78,43 @@ int main()
 
     std::cout << msgpack_unpacked["hey"]["ola"] << std::endl;*/
 
-    /*using namespace msgpack11;
+    using namespace msgpack11;
 
-    MsgPack arr = MsgPack::array({1, 2, 3});
+    MsgPack pack = MsgPack::object {{"key1", "value2"}};
+    MsgPack pack10 = MsgPack::object {{"key2", "value3"}};
+    MsgPack pack11 = MsgPack::object {{"key10", "value10"}};
+    MsgPack pack12 = MsgPack::object {{"key11", 10}};
+
+    MsgPack::array array {pack, pack10, pack12};
+
+    array.push_back(pack11);
+
+    MsgPack arr = array;
+    
 
     MsgPack pack1 = MsgPack::object {
         {"array", arr}
     };
 
-    std::string ser = pack1.dump();
+
+    MsgPack parent = MsgPack::object {
+        {"object", pack1}
+    };
+
+    std::string ser = parent.dump();
 
     std::string err;
     MsgPack pack2 = MsgPack::parse(ser, err);
 
-    std::cout << pack2["array"][0].int_value() << std::endl;*/
+    std::cout << "err: " << err << std::endl;
+    //std::cout << pack2["object"]["array"][2] << std::endl;
+
+    DTP::Packet packet(0, std::string("me"), std::string("you"), 10, pack2.dump());
+
+    std::cout << "Payload: " << packet.getPayload() << std::endl;
+
+    MsgPack parsed = MsgPack::parse(packet.getPayload(), err);
+    std::cout << parsed["object"]["array"][2]["key11"].int_value() << std::endl;
 
     /*uint8_t* hash;
 
