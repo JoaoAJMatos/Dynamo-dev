@@ -130,8 +130,37 @@ public:
     }
 };*/
 
+class myClass
+{
+private:
+    std::string test;
+
+public:
+    myClass(std::string test)
+    {
+        this->test = test;
+    }
+
+    std::string getTest()
+    {
+        std::stringstream ss;
+        ss << this->test << "|" << this->test;
+        return ss.str();
+    }
+};
+
 int main()
 {
+    /*std::string message = "I'm a cool message";
+    
+    myClass myClassObject(message);
+
+    std::string test = myClassObject.getTest();
+
+    std::cout << "Test: " << test << std::endl;
+    std::cout << "C_str(): " << test.c_str() << std::endl;*/
+
+
     /*using namespace msgpack11;
     std::string err;
 

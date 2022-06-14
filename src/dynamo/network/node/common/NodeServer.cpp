@@ -82,9 +82,33 @@ void NodeServer::responder() // After responding to the incoming message the res
             msgpack = Blockchain::serialize(*this->blockchain);
             payload = msgpack.dump();
 
-            response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, payload);
-            response->show();
-            std::cout << "Buffer size: " << response->buffer().size() << std::endl;
+            //response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, payload);
+            DTP::Packet rsp(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, payload);
+
+            std::cout << "Packet Buffer: " << rsp.buffer() << std::endl;
+
+            char* toSend = new char[rsp.buffer().length()];
+
+            std::string test;
+            std::cout << "Here: ";
+
+            for (int i = 0; i < rsp.buffer().length(); i++)
+            {
+                toSend[i] = rsp.buffer()[i];
+                std::cout << toSend[i];
+                test.append(&toSend[i]);
+            }
+
+            std::cout << std::endl << "Packet Buffer2: " << std::string(toSend) << std::endl;
+            std::cout << "Test: " << test << std::endl;
+            std::cout << "Test c_str(): " << test.c_str() << std::endl;
+
+            DTP::Packet response2(std::string(test.c_str()));
+
+            Blockchain chainTest(response2.getPayload());
+            chainTest.printChain();
+
+            send(new_socket, test.c_str(), rsp.buffer().length(), 0);
         }
         else if (this->packet->headers().type == BLOCKCHAIN_DATA_PACKET)
         {
@@ -118,8 +142,14 @@ void NodeServer::responder() // After responding to the incoming message the res
             std::cout << "[ERROR] Unknown packet type: " << this->packet->headers().type << std::endl;
         }
 
-        int bytes = send(new_socket, response->buffer().data(), 300000, 0);
-        std::cout << "[INFO] Sent " << bytes << " bytes to " << this->nodeIP << ":" << this->nodePort << std::endl;
+        /*char buf[response->buffer().length()];
+
+        strcpy(buf, response->buffer());
+        std::cout << "Buffer sent: " << buf << std::endl;
+
+        int bytes = send(new_socket, buf, 3000000, 0);*/
+
+        //std::cout << "[INFO] Sent " << bytes << " bytes to " << this->nodeIP << ":" << this->nodePort << std::endl;
         close(new_socket);
         return;
     }
