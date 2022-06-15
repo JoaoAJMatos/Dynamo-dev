@@ -80,26 +80,30 @@ void NodeServer::responder() // After responding to the incoming message the res
         {
             // Send the blockchain to the client
             msgpack = Blockchain::serialize(*this->blockchain);
-            payload = msgpack.dump();
+            payload = std::string(msgpack.dump().c_str(), msgpack.dump().length());
 
             //response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, payload);
             DTP::Packet rsp(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, payload);
 
             std::cout << "Packet Buffer: " << rsp.buffer() << std::endl;
 
-            /*char* toSend = new char[rsp.buffer().length()];
+            char* toSend1 = new char[rsp.buffer().length()];
 
             std::string test;
             std::cout << "Here: ";
 
             for (int i = 0; i < rsp.buffer().length(); i++)
             {
-                toSend[i] = rsp.buffer()[i];
-                std::cout << toSend[i];
-                test.append(&toSend[i]);
+                toSend1[i] = rsp.buffer()[i];
+                if (rsp.buffer()[i] == '\0')
+                {
+                    std::cout << "Found null at: " << i << std::endl;
+                }
+                std::cout << toSend1[i];
+                test.append(&toSend1[i]);
             }
 
-            std::cout << std::endl << "Packet Buffer2: " << std::string(toSend) << std::endl;
+            /*std::cout << std::endl << "Packet Buffer2: " << std::string(toSend) << std::endl;
             std::cout << "Test: " << test << std::endl;
             std::cout << "Test c_str(): " << test.c_str() << std::endl;
 
@@ -108,12 +112,14 @@ void NodeServer::responder() // After responding to the incoming message the res
             Blockchain chainTest(response2.getPayload());
             chainTest.printChain();*/
 
-            const char* toSend = rsp.buffer().c_str();
-            const int toSendLen = rsp.buffer().length();
+            std::cout << std::endl << "Test: " << test << std::endl;
+
+            const char* toSend = test.c_str();
+            const int toSendLen = test.length();
 
             std::string toSendBuffer = std::string(toSend, toSendLen);
 
-            std::cout << "To send buffer: " << toSendBuffer << std::endl;
+            std::cout << std::endl << "To send buffer: " << toSendBuffer << std::endl;
 
             DTP::Packet response2(toSendBuffer);
 
