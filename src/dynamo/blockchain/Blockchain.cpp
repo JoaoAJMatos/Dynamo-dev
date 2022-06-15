@@ -91,9 +91,6 @@ msgpack11::MsgPack Blockchain::serialize(Blockchain chain)
         {"chain", chainData}
     };
 
-    std::cout << "Array size: " << tempBlockchain["chain"].array_items().size() << std::endl;
-    std::cout << "Is array? : " << tempBlockchain["chain"].is_array() << std::endl;
-
     return tempBlockchain;
 }
 

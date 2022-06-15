@@ -87,50 +87,22 @@ void NodeServer::responder() // After responding to the incoming message the res
 
             std::cout << std::endl << "Payload: " << rsp.getPayload() << std::endl;
 
-            send(new_socket, rsp.buffer().data(), rsp.buffer().length(), 0);
-
-            /*std::cout << "Packet Buffer: " << rsp.buffer() << std::endl;
-
-            char* toSend1 = new char[rsp.buffer().length()];
-
-            std::string test;
-            std::cout << "Here: ";
-
+            char buf2[3000000];
             for (int i = 0; i < rsp.buffer().length(); i++)
             {
-                toSend1[i] = rsp.buffer()[i];
-                if (rsp.buffer()[i] == '\0')
+                if (rsp.buffer()[i] != '\0')
                 {
-                    std::cout << "Found null at: " << i << std::endl;
+                    buf2[i] = rsp.buffer()[i];
                 }
-                std::cout << toSend1[i];
-                test.append(&toSend1[i]);
-            }*/
+            }
 
-            /*std::cout << std::endl << "Packet Buffer2: " << std::string(toSend) << std::endl;
-            std::cout << "Test: " << test << std::endl;
-            std::cout << "Test c_str(): " << test.c_str() << std::endl;
+            std::string buf(rsp.buffer().c_str(), rsp.buffer().length());
 
-            DTP::Packet response2(std::string(test.c_str()));
+            std::cout << std::endl << "Buffer: " << buf << std::endl;
+            std::cout << std::endl << "Buffer data: " << buf.data() << std::endl;
 
-            Blockchain chainTest(response2.getPayload());
-            chainTest.printChain();*/
+            send(new_socket, buf2, sizeof(buf2) / sizeof(buf2[0]), 0);
 
-            /*std::cout << std::endl << "Test: " << test << std::endl;
-
-            const char* toSend = test.c_str();
-            const int toSendLen = test.length();
-
-            std::string toSendBuffer = std::string(toSend, toSendLen);
-
-            std::cout << std::endl << "To send buffer: " << toSendBuffer << std::endl;
-
-            DTP::Packet response2(toSendBuffer);
-
-            Blockchain chainTest(response2.getPayload());
-            chainTest.printChain();*/
-
-            //send(new_socket, toSendBuffer.c_str(), toSendBuffer.length(), 0);
         }
         else if (this->packet->headers().type == BLOCKCHAIN_DATA_PACKET)
         {
@@ -164,14 +136,6 @@ void NodeServer::responder() // After responding to the incoming message the res
             std::cout << "[ERROR] Unknown packet type: " << this->packet->headers().type << std::endl;
         }
 
-        /*char buf[response->buffer().length()];
-
-        strcpy(buf, response->buffer());
-        std::cout << "Buffer sent: " << buf << std::endl;
-
-        int bytes = send(new_socket, buf, 3000000, 0);*/
-
-        //std::cout << "[INFO] Sent " << bytes << " bytes to " << this->nodeIP << ":" << this->nodePort << std::endl;
         close(new_socket);
         return;
     }

@@ -12,7 +12,7 @@ DTP::Packet::Packet(int type, std::string origin, std::string destination, int p
     this->packetHeader.destination = std::move(destination);
     this->packetHeader.port = port;
     this->payloadSize = payload.length();
-    this->payload = payload;
+    this->payload = std::string(payload.c_str(), this->payloadSize);
 }
 
 DTP::Packet::Packet(const std::string& _buffer)

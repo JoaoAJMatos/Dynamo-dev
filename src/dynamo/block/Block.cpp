@@ -4,6 +4,43 @@
 
 #include "Block.h"
 
+uint8_t* hexToUint(const char* buffer)
+{
+    if (buffer == nullptr) return nullptr;
+
+    size_t slength = strlen(buffer);
+
+    if ((slength % 2) != 0) return nullptr; // must be even
+
+    size_t dlength = slength / 2;
+
+    uint8_t* data = (uint8_t*)malloc(dlength);
+
+    memset(data, 0, dlength);
+
+    size_t index = 0;
+    while (index < slength) 
+    {
+        char c = buffer[index];
+        int value = 0;
+        
+        if (c >= '0' && c <= '9')
+            value = (c - '0');
+        else if (c >= 'A' && c <= 'F')
+            value = (10 + (c - 'A'));
+        else if (c >= 'a' && c <= 'f')
+            value = (10 + (c - 'a'));
+        else
+            return nullptr;
+
+        data[(index / 2)] += value << (((index + 1) % 2) * 4);
+
+        index++;
+    }   
+
+    return data;
+}
+
 /**
  * @brief Construct a new Block:: Block object
  * 
@@ -37,12 +74,12 @@ Block::Block(std::string block_packet)
     {
         std::cout << "[BLOCK HASH] " << block["hash"].string_value() << std::endl;
 
-        this->timestamp = block["timestamp"].int_value();
-        this->hash = reinterpret_cast<uint8_t*>(const_cast<char*>(block["hash"].string_value().c_str()));               // I know this might look like a mess,
-        this->prev_hash = reinterpret_cast<uint8_t*>(const_cast<char*>(block["prev_hash"].string_value().c_str()));     // but it works
-        this->height = block["height"].int_value();
-        this->nonce = block["nonce"].int_value();
-        this->difficulty = block["difficulty"].int_value();
+        this->timestamp = (time_t)block["timestamp"].int_value();
+        this->hash = hexToUint(block["hash"].string_value().c_str());        // I know this might look like a mess,
+        this->prev_hash = hexToUint(block["prev_hash"].string_value().c_str());   // but it works
+        this->height = (size_t)block["height"].int_value();
+        this->nonce = (size_t)block["nonce"].int_value();
+        this->difficulty = (size_t)block["difficulty"].int_value();
 
         std::vector<Transaction> dataArray;
 
@@ -226,12 +263,12 @@ msgpack11::MsgPack Block::serialize(Block* block)
     data = tempData;
 
     MsgPack tempBlock = MsgPack::object {
-        {"timestamp", block->getTimestamp()},
+        {"timestamp", (int)block->getTimestamp()},
         {"hash", Block::toString(block->getHash())},
         {"prev_hash", Block::toString(block->getPrevHash())},
-        {"height", block->getHeight()},
-        {"nonce", block->getNonce()},
-        {"difficulty", block->getDifficulty()},
+        {"height", (int)block->getHeight()},
+        {"nonce", (int)block->getNonce()},
+        {"difficulty", (int)block->getDifficulty()},
         {"data", data}
     };
 
