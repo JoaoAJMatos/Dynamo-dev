@@ -333,7 +333,7 @@ int Node::syncChains()
         {
             try
             {
-                DTP::Packet response(std::string(client->get_response_buffer()));
+                DTP::Packet response(std::string(client->get_response_buffer(), sizeof(client->get_response_buffer()) / sizeof(char)));
 
                 std::cout << "Response length: " << std::string(client->get_response_buffer()).length() << std::endl;
 

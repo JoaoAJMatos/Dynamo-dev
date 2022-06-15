@@ -53,7 +53,7 @@ int NodeClient::request(const char *server_ip, const int server_port, const std:
 
         std::cout << "Bytes sent: " << bytes << std::endl;
 
-        do
+        while (res > 0)
         {
             res = recv(sock, response_buffer, 300000, 0);
 
@@ -65,7 +65,7 @@ int NodeClient::request(const char *server_ip, const int server_port, const std:
                 return -1;
             }
 
-        } while ((res > 0));
+        };
 
         response_string = std::string(response_buffer, sizeof(response_buffer) / sizeof(response_buffer[0]));
     }
