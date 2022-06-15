@@ -24,7 +24,7 @@ Transaction::Transaction(std::string transaction_packet)
     try
     {
         strcpy(this->id, transaction["id"].string_value().c_str());
-        createOutput(transaction["outMap"]["recipient"].string_value(), (size_t)transaction["outMap"]["amount"].int_value(), transaction["outMap"]["sender"].string_value(), (size_t)transaction["outMap"]["balance"].int_value());
+        createOutput(transaction["outMap"]["recipient"].string_value(), (size_t)transaction["outMap"]["amount"].int_value(), transaction["outMap"]["sender"].string_value(), (size_t)transaction["inMap"]["balance"].int_value());
 
         this->inMap.timestamp = transaction["inMap"]["timestamp"].int_value();
         this->inMap.balance = transaction["inMap"]["balance"].int_value();
