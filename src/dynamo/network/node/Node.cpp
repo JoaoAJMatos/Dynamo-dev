@@ -335,8 +335,6 @@ int Node::syncChains()
             {
                 DTP::Packet response(std::string(client->get_response_buffer(), sizeof(client->get_response_buffer()) / sizeof(char)));
 
-                std::cout << "Response length: " << std::string(client->get_response_buffer()).length() << std::endl;
-
                 std::cout << "Got response buffer size: " << response.buffer().size() << std::endl;
                 std::cout << std::endl << "Response packet payload: " << response.getPayload() << std::endl;
 
