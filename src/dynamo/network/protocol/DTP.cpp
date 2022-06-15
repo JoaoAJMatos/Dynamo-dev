@@ -4,6 +4,8 @@
 
 DTP::Packet::Packet(int type, std::string origin, std::string destination, int port, std::string payload)
 {
+    std::cout << "Payload received for DTP constructor: " << payload << std::endl;
+
     this->indicator = DTP_INDICATOR;
     this->packetHeader.type = type;
     this->packetHeader.origin = std::move(origin);

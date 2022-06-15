@@ -87,7 +87,7 @@ void NodeServer::responder() // After responding to the incoming message the res
 
             std::cout << std::endl << "Payload: " << rsp.getPayload() << std::endl;
 
-            send(new_socket, rsp.getPayload().data(), rsp.getPayload().size(), 0);
+            send(new_socket, rsp.buffer().data(), rsp.buffer().length(), 0);
 
             /*std::cout << "Packet Buffer: " << rsp.buffer() << std::endl;
 

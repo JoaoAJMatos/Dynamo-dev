@@ -429,10 +429,14 @@ void Node::start()
 
         while(!isChainLinked)
         {
-            syncChains();
-            logger("Unable to sync with the network");
-            logger("Retrying...");
-            Time::sleep(1000);
+            int result = syncChains();
+
+            if (result < 0)
+            {
+                logger("Unable to sync with the network");
+                logger("Retrying...");
+                Time::sleep(1000);
+            }
         }
     }
 
