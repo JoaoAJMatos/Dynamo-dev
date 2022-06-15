@@ -35,6 +35,8 @@ Block::Block(std::string block_packet)
 
     try
     {
+        std::cout << "[BLOCK HASH] " << block["hash"].string_value() << std::endl;
+
         this->timestamp = block["timestamp"].int_value();
         this->hash = reinterpret_cast<uint8_t*>(const_cast<char*>(block["hash"].string_value().c_str()));               // I know this might look like a mess,
         this->prev_hash = reinterpret_cast<uint8_t*>(const_cast<char*>(block["prev_hash"].string_value().c_str()));     // but it works
