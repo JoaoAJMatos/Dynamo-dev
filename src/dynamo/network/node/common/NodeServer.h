@@ -17,6 +17,7 @@
 #define TRANSACTION_POOL_REQUEST_PACKET 4
 
 #include <unistd.h>
+#include <fstream>
 
 #ifndef _WIN32
 #include <arpa/inet.h>

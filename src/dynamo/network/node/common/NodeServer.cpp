@@ -64,6 +64,28 @@ void NodeServer::handler() // The handler will attempt to create a DTP packet in
     return;
 }
 
+void toFile(std::string content)
+{
+    std::ofstream tempFile;
+
+    tempFile.open("temp.txt");
+    tempFile << content;
+    tempFile.close();
+}
+
+std::string fromFile()
+{
+    std::string line;
+    std::ifstream myfile("temp.txt");
+    if (myfile.is_open())
+    {
+        while (getline(myfile, line))
+        {
+            myfile.close();
+            return line;
+        }
+    }
+}
 
 void NodeServer::responder() // After responding to the incoming message the responder should set the broadcast flag of the node to true
 {                            // in order for the node to know when to broadcast the message to all the other nodes
@@ -86,6 +108,14 @@ void NodeServer::responder() // After responding to the incoming message the res
             DTP::Packet rsp(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, payload);
 
             std::cout << std::endl << "Payload: " << rsp.getPayload() << std::endl;
+
+            toFile(rsp.getPayload());
+            std::string newString = fromFile();
+
+            Blockchain newChain(newString);
+            newChain.printChain();
+
+            std::cout << std::endl << "New String: " << newString << std::endl;
 
             send(new_socket, rsp.buffer().data(), rsp.buffer().length(), 0);
 
