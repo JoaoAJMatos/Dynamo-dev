@@ -87,7 +87,7 @@ void NodeServer::responder() // After responding to the incoming message the res
 
             std::cout << "Packet Buffer: " << rsp.buffer() << std::endl;
 
-            char* toSend = new char[rsp.buffer().length()];
+            /*char* toSend = new char[rsp.buffer().length()];
 
             std::string test;
             std::cout << "Here: ";
@@ -106,9 +106,21 @@ void NodeServer::responder() // After responding to the incoming message the res
             DTP::Packet response2(std::string(test.c_str()));
 
             Blockchain chainTest(response2.getPayload());
+            chainTest.printChain();*/
+
+            const char* toSend = rsp.buffer().c_str();
+            const int toSendLen = rsp.buffer().length();
+
+            std::string toSendBuffer = std::string(toSend, toSendLen);
+
+            std::cout << "To send buffer: " << toSendBuffer << std::endl;
+
+            DTP::Packet response2(toSendBuffer);
+
+            Blockchain chainTest(response2.getPayload());
             chainTest.printChain();
 
-            send(new_socket, test.c_str(), rsp.buffer().length(), 0);
+            send(new_socket, toSendBuffer.c_str(), toSendBuffer.length(), 0);
         }
         else if (this->packet->headers().type == BLOCKCHAIN_DATA_PACKET)
         {

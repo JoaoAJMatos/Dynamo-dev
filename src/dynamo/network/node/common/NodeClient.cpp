@@ -65,10 +65,9 @@ int NodeClient::request(const char *server_ip, const int server_port, const std:
                 return -1;
             }
 
-            response_string.append(std::string(response_buffer));
         } while ((res > 0));
 
-        std::cout << "[+] Response received: " << response_string << std::endl;
+        response_string = std::string(response_buffer, sizeof(response_buffer) / sizeof(response_buffer[0]));
     }
     else
     {

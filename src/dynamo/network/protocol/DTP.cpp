@@ -40,7 +40,7 @@ DTP::Packet::Packet(const std::string& _buffer)
 std::string DTP::Packet::buffer()
 {
     std::stringstream ss;
-    ss << this->indicator << "|" << this->packetHeader.type << "|" << this->packetHeader.origin << "|" << this->packetHeader.destination << "|" << this->packetHeader.port << "|" << this->payload;
+    ss << this->indicator << "|" << this->packetHeader.type << "|" << this->packetHeader.origin << "|" << this->packetHeader.destination << "|" << this->packetHeader.port << "|" << this->payload << "|";
     return ss.str();
 }
 

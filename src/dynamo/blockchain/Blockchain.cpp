@@ -12,6 +12,11 @@ Blockchain::Blockchain(std::string blockchain_packet)
 
     std::cout << "Blockchain constructor string: " << blockchain_packet << std::endl;
 
+    for (int i = 0; i < blockchain_packet.size(); i++)
+    {
+        if (blockchain_packet[i] == '\0') std::cout << "Found null byte: " << i << std::endl;
+    }
+
     // Deserialize the blockchain packet
     std::string err;
     MsgPack blockchain = MsgPack::parse(blockchain_packet, err);
