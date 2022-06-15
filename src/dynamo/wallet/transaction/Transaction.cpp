@@ -108,14 +108,22 @@ int Transaction::validTransaction(Transaction* transaction)
 {
     ECDSA keyPair;
 
+    std::cout << "Sender: " << transaction->inMap.address << std::endl;
+    std::cout << "strcmp out: " << strcmp(transaction->inMap.address.c_str(), "Genesis") << std::endl;
+
     // Check if the transaction is comming from the Genesis block or is a reward transaction
-    if (transaction->inMap.address == "Genesis" || transaction->inMap.address == "dynamo-consensus-node-reward") return 1;
+    if ((strcmp(transaction->inMap.address.c_str(), "Genesis") == 0) || (strcmp(transaction->inMap.address.c_str(), "dynamo-consensus-node-reward") == 0))
+    {
+        // Check if the balance is sufficient
+        if(transaction->inMap.balance >= transaction->outMap.amount) return 1;
+    }
     
     // Check if the signature is valid
-    if(keyPair.verifySignature(transaction->inMap.address.c_str(), transaction->outputMapHash.c_str(), transaction->inMap.signature.c_str())) return 1;
-
-    // Check if the balance is sufficient
-    if(transaction->inMap.balance >= transaction->outMap.amount) return 1;
+    if(keyPair.verifySignature(transaction->inMap.address.c_str(), transaction->outputMapHash.c_str(), transaction->inMap.signature.c_str()))
+    {
+        // Check if the balance is sufficient
+        if(transaction->inMap.balance >= transaction->outMap.amount) return 1;
+    } 
 
     return 0;
 }

@@ -9,7 +9,8 @@ DTP::Packet::Packet(int type, std::string origin, std::string destination, int p
     this->packetHeader.origin = std::move(origin);
     this->packetHeader.destination = std::move(destination);
     this->packetHeader.port = port;
-    this->payload = std::move(payload);
+    this->payloadSize = payload.length();
+    this->payload = payload;
 }
 
 DTP::Packet::Packet(const std::string& _buffer)
@@ -18,6 +19,8 @@ DTP::Packet::Packet(const std::string& _buffer)
     std::string delimiter = "|";
 
     std::string buffer = _buffer;
+
+    std::cout << "Packet constructor buffer: " << buffer << std::endl;
 
     this->indicator = atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());
     buffer.erase(0, buffer.find(delimiter) + delimiter.length());
@@ -34,13 +37,16 @@ DTP::Packet::Packet(const std::string& _buffer)
     this->packetHeader.port = atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());
     buffer.erase(0, buffer.find(delimiter) + delimiter.length());
 
+    this->payloadSize = atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());
+    buffer.erase(0, buffer.find(delimiter) + delimiter.length());
+
     this->payload = buffer.substr(pos, buffer.find(delimiter));
 }
 
 std::string DTP::Packet::buffer()
 {
     std::stringstream ss;
-    ss << this->indicator << "|" << this->packetHeader.type << "|" << this->packetHeader.origin << "|" << this->packetHeader.destination << "|" << this->packetHeader.port << "|" << this->payload << "|";
+    ss << this->indicator << "|" << this->packetHeader.type << "|" << this->packetHeader.origin << "|" << this->packetHeader.destination << "|" << this->packetHeader.port << "|" << this->payloadSize << "|" << this->payload << "|";
     return ss.str();
 }
 
@@ -70,4 +76,9 @@ std::string DTP::Packet::getPayload()
 int DTP::Packet::getIndicator()
 {
     return this->indicator;
+}
+
+int DTP::Packet::getPayloadSize()
+{
+    return this->payloadSize;
 }

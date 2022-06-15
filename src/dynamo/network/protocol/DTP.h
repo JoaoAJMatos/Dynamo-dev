@@ -38,6 +38,7 @@ namespace DTP
         
         header packetHeader;
         
+        int payloadSize;            // The size of the payload
         std::string payload;        // The payload of the packet
 
         msgpack11::MsgPack packer; // The MsgPack object to serialize the packet
@@ -68,6 +69,7 @@ namespace DTP
         int getIndicator();
 
         std::string getPayload();
+        int getPayloadSize();
     };
 }
 

@@ -333,13 +333,15 @@ int Node::syncChains()
             {
                 DTP::Packet response(client->get_response_buffer());
 
-                std::cout << std::endl << "Response packet payload: " << response.getPayload() << std::endl;
+                std::string response_data(response.getPayload().c_str(), response.getPayloadSize());
+
+                std::cout << std::endl << "Response packet payload: " << response_data << std::endl;
 
                 if (response.getIndicator() == DTP_INDICATOR)
                 {
                     if (response.headers().type == BLOCKCHAIN_DATA_PACKET)
                     {
-                        this->blockchain = new Blockchain(response.getPayload());
+                        this->blockchain = new Blockchain(response_data);
 
                         if (this->blockchain->chain.empty()) return -1;
 

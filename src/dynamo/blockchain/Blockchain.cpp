@@ -12,22 +12,12 @@ Blockchain::Blockchain(std::string blockchain_packet)
 
     std::cout << "Blockchain constructor string: " << blockchain_packet << std::endl;
 
-    for (int i = 0; i < blockchain_packet.size(); i++)
-    {
-        if (blockchain_packet[i] == '\0') std::cout << "Found null byte: " << i << std::endl;
-    }
-
     // Deserialize the blockchain packet
     std::string err;
     MsgPack blockchain = MsgPack::parse(blockchain_packet, err);
 
     std::cout << "Err blockchain constructor: " << err << std::endl;
     std::cout << "Is object: " << blockchain.is_object() << std::endl;
-
-    /*Block test(blockchain["chain"].array_items()[0].string_value());
-    test.printBlock();*/
-
-    //std::cout << "Chain dump: " << blockchain["chain"].array_items()[0] << std::endl;
 
     std::string addr = "hehe";
     Blockchain tempChain(0, addr);
@@ -64,18 +54,18 @@ int Blockchain::replaceChain(const Blockchain& _chain)
 {
     if (_chain.chain.size() <= this->chain.size())
     {
-        std::cout << "[ERROR] The incoming _chain is smaller or the same size as the current one" << std::endl;
+        std::cout << "[ERROR] The incoming chain is smaller or the same size as the current one" << std::endl;
         std::cout << "Incoming size: " << _chain.chain.size() << " | Your size: " << this->chain.size() << std::endl;
         return 1; // The incoming _chain must be longer
     } 
     if (!Blockchain::isValid(_chain))
     {
-        std::cout << "[ERROR] The incoming _chain is invalid" << std::endl;
+        std::cout << "[ERROR] The incoming chain is invalid" << std::endl;
         return 1; // The blocks contained in the _chain must be valid
     }
     if (!Blockchain::isTransactionDataValid(_chain))
     {
-        std::cout << "[ERROR] The incoming _chain contains invalid transactions" << std::endl;
+        std::cout << "[ERROR] The incoming chain contains invalid transactions" << std::endl;
         return 1; // The transactions contained in the _chain must be valid
     }
 
@@ -148,18 +138,34 @@ int Blockchain::isTransactionDataValid(Blockchain chain)
             {
                 rewardTransactionCount++;
 
-                if (rewardTransactionCount > 1) return 0; // Block has more than one reward transaction
-                if (transaction.getOutputMap().amount != Transaction::getBlockSubsidy(block->getHeight())) return 0; // Mining reward isn't correct
+                if (rewardTransactionCount > 1)
+                {
+                    std::cout << "[ERROR] There are more than one reward transactions in block" << std::endl;
+                    return 0; // Block has more than one reward transaction
+                } 
+                if (transaction.getOutputMap().amount != Transaction::getBlockSubsidy(block->getHeight()))
+                {
+                    std::cout << "[ERROR] The reward transaction amount is not correct" << std::endl;
+                    return 0; // Mining reward isn't correct
+                } 
             }
             else 
             {
-                if(Transaction::validTransaction(&transaction)) return 0; // Transaction is not valid
+                if(!Transaction::validTransaction(&transaction)) return 0; // Transaction is not valid
 
                 int trueBalance = calculateBalanceOfAddress(transaction.getInputMap().address);
 
-                if (transaction.getInputMap().balance != trueBalance) return 0; // Sender's balance is not accurate
+                if (((strcmp(transaction.getInputMap().address.c_str(), "Genesis") != 0) && (strcmp(transaction.getInputMap().address.c_str(), "dynamo-consensus-node-reward") != 0)) && (transaction.getInputMap().balance != trueBalance))
+                {
+                    std::cout << "[ERROR] Blockchain Validation Error: On block " << block->getHeight() << " the balance of " << transaction.getInputMap().address << " (" << transaction.getInputMap().balance << ") does not match the expected balance of: " << trueBalance << std::endl;
+                    return 0; // Sender's balance is not accurate
+                }
 
-                if (transactions.insert(std::pair<char*, Transaction>(transaction.getID(), transaction)).second == false) return 0; // Transaction is a duplicate
+                if (transactions.insert(std::pair<char*, Transaction>(transaction.getID(), transaction)).second == false)
+                {
+                    std::cout << "[ERROR] Blockchain Validation Error: On block " << block->getHeight() << " the transaction " << transaction.getID() << " is a duplicate" << std::endl;
+                    return 0; // Transaction is a duplicate
+                }
             }
         }
     }
