@@ -85,24 +85,12 @@ void NodeServer::responder() // After responding to the incoming message the res
             //response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, payload);
             DTP::Packet rsp(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, payload);
 
-            std::cout << std::endl << "Payload: " << rsp.getPayload() << std::endl;
-
-            char buf2[3000000];
-            for (int i = 0; i < rsp.buffer().length(); i++)
-            {
-                if (rsp.buffer()[i] != '\0')
-                {
-                    buf2[i] = rsp.buffer()[i];
-                }
-            }
-
             std::string buf(rsp.buffer().c_str(), rsp.buffer().length());
 
             std::cout << std::endl << "Buffer: " << buf << std::endl;
-            std::cout << std::endl << "Buffer data: " << buf.data() << std::endl;
+            std::cout << std::endl << "Buffer data: " << std::string(buf.c_str(), buf.length()).data() << std::endl;
 
-            send(new_socket, buf2, sizeof(buf2) / sizeof(buf2[0]), 0);
-
+            send(new_socket, rsp.buffer().c_str(), rsp.buffer().length(), 0);
         }
         else if (this->packet->headers().type == BLOCKCHAIN_DATA_PACKET)
         {

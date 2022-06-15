@@ -4,6 +4,24 @@
 
 #include "Block.h"
 
+int toHex(char* dest, size_t dest_len, const uint8_t* uint_buf, size_t uint_buf_len)
+{
+    // Check if the destination buffer is large enough
+    if(dest_len < (uint_buf_len*2+1)) return 1;
+    
+    *dest = '\0'; // In case uint_buf_len == 0
+    
+    while(uint_buf_len--) 
+    {
+        // sprintf directly to where dest points
+        sprintf(dest, "%02X", *uint_buf);
+        dest += 2;
+        ++uint_buf;
+    }
+
+    return 0;
+}
+
 uint8_t* hexToUint(const char* buffer)
 {
     if (buffer == nullptr) return nullptr;
@@ -255,6 +273,12 @@ msgpack11::MsgPack Block::serialize(Block* block)
     MsgPack data;
     MsgPack::array tempData;
 
+    char buf1[64];
+    char buf2[64];
+
+    toHex(buf1, sizeof(buf1), block->getHash(), sizeof(block->getHash()));
+    toHex(buf2, sizeof(buf2), block->getPrevHash(), sizeof(block->getPrevHash()));
+
     for (auto& transaction : block->data)
     {
         tempData.push_back(Transaction::serialize(&transaction));
@@ -264,8 +288,8 @@ msgpack11::MsgPack Block::serialize(Block* block)
 
     MsgPack tempBlock = MsgPack::object {
         {"timestamp", (int)block->getTimestamp()},
-        {"hash", Block::toString(block->getHash())},
-        {"prev_hash", Block::toString(block->getPrevHash())},
+        {"hash", std::string(buf2)},
+        {"prev_hash", std::string(buf2)},
         {"height", (int)block->getHeight()},
         {"nonce", (int)block->getNonce()},
         {"difficulty", (int)block->getDifficulty()},

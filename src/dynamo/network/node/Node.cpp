@@ -333,9 +333,9 @@ int Node::syncChains()
             {
                 DTP::Packet response(client->get_response_buffer());
 
-                std::string response_data(response.getPayload().c_str(), response.getPayloadSize());
+                std::string response_data(response.buffer(), response.buffer().length());
 
-                std::cout << std::endl << "Response packet payload: " << response_data << std::endl;
+                std::cout << std::endl << "Response packet: " << response_data << std::endl;
 
                 if (response.getIndicator() == DTP_INDICATOR)
                 {
