@@ -80,12 +80,16 @@ void NodeServer::responder() // After responding to the incoming message the res
         {
             // Send the blockchain to the client
             msgpack = Blockchain::serialize(*this->blockchain);
-            payload = std::string(msgpack.dump().c_str(), msgpack.dump().length());
+            payload = msgpack.dump();
 
             //response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, payload);
             DTP::Packet rsp(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, payload);
 
-            std::cout << "Packet Buffer: " << rsp.buffer() << std::endl;
+            std::cout << std::endl << "Payload: " << rsp.getPayload() << std::endl;
+
+            send(new_socket, rsp.getPayload().data(), rsp.getPayload().size(), 0);
+
+            /*std::cout << "Packet Buffer: " << rsp.buffer() << std::endl;
 
             char* toSend1 = new char[rsp.buffer().length()];
 
@@ -101,7 +105,7 @@ void NodeServer::responder() // After responding to the incoming message the res
                 }
                 std::cout << toSend1[i];
                 test.append(&toSend1[i]);
-            }
+            }*/
 
             /*std::cout << std::endl << "Packet Buffer2: " << std::string(toSend) << std::endl;
             std::cout << "Test: " << test << std::endl;
@@ -112,7 +116,7 @@ void NodeServer::responder() // After responding to the incoming message the res
             Blockchain chainTest(response2.getPayload());
             chainTest.printChain();*/
 
-            std::cout << std::endl << "Test: " << test << std::endl;
+            /*std::cout << std::endl << "Test: " << test << std::endl;
 
             const char* toSend = test.c_str();
             const int toSendLen = test.length();
@@ -124,9 +128,9 @@ void NodeServer::responder() // After responding to the incoming message the res
             DTP::Packet response2(toSendBuffer);
 
             Blockchain chainTest(response2.getPayload());
-            chainTest.printChain();
+            chainTest.printChain();*/
 
-            send(new_socket, toSendBuffer.c_str(), toSendBuffer.length(), 0);
+            //send(new_socket, toSendBuffer.c_str(), toSendBuffer.length(), 0);
         }
         else if (this->packet->headers().type == BLOCKCHAIN_DATA_PACKET)
         {
