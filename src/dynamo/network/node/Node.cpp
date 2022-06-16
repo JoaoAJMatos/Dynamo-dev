@@ -374,6 +374,7 @@ int Node::receive_file(int sockfd)
     while(true)
     {
         n = recv(sockfd, buffer, PACKET_SIZE, 0);
+        std::cout << "Received: " << buffer << std::endl;
         if (n <= 0) break;
         fprintf(fp, "%s", buffer);
         bzero(buffer, PACKET_SIZE);
@@ -405,13 +406,17 @@ int Node::syncChains()
 
                     if (res == 0)
                     {
-                        receive_file(client->get_sock());
-                        std::string blockchain_string = fromFileNode();
-                        this->blockchain = new Blockchain(blockchain_string);
-                        if (this->blockchain->chain.empty()) return -1;
-                        this->isChainLinked = true;
-                        logger("Chain synced successfully");
-                        return 0;
+                        res = receive_file(client->get_sock());
+
+                        if (res == 0)
+                        {
+                            std::string blockchain_string = fromFileNode();
+                            this->blockchain = new Blockchain(blockchain_string);
+                            if (this->blockchain->chain.empty()) return -1;
+                            this->isChainLinked = true;
+                            logger("Chain synced successfully");
+                            return 0;
+                        }
                     }
                 }
             }

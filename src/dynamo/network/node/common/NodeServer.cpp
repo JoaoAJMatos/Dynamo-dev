@@ -100,10 +100,6 @@ void NodeServer::responder() // After responding to the incoming message the res
     {
         if (this->packet->headers().type == BLOCKCHAIN_REQUEST_PACKET)
         {
-            // Send the blockchain to the client
-            msgpack = Blockchain::serialize(*this->blockchain);
-            payload = msgpack.dump();
-
             // Send packet informing the File transfer will begin
             response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, std::string(""));
             send(new_socket, response->buffer().c_str(), BUFFER_SIZE, 0);
@@ -145,6 +141,10 @@ void NodeServer::responder() // After responding to the incoming message the res
             if (this->packet->getPayload() == std::string("1"))
             {
                 std::cout << "[INFO] Transfering blockchain" << std::endl;
+                // Send the blockchain to the client
+                msgpack = Blockchain::serialize(*this->blockchain);
+                payload = msgpack.dump();
+
                 // Send the blockchain file
                 ftp_transfer(payload);
             }
@@ -236,32 +236,13 @@ int NodeServer::ftp_transfer(std::string payload)
     fp = fopen("temp.txt", "r");
 
     int res;
-    DTP::Packet* resp;
 
     if (fp != nullptr)
     {
-        int tries = 0;
-        while(true)
-        {
-            res = send_file(fp, new_socket); // Send the file to the client
-            tries++;
-
-            if (res == 0) // If the file was successfully sent, wait for an ACK from the client
-            {
-                recv(new_socket, buffer, BUFFER_SIZE, 0);
-                resp = new DTP::Packet(buffer);
-
-                if ((resp->getIndicator() == DTP_INDICATOR) && (resp->headers().type == ACK)) break;
-                if (tries == 10)
-                {
-                    std::cout << "[WARNING] The server was unable to ensure the file has been received by the client" << std::endl;
-                    return -1;
-                }
-            }
-        }
+        res = send_file(fp, new_socket); // Send the file to the client
     }
 
-    return 0;
+    return res;
 }
 
 void NodeServer::set_working_blockchain(Blockchain* blockchain)
