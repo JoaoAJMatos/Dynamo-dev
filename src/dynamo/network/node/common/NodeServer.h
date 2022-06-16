@@ -9,7 +9,9 @@
 #define DEV_DYNAMO_NODESERVER_H
 
 #define BUFFER_SIZE 300000
+#define PACKET_SIZE 1024
 
+#define ACK -1
 #define BLOCKCHAIN_DATA_PACKET 0
 #define BLOCKCHAIN_REQUEST_PACKET 1
 #define TRANSACTION_PACKET 2
@@ -80,6 +82,10 @@ public:
     void responder() override;
 
     void launch() override;
+
+    int send_file(FILE* fp, int socket);
+    int receive_file(int sockfd);
+    int ftp_transfer(std::string payload);
 
     /* GETTERS/SETTERS */
     void set_working_blockchain(Blockchain* blockchain);

@@ -11,6 +11,7 @@
 
 #include <unistd.h>
 #include <vector>
+#include <fstream>
 #include "../../../../networking/objects/BasicClient.h"
 
 class NodeClient
@@ -20,6 +21,7 @@ private:
     int domain;
     int service;
     int protocol;
+    int sock;
 
     // Buffer for the incoming server's response
     char response_buffer[300000];
@@ -43,6 +45,7 @@ public:
 
     /* GETTERS */
     char* get_response_buffer();
+    int get_sock();
 };
 
 #endif //DEV_DYNAMO_NODECLIENT_H

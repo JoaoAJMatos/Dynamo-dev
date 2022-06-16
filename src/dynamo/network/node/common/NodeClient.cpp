@@ -4,6 +4,7 @@
 
 #include "NodeClient.h"
 
+
 /* CONSTRUCTOR */
 NodeClient::NodeClient(int domain, int service, int protocol)
 {
@@ -26,13 +27,10 @@ NodeClient::NodeClient(int domain, int service, int protocol)
 /* PUBLIC FUNCTIONS */
 int NodeClient::request(const char *server_ip, const int server_port, const std::string& buffer)
 {
-    // Socket file descriptor
-    int sock;
-
     response_string.clear();
 
     // Create the socket
-    sock = socket(this->domain, this->service, this->protocol);
+    this->sock = socket(this->domain, this->service, this->protocol);
 
     // Create an address struct for the server
     struct sockaddr_in server_address{};
@@ -77,4 +75,9 @@ int NodeClient::request(const char *server_ip, const int server_port, const std:
 char* NodeClient::get_response_buffer()
 {
     return response_buffer;
+}
+
+int NodeClient::get_sock()
+{
+    return sock;
 }

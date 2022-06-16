@@ -4,6 +4,29 @@
 
 #include "NodeServer.h"
 
+/* HELPER FUNCTIONS */
+void toFile(std::string content)
+{
+    std::ofstream tempFile;
+    tempFile.open("temp.txt");
+    tempFile << content;
+    tempFile.close();
+}
+
+std::string fromFile()
+{
+    std::string line;
+    std::ifstream myfile("temp.txt");
+    if (myfile.is_open())
+    {
+        while (getline(myfile, line))
+        {
+            myfile.close();
+            return line;
+        }
+    }
+}
+
 /* CONSTRUCTOR */
 NodeServer::NodeServer(int domain, int service, int protocol, int port, unsigned long iface, int bklg,
                        int thread_count) : net::BasicServer(domain, service, protocol, port, iface, bklg)
@@ -64,29 +87,6 @@ void NodeServer::handler() // The handler will attempt to create a DTP packet in
     return;
 }
 
-void toFile(std::string content)
-{
-    std::ofstream tempFile;
-
-    tempFile.open("temp.txt");
-    tempFile << content;
-    tempFile.close();
-}
-
-std::string fromFile()
-{
-    std::string line;
-    std::ifstream myfile("temp.txt");
-    if (myfile.is_open())
-    {
-        while (getline(myfile, line))
-        {
-            myfile.close();
-            return line;
-        }
-    }
-}
-
 void NodeServer::responder() // After responding to the incoming message the responder should set the broadcast flag of the node to true
 {                            // in order for the node to know when to broadcast the message to all the other nodes
 
@@ -104,63 +104,20 @@ void NodeServer::responder() // After responding to the incoming message the res
             msgpack = Blockchain::serialize(*this->blockchain);
             payload = msgpack.dump();
 
-            //response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, payload);
-            DTP::Packet rsp(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, payload);
+            // Send packet informing the File transfer will begin
+            response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, std::string(""));
+            send(new_socket, response->buffer().c_str(), BUFFER_SIZE, 0);
+            
+            // Wait for the client to acknowledge the packet and send an FTP Ready packet
+            recv(new_socket, buffer, BUFFER_SIZE, 0);
+            delete response;
+            response = new DTP::Packet(buffer);
 
-            std::cout << std::endl << "Payload: " << rsp.getPayload() << std::endl;
-
-            toFile(rsp.getPayload());
-            std::string newString = fromFile();
-
-            Blockchain newChain(newString);
-            newChain.printChain();
-
-            std::cout << std::endl << "New String: " << newString << std::endl;
-
-            send(new_socket, rsp.buffer().data(), rsp.buffer().length(), 0);
-
-            /*std::cout << "Packet Buffer: " << rsp.buffer() << std::endl;
-
-            char* toSend1 = new char[rsp.buffer().length()];
-
-            std::string test;
-            std::cout << "Here: ";
-
-            for (int i = 0; i < rsp.buffer().length(); i++)
+            if (response->getIndicator() == DTP_INDICATOR && response->headers().type == FTP_READY)
             {
-                toSend1[i] = rsp.buffer()[i];
-                if (rsp.buffer()[i] == '\0')
-                {
-                    std::cout << "Found null at: " << i << std::endl;
-                }
-                std::cout << toSend1[i];
-                test.append(&toSend1[i]);
-            }*/
-
-            /*std::cout << std::endl << "Packet Buffer2: " << std::string(toSend) << std::endl;
-            std::cout << "Test: " << test << std::endl;
-            std::cout << "Test c_str(): " << test.c_str() << std::endl;
-
-            DTP::Packet response2(std::string(test.c_str()));
-
-            Blockchain chainTest(response2.getPayload());
-            chainTest.printChain();*/
-
-            /*std::cout << std::endl << "Test: " << test << std::endl;
-
-            const char* toSend = test.c_str();
-            const int toSendLen = test.length();
-
-            std::string toSendBuffer = std::string(toSend, toSendLen);
-
-            std::cout << std::endl << "To send buffer: " << toSendBuffer << std::endl;
-
-            DTP::Packet response2(toSendBuffer);
-
-            Blockchain chainTest(response2.getPayload());
-            chainTest.printChain();*/
-
-            //send(new_socket, toSendBuffer.c_str(), toSendBuffer.length(), 0);
+                // Send the blockchain to the client
+                ftp_transfer(payload);
+            }
         }
         else if (this->packet->headers().type == BLOCKCHAIN_DATA_PACKET)
         {
@@ -225,6 +182,83 @@ void NodeServer::launch()
             responder();
         }
     });
+}
+
+int NodeServer::send_file(FILE* fp, int sockfd)
+{
+    char data[PACKET_SIZE] = {0};
+
+    while(fgets(data, PACKET_SIZE, fp) != NULL)
+    {
+        if(send(sockfd, data, sizeof(data), 0) < 0)
+        {
+            std::cout << "[ERROR] (At NodeServer::send_file(2)): Failed to send file" << std::endl;
+            return -1;
+        }
+        bzero(data, PACKET_SIZE);
+    }
+
+    return 0;
+}
+
+int NodeServer::receive_file(int sockfd)
+{
+    int n;
+    FILE* fp;
+    char* filename = "temp.txt";
+    char buffer[PACKET_SIZE];
+
+    fp = fopen(filename, "w");
+    if (fp == nullptr)
+    {
+        std::cout << "[ERROR] (At NodeServer::receive_file(1)): Failed to open file for writing" << std::endl;
+        return -1;
+    }
+
+    while(true)
+    {
+        n = recv(sockfd, buffer, PACKET_SIZE, 0);
+        if (n <= 0) break;
+        fprintf(fp, "%s", buffer);
+        bzero(buffer, PACKET_SIZE);
+    }
+
+    return 0;
+}
+
+int NodeServer::ftp_transfer(std::string payload)
+{
+    toFile(payload); // Write the contents of the serialized blockchain to a temp file
+    FILE* fp;
+    fp = fopen("temp.txt", "r");
+
+    int res;
+    DTP::Packet* resp;
+
+    if (fp != nullptr)
+    {
+        int tries = 0;
+        while(true)
+        {
+            res = send_file(fp, new_socket); // Send the file to the client
+            tries++;
+
+            if (res == 0) // If the file was successfully sent, wait for an ACK from the client
+            {
+                recv(new_socket, buffer, BUFFER_SIZE, 0);
+                resp = new DTP::Packet(buffer);
+
+                if ((resp->getIndicator() == DTP_INDICATOR) && (resp->headers().type == ACK)) break;
+                if (tries == 10)
+                {
+                    std::cout << "[WARNING] The server was unable to ensure the file has been received by the client" << std::endl;
+                    return -1;
+                }
+            }
+        }
+    }
+
+    return 0;
 }
 
 void NodeServer::set_working_blockchain(Blockchain* blockchain)

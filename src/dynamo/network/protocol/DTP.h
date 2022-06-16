@@ -15,6 +15,7 @@
 #define __DTP_H__
 
 #define DTP_INDICATOR 10
+#define FTP_READY 5
 
 #include <iostream>
 

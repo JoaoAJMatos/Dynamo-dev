@@ -4,6 +4,29 @@
 
 #include "Node.h"
 
+/* HELPER FUNCTIONS */
+void toFileNode(std::string content)
+{
+    std::ofstream tempFile;
+    tempFile.open("temp.txt");
+    tempFile << content;
+    tempFile.close();
+}
+
+std::string fromFileNode()
+{
+    std::string line;
+    std::ifstream myfile("temp.txt");
+    if (myfile.is_open())
+    {
+        while (getline(myfile, line))
+        {
+            myfile.close();
+            return line;
+        }
+    }
+}
+
 /* CONSTRUCTOR */
 Node::Node()
 {
@@ -175,7 +198,6 @@ int Node::discover_peers()
             logger("Connection unsuccessful, trying again...");
         }
         
-
         if (result == 0) break;
     }
 
@@ -318,6 +340,48 @@ void Node::getInput()
     }
 }
 
+int Node::send_file(FILE* fp, int sockfd)
+{
+    char data[PACKET_SIZE] = {0};
+
+    while(fgets(data, PACKET_SIZE, fp) != NULL)
+    {
+        if(send(sockfd, data, sizeof(data), 0) < 0)
+        {
+            std::cout << "[ERROR] (At NodeServer::send_file(2)): Failed to send file" << std::endl;
+            return -1;
+        }
+        bzero(data, PACKET_SIZE);
+    }
+
+    return 0;
+}
+
+int Node::receive_file(int sockfd)
+{
+    int n;
+    FILE* fp;
+    char* filename = "temp.txt";
+    char buffer[PACKET_SIZE];
+
+    fp = fopen(filename, "w");
+    if (fp == nullptr)
+    {
+        std::cout << "[ERROR] (At NodeServer::receive_file(1)): Failed to open file for writing" << std::endl;
+        return -1;
+    }
+
+    while(true)
+    {
+        n = recv(sockfd, buffer, PACKET_SIZE, 0);
+        if (n <= 0) break;
+        fprintf(fp, "%s", buffer);
+        bzero(buffer, PACKET_SIZE);
+    }
+
+    return 0;
+}
+
 int Node::syncChains()
 {
     // Keep asking the known nodes for an updated blockchain until one is received
@@ -333,22 +397,20 @@ int Node::syncChains()
             {
                 DTP::Packet response(client->get_response_buffer());
 
-                std::string response_data(response.getPayload().c_str(), response.getPayloadSize());
-
-                std::cout << std::endl << "Response packet payload: " << response_data << std::endl;
-
-                if (response.getIndicator() == DTP_INDICATOR)
+                if (response.getIndicator() == DTP_INDICATOR && response.headers().type == BLOCKCHAIN_DATA_PACKET)
                 {
-                    if (response.headers().type == BLOCKCHAIN_DATA_PACKET)
+                    // Send the FTP ready packet to start the file transfer
+                    DTP::Packet pkt(FTP_READY, this->uuid, node.first, node.second, std::string(""));
+                    res = this->client->request(node.first.c_str(), node.second, pkt.buffer());
+
+                    if (res == 0)
                     {
-                        this->blockchain = new Blockchain(response_data);
-
+                        receive_file(client->get_sock());
+                        std::string blockchain_string = fromFileNode();
+                        this->blockchain = new Blockchain(blockchain_string);
                         if (this->blockchain->chain.empty()) return -1;
-
                         this->isChainLinked = true;
-
                         logger("Chain synced successfully");
-
                         return 0;
                     }
                 }
