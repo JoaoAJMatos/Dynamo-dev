@@ -91,6 +91,9 @@ void NodeServer::responder() // After responding to the incoming message the res
 {                            // in order for the node to know when to broadcast the message to all the other nodes
     std::string payload;
 
+    using namespace msgpack11;
+    MsgPack msgpack;
+
     DTP::Packet* response;
 
     if (this->packet->getIndicator() == DTP_INDICATOR)
@@ -139,7 +142,7 @@ void NodeServer::responder() // After responding to the incoming message the res
             {
                 std::cout << "[INFO] Transfering blockchain" << std::endl;
                 // Send the blockchain to the client
-                std::string serializedChain = Blockchain::toString(this->blockchain);
+                std::string serializedChain = Blockchain::toString(*this->blockchain);
 
                 // Send the blockchain file
                 ftp_transfer(serializedChain);
