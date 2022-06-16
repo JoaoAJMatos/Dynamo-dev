@@ -363,22 +363,30 @@ int Node::receive_file(int sockfd)
     FILE* fp;
     char* filename = "temp.txt";
     char buffer[PACKET_SIZE];
+    int bytesReceived = 0;
 
-    fp = fopen(filename, "w");
+    fp = fopen(filename, "ab");
     if (fp == nullptr)
     {
         std::cout << "[ERROR] (At NodeServer::receive_file(1)): Failed to open file for writing" << std::endl;
         return -1;
     }
 
-    while(true)
+    long double sz = 1;
+
+    while((bytesReceived = read(sockfd, buffer, PACKET_SIZE)) > 0)
     {
-        n = recv(sockfd, buffer, PACKET_SIZE, 0);
-        std::cout << "Received: " << buffer << std::endl;
-        std::cout << "Read bytes: " << n << std::endl;
-        if (n <= 0) break;
-        fprintf(fp, "%s", buffer);
-        bzero(buffer, PACKET_SIZE);
+        sz++;
+        gotoxy(0, 4);
+        printf("Received: %llf Mb", (sz/PACKET_SIZE));
+        fflush(stdout);
+        fwrite(buffer, 1, bytesReceived, fp);
+    }
+
+    if (bytesReceived < 0)
+    {
+        std::cout << "[ERROR] (At NodeServer::receive_file(2)): Failed to read from socket" << std::endl;
+        return -1;
     }
 
     return 0;

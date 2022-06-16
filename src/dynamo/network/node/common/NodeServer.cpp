@@ -180,20 +180,25 @@ void NodeServer::launch()
 
 int NodeServer::send_file(FILE* fp, int sockfd)
 {
-    int n;
-    char data[PACKET_SIZE];
-
-    while(fgets(data, PACKET_SIZE, fp) != NULL)
+    while(1)
     {
-        std::cout << "[INFO] Sending file chunk: " << data << std::endl;
+        char data[PACKET_SIZE] = {0};
+        int nread = fread(data, 1, PACKET_SIZE, fp);
 
-        if(n = send(sockfd, data, sizeof(data), 0) < 0)
+        if(nread > 0)
         {
-            std::cout << "[ERROR] (At NodeServer::send_file(2)): Failed to send file" << std::endl;
-            return -1;
+            send(sockfd, data, nread, 0);
         }
-        std::cout << "Sent " << n << " bytes" << std::endl;
-        bzero(data, PACKET_SIZE);
+        if(nread < PACKET_SIZE)
+        {
+            if(feof(fp)) std::cout << "[INFO] File transfer complete" << std::endl;
+            else
+            {
+                std::cout << "[ERROR] Error reading file" << std::endl;
+                return -1;
+            }
+            break;
+        }
     }
 
     return 0;
@@ -205,20 +210,30 @@ int NodeServer::receive_file(int sockfd)
     FILE* fp;
     char* filename = "temp.txt";
     char buffer[PACKET_SIZE];
+    int bytesReceived = 0;
 
-    fp = fopen(filename, "w");
+    fp = fopen(filename, "ab");
     if (fp == nullptr)
     {
         std::cout << "[ERROR] (At NodeServer::receive_file(1)): Failed to open file for writing" << std::endl;
         return -1;
     }
 
-    while(true)
+    long double sz = 1;
+
+    while((bytesReceived = read(sockfd, buffer, PACKET_SIZE)) > 0)
     {
-        n = recv(sockfd, buffer, PACKET_SIZE, 0);
-        if (n <= 0) break;
-        fprintf(fp, "%s", buffer);
-        bzero(buffer, PACKET_SIZE);
+        sz++;
+        gotoxy(0, 4);
+        printf("Received: %llf Mb", (sz/PACKET_SIZE));
+        fflush(stdout);
+        fwrite(buffer, 1, bytesReceived, fp);
+    }
+
+    if (bytesReceived < 0)
+    {
+        std::cout << "[ERROR] (At NodeServer::receive_file(2)): Failed to read from socket" << std::endl;
+        return -1;
     }
 
     return 0;
@@ -227,8 +242,7 @@ int NodeServer::receive_file(int sockfd)
 int NodeServer::ftp_transfer(std::string payload)
 {
     toFile(payload); // Write the contents of the serialized blockchain to a temp file
-    FILE* fp;
-    fp = fopen("temp.txt", "r");
+    FILE* fp = fopen("temp.txt", "rb");
 
     int res;
 

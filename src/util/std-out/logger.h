@@ -9,5 +9,6 @@
 #include "../../system/time/Time.h"
 
 void logger(const std::string& text);
+void gotoxy(int x, int y);
 
 #endif //DEV_DYNAMO_LOGGER_H
