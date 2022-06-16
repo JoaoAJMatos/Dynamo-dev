@@ -153,14 +153,6 @@ void NodeServer::responder() // After responding to the incoming message the res
             std::cout << "[ERROR] Unknown packet type: " << this->packet->headers().type << std::endl;
         }
 
-        /*char buf[response->buffer().length()];
-
-        strcpy(buf, response->buffer());
-        std::cout << "Buffer sent: " << buf << std::endl;
-
-        int bytes = send(new_socket, buf, 3000000, 0);*/
-
-        //std::cout << "[INFO] Sent " << bytes << " bytes to " << this->nodeIP << ":" << this->nodePort << std::endl;
         close(new_socket);
         return;
     }
@@ -188,21 +180,21 @@ void NodeServer::launch()
 
 int NodeServer::send_file(FILE* fp, int sockfd)
 {
+    int n;
     char data[PACKET_SIZE];
 
     while(fgets(data, PACKET_SIZE, fp) != NULL)
     {
         std::cout << "[INFO] Sending file chunk: " << data << std::endl;
 
-        if(send(sockfd, data, sizeof(data), 0) < 0)
+        if(n = send(sockfd, data, sizeof(data), 0) < 0)
         {
             std::cout << "[ERROR] (At NodeServer::send_file(2)): Failed to send file" << std::endl;
             return -1;
         }
+        std::cout << "Sent " << n << " bytes" << std::endl;
         bzero(data, PACKET_SIZE);
     }
-    std::string line(fromFile(), sizeof(fromFile()));
-    send(sockfd, line.data(), line.length(), 0);
 
     return 0;
 }

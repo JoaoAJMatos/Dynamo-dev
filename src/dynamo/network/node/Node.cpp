@@ -375,6 +375,7 @@ int Node::receive_file(int sockfd)
     {
         n = recv(sockfd, buffer, PACKET_SIZE, 0);
         std::cout << "Received: " << buffer << std::endl;
+        std::cout << "Read bytes: " << n << std::endl;
         if (n <= 0) break;
         fprintf(fp, "%s", buffer);
         bzero(buffer, PACKET_SIZE);
