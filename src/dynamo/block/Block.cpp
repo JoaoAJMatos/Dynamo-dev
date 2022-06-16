@@ -27,37 +27,45 @@ Block::Block(std::time_t timestamp, uint8_t* hash, uint8_t* prev_hash, size_t he
 
 Block::Block(std::string block_packet)
 {
-    using namespace msgpack11;
+    int pos = 0;
+    std::string delimiter = ",";
 
-    // Deserialize the block packet
-    std::string err;
-    MsgPack block = MsgPack::parse(block_packet, err);
+    std::string buffer = block_packet;
 
-    try
+    this->timestamp = (time_t)atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());
+    buffer.erase(0, buffer.find(delimiter) + delimiter.length());
+
+    this->hash = ECDSA::hexToUint8(buffer.substr(pos, buffer.find(delimiter)).c_str());
+    buffer.erase(0, buffer.find(delimiter) + delimiter.length());
+
+    this->prev_hash = ECDSA::hexToUint8(buffer.substr(pos, buffer.find(delimiter)).c_str());
+    buffer.erase(0, buffer.find(delimiter) + delimiter.length());
+
+    this->height = (size_t)atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());
+    buffer.erase(0, buffer.find(delimiter) + delimiter.length());
+
+    this->nonce = (size_t)atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());
+    buffer.erase(0, buffer.find(delimiter) + delimiter.length());
+
+    this->difficulty = atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());
+    buffer.erase(0, buffer.find(delimiter) + delimiter.length());
+
+    std::vector<Transaction> dataArray;
+    std::string transactionString;
+
+    while((transactionString = buffer.substr(pos, buffer.find("|"))) != "")
     {
-        std::cout << "[BLOCK HASH] " << block["hash"].string_value() << std::endl;
-
-        this->timestamp = block["timestamp"].int_value();
-        this->hash = reinterpret_cast<uint8_t*>(const_cast<char*>(block["hash"].string_value().c_str()));               // I know this might look like a mess,
-        this->prev_hash = reinterpret_cast<uint8_t*>(const_cast<char*>(block["prev_hash"].string_value().c_str()));     // but it works
-        this->height = block["height"].int_value();
-        this->nonce = block["nonce"].int_value();
-        this->difficulty = block["difficulty"].int_value();
-
-        std::vector<Transaction> dataArray;
-
-        for (int i = 0; i < block["data"].array_items().size(); i++)
+        buffer.erase(0, buffer.find("|") + delimiter.length());
+        
+        if (transactionString != "-")
         {
-            Transaction transact(block["data"][i].dump());
+            Transaction transact(transactionString);
             dataArray.push_back(transact);
         }
+        else break;
+    }
 
-        this->data = dataArray;
-    }
-    catch(const std::exception& e)
-    {
-        std::cout << "[ERROR] Unable to create a block instance from the incomming packet." << std::endl;
-    }
+    this->data = dataArray;
 }
 
 /* HELPER FUNCTION */
@@ -206,14 +214,9 @@ Block* Block::genesis(const std::string& first_node_wallet_address, int reward)
     return new Block(timestamp, hash, hash, 0, 0, INITIAL_DIFFICULTY, data);
 }
 
-std::string Block::toString(uint8_t* str)
-{
-    return std::string((char *)str);
-}
-
 msgpack11::MsgPack Block::serialize(Block* block)
 {
-    using namespace msgpack11;
+    /*using namespace msgpack11;
 
     MsgPack data;
     MsgPack::array tempData;
@@ -235,7 +238,22 @@ msgpack11::MsgPack Block::serialize(Block* block)
         {"data", data}
     };
 
-    return tempBlock;
+    return tempBlock;*/
+}
+
+std::string Block::toString(Block* block)
+{
+    std::stringstream ss;
+
+    ss << block->getTimestamp() << "," << SHA256::toString(block->getHash()) << "," << SHA256::toString(block->getPrevHash()) << "," << block->getHeight() << "," << block->getNonce() << "," << block->getDifficulty() << ",";
+    for (auto& transaction : block->data)
+    {
+        ss << Transaction::toString(&transaction) << "|";
+    }
+
+    ss << "-"; // Block separator
+
+    return ss.str();
 }
 
 /**

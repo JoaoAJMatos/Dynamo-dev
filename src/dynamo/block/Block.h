@@ -17,6 +17,7 @@
 #include "../../system/time/Time.h"
 #include "../wallet/transaction/Transaction.h"
 #include "../../../libs/msgpack11/msgpack11.hpp"
+#include "../../crypto/EC/ECDSA.h"
 
 class Block
 {
@@ -24,6 +25,8 @@ private:
 
     /* MEMBER VARIABLES */
     std::time_t timestamp;
+    uint8_t hashBuf[64];
+    uint8_t prevHashBuf[64];
     uint8_t* hash;
     uint8_t* prev_hash;
     std::string hashString;
@@ -35,7 +38,7 @@ private:
     SHA256 sha;
     Time t;
 
-    static std::string toString(uint8_t* str);
+    static std::string uint8ToString(uint8_t* str);
 
 public:
     std::vector<Transaction> data; // Array of transactions
@@ -89,6 +92,7 @@ public:
      * @return msgpack11::MsgPack 
      */
     static msgpack11::MsgPack serialize(Block* block);
+    static std::string toString(Block* block);
 
     /* PUBLIC FUNCTIONS */
     /**

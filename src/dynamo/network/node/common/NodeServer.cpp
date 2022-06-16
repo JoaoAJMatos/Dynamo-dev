@@ -89,9 +89,6 @@ void NodeServer::handler() // The handler will attempt to create a DTP packet in
 
 void NodeServer::responder() // After responding to the incoming message the responder should set the broadcast flag of the node to true
 {                            // in order for the node to know when to broadcast the message to all the other nodes
-
-    using namespace msgpack11;
-    MsgPack msgpack;
     std::string payload;
 
     DTP::Packet* response;
@@ -142,11 +139,10 @@ void NodeServer::responder() // After responding to the incoming message the res
             {
                 std::cout << "[INFO] Transfering blockchain" << std::endl;
                 // Send the blockchain to the client
-                msgpack = Blockchain::serialize(*this->blockchain);
-                payload = msgpack.dump();
+                std::string serializedChain = Blockchain::toString(this->blockchain);
 
                 // Send the blockchain file
-                ftp_transfer(payload);
+                ftp_transfer(serializedChain);
             }
         }
         else
@@ -189,10 +185,12 @@ void NodeServer::launch()
 
 int NodeServer::send_file(FILE* fp, int sockfd)
 {
-    char data[PACKET_SIZE] = {0};
+    char data[PACKET_SIZE];
 
     while(fgets(data, PACKET_SIZE, fp) != NULL)
     {
+        std::cout << "[INFO] Sending file chunk: " << data << std::endl;
+
         if(send(sockfd, data, sizeof(data), 0) < 0)
         {
             std::cout << "[ERROR] (At NodeServer::send_file(2)): Failed to send file" << std::endl;
@@ -200,6 +198,8 @@ int NodeServer::send_file(FILE* fp, int sockfd)
         }
         bzero(data, PACKET_SIZE);
     }
+    std::string line(fromFile(), sizeof(fromFile()));
+    send(sockfd, line.data(), line.length(), 0);
 
     return 0;
 }

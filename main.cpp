@@ -193,10 +193,8 @@ int main()
 
     Node n;
     n.start();
-/*
-    std::vector<std::string> params = {"1", "2", "3"};
 
-    std::vector<Transaction> pool;
+    /*std::vector<std::string> params = {"1", "2", "3"};
 
     std::string me = "me";
     std::string you = "you";
@@ -204,11 +202,13 @@ int main()
     ECDSA ec;
 
     Transaction t(&ec ,me, (size_t)10, you, (size_t)20);
+    t.showTransaction();
+    std::string transactionString = Transaction::toString(&t);
 
-    pool.push_back(t);
+    std::cout << transactionString << std::endl;
 
-    int one = 1;
-*/
+    Transaction t2(transactionString);
+    t2.showTransaction();*/
 /*
     std::string msgpack_bytes = msgpack.dump();
     std::cout << msgpack_bytes << std::endl;
@@ -299,28 +299,40 @@ int main()
     sha.update("hey");
     uint8_t* lastHash = sha.digest();
 
-
     char* pubKey = ec.getPublicKeyHex();
     std::string publicKey(pubKey);
-
-    std::cout << publicKey << std::endl;
-
-    Blockchain myBlockchain(1, publicKey);
-
-    myBlockchain.printChain();
 
     std::string recipient = "you";
     std::string sender = "me";
 
     Transaction transaction(nullptr, recipient, (size_t)2, sender, (size_t)10);
+    Transaction transaction2(nullptr, recipient, (size_t)10, sender, (size_t)10);
 
     std::vector<Transaction> transactionArray;
+    std::vector<Transaction> transactionArray2;
 
     transactionArray.push_back(transaction);
+    transactionArray2.push_back(transaction2);
 
     Block myBlock(Time::getTimestamp(), hash, lastHash, 0, 10, 19, transactionArray);
+    Block myBlock2(Time::getTimestamp(), hash, lastHash, 1, 10, 20, transactionArray2);
+    //myBlock.printBlock();
 
-    Block* minedBlock;
+    Blockchain myBlockchain(0, std::string("me"));
+
+    myBlockchain.chain.push_back(&myBlock);
+    myBlockchain.chain.push_back(&myBlock2);
+
+    myBlockchain.printChain();
+
+    std::string chainString = Blockchain::toString(myBlockchain);
+
+    Blockchain newChain(chainString);
+    newChain.printChain();*/
+
+    //newBlock.printBlock();
+
+    /*Block* minedBlock;
     minedBlock = Block::mineBlock(myBlock, transactionArray, 1);
 
     minedBlock->printBlock();*/

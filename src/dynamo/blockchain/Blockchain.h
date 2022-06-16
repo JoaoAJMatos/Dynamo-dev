@@ -60,6 +60,7 @@ public:
     int isValid(Blockchain chain);
 
     static msgpack11::MsgPack serialize(Blockchain chain);
+    static std::string toString(Blockchain chain);
 
     /**
      * @brief Prints the chain to the std out

@@ -8,6 +8,7 @@
 #define NODE_CONFIG_FILE_NAME "node.conf"
 #define DEFAULT_UNIX_NODE_CONFIG_PATH "/etc/dynamo/Node/"
 #define DEFAULT_WINDOWS_NODE_CONFIG_PATH "C:\\dynamo\\Node"
+#define BLOCKCHAIN_DB_PATH "/etc/dynamo/Node/blockchain.db"
 
 #ifdef _WIN32
 #define DEFAULT_CONFIG_PATH DEFAULT_WINDOWS_NODE_CONFIG_PATH

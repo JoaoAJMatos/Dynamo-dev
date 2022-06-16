@@ -141,6 +141,7 @@ public:
     static int validTransaction(Transaction* transaction);
 
     static msgpack11::MsgPack serialize(Transaction* transaction);
+    static std::string toString(Transaction* transaction);
 
     /* GETTERS */
     inputMap getInputMap();

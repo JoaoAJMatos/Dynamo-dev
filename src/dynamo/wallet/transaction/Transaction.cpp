@@ -14,7 +14,7 @@ Transaction::Transaction(ECDSA* keyPair, const std::string& recipient, size_t am
 
 Transaction::Transaction(std::string transaction_packet)
 {
-    using namespace msgpack11;
+    /*using namespace msgpack11;
 
     // Deserialize the transaction packet
     std::string err;
@@ -34,7 +34,40 @@ Transaction::Transaction(std::string transaction_packet)
     catch(const std::exception& e)
     {
         std::cout << "[ERROR] Unable to create a transaction instance from the incomming packet." << std::endl;
-    }
+    }*/
+
+    int pos = 0;
+    std::string delimiter = ";";
+
+    std::string buffer = transaction_packet;
+
+    strcpy(this->id, buffer.substr(pos, buffer.find(delimiter)).c_str());
+    buffer.erase(0, buffer.find(delimiter) + delimiter.length());
+
+    std::string recipient = buffer.substr(pos, buffer.find(delimiter));
+    buffer.erase(0, buffer.find(delimiter) + delimiter.length());
+
+    int amount = atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());
+    buffer.erase(0, buffer.find(delimiter) + delimiter.length());
+
+    std::string sender = buffer.substr(pos, buffer.find(delimiter));
+    buffer.erase(0, buffer.find(delimiter) + delimiter.length());
+
+    int balanceAfterTransaction = atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());
+    buffer.erase(0, buffer.find(delimiter) + delimiter.length());
+
+    this->inMap.timestamp = (time_t)atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());
+    buffer.erase(0, buffer.find(delimiter) + delimiter.length());
+
+    this->inMap.balance = (size_t)atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());
+    buffer.erase(0, buffer.find(delimiter) + delimiter.length());
+
+    this->inMap.address = buffer.substr(pos, buffer.find(delimiter));
+    buffer.erase(0, buffer.find(delimiter) + delimiter.length());
+
+    this->inMap.signature = buffer.substr(pos, buffer.find(delimiter));
+
+    createOutput(recipient, (size_t)amount, sender, (size_t)this->inMap.balance);
 }
 
 /**
@@ -232,6 +265,13 @@ msgpack11::MsgPack Transaction::serialize(Transaction* transaction)
     };
 
     return transaction_pack;
+}
+
+std::string Transaction::toString(Transaction* transaction)
+{
+    std::stringstream ss;
+    ss << transaction->getID() << ";" << transaction->getOutputMap().recipient << ";" << transaction->getOutputMap().amount << ";" << transaction->getOutputMap().sender << ";" << transaction->getOutputMap().balance << ";" << transaction->getInputMap().timestamp << ";" << transaction->getInputMap().balance << ";" << transaction->getInputMap().address << ";" << transaction->getInputMap().signature << ";";
+    return ss.str();
 }
 
 /**

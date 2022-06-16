@@ -8,37 +8,24 @@ Blockchain::Blockchain(int isRoot, const std::string& firstNodeAddress)
 
 Blockchain::Blockchain(std::string blockchain_packet)
 {
-    using namespace msgpack11;
+    int pos = 0;
+    std::string delimiter = "/";
 
-    std::cout << "Blockchain constructor string: " << blockchain_packet << std::endl;
+    std::string buffer = blockchain_packet;
+    std::string blockString;
+    Block* block;
 
-    // Deserialize the blockchain packet
-    std::string err;
-    MsgPack blockchain = MsgPack::parse(blockchain_packet, err);
-
-    std::cout << "Err blockchain constructor: " << err << std::endl;
-    std::cout << "Is object: " << blockchain.is_object() << std::endl;
-
-    std::string addr = "hehe";
-    Blockchain tempChain(0, addr);
-
-    try
+    while ((blockString = buffer.substr(pos, buffer.find("/"))) != "*")
     {
-        std::cout << "Chain array size: " << blockchain["chain"].array_items().size() << std::endl;
+        buffer.erase(0, buffer.find("|-") + delimiter.length() + 2);
 
-        for (int i = 0; i < blockchain["chain"].array_items().size(); i++)
+        if (blockString != "")
         {
-            auto* newBlock = new Block(blockchain["chain"][i].dump());
-            tempChain.chain.push_back(newBlock);
+            block = new Block(blockString);
+            this->chain.push_back(block);
         }
-
-        int res = this->replaceChain(tempChain);
-        std::cout << "Replace chain result: " << res << std::endl;
-    }
-    catch(const std::exception& e)
-    {
-        std::cout << "[ERROR] Unable to create a blockchain instance from the incomming packet." << std::endl;
-    }
+        else break;
+    };
 }
 
 int Blockchain::addBlock(std::vector<Transaction> data, int log)
@@ -95,6 +82,19 @@ msgpack11::MsgPack Blockchain::serialize(Blockchain chain)
     std::cout << "Is array? : " << tempBlockchain["chain"].is_array() << std::endl;
 
     return tempBlockchain;
+}
+
+std::string Blockchain::toString(Blockchain chain)
+{
+    std::stringstream ss;
+    for (auto& block : chain.chain)
+    {
+        ss << Block::toString(block) << "/";
+    }
+
+    ss << "*"; // End of chain
+
+    return ss.str();
 }
 
 void Blockchain::printChain() // Print the whole chain
