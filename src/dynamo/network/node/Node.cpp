@@ -399,8 +399,8 @@ int Node::syncChains()
 
                 if (response.getIndicator() == DTP_INDICATOR && response.headers().type == BLOCKCHAIN_DATA_PACKET)
                 {
-                    // Send the FTP ready packet to start the file transfer
-                    DTP::Packet pkt(FTP_READY, this->uuid, node.first, node.second, std::string(""));
+                    // Send the FTP ready packet to start the file transfer. The payload indicates what file should be sent
+                    DTP::Packet pkt(FTP_READY, this->uuid, node.first, node.second, std::string("1"));
                     res = this->client->request(node.first.c_str(), node.second, pkt.buffer());
 
                     if (res == 0)

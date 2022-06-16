@@ -108,16 +108,8 @@ void NodeServer::responder() // After responding to the incoming message the res
             response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, std::string(""));
             send(new_socket, response->buffer().c_str(), BUFFER_SIZE, 0);
             
-            // Wait for the client to acknowledge the packet and send an FTP Ready packet
-            recv(new_socket, buffer, BUFFER_SIZE, 0);
-            delete response;
-            response = new DTP::Packet(buffer);
-
-            if (response->getIndicator() == DTP_INDICATOR && response->headers().type == FTP_READY)
-            {
-                // Send the blockchain to the client
-                ftp_transfer(payload);
-            }
+            std::cout << "[INFO] Sent DFTP SYN" << std::endl;
+            return;
         }
         else if (this->packet->headers().type == BLOCKCHAIN_DATA_PACKET)
         {
@@ -145,6 +137,17 @@ void NodeServer::responder() // After responding to the incoming message the res
             this->transactionPool->setTransaction(&transaction);
 
             std::cout << "[INFO] New transaction received from " << this->nodeIP << ":" << this->nodePort << " with ID " << transaction.getID() << std::endl;
+        }
+        else if (this->packet->headers().type == FTP_READY)
+        {
+            std::cout << "[INFO] Received DFTP READY" << std::endl;
+
+            if (this->packet->getPayload() == std::string("1"))
+            {
+                std::cout << "[INFO] Transfering blockchain" << std::endl;
+                // Send the blockchain file
+                ftp_transfer(payload);
+            }
         }
         else
         {

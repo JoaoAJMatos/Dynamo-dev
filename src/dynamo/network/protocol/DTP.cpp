@@ -4,8 +4,6 @@
 
 DTP::Packet::Packet(int type, std::string origin, std::string destination, int port, std::string payload)
 {
-    std::cout << "Payload received for DTP constructor: " << payload << std::endl;
-
     this->indicator = DTP_INDICATOR;
     this->packetHeader.type = type;
     this->packetHeader.origin = std::move(origin);
@@ -21,8 +19,6 @@ DTP::Packet::Packet(const std::string& _buffer)
     std::string delimiter = "|";
 
     std::string buffer = _buffer;
-
-    std::cout << "Packet constructor buffer: " << buffer << std::endl;
 
     this->indicator = atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());
     buffer.erase(0, buffer.find(delimiter) + delimiter.length());
