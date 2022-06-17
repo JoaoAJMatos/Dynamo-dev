@@ -366,9 +366,9 @@ void Node::transact()
         std::string transactionString = Transaction::toString(transaction);
         this->transactionPool->setTransaction(transaction);
 
-        std::cout << "Transaction string payload sent: " << transactionString << std::endl;
-
         DTP::Packet packet(TRANSACTION_PACKET, this->uuid, std::string("all"), this->server_port, 0, transactionString);
+
+        std::cout << "Transaction string payload sent: " << packet.getPayload() << std::endl;
 
         broadcast(packet.buffer());
     }

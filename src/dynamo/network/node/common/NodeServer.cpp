@@ -91,9 +91,10 @@ void NodeServer::handler() // The handler will attempt to create a DTP packet in
 
         std::string ip(nodeIP);
         int servPort = this->packet->headers().serverPort;
+        std::string destination = this->packet->headers().destination;
 
         // Check if the incomming node is in the known hosts list, if not, add it
-        if (!isKnownHost(ip, servPort))
+        if (destination != std::string("all") && (!isKnownHost(ip, servPort)))
         {
             known_hosts->push_back({ip, servPort});
         }
