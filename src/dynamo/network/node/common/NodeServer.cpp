@@ -103,8 +103,6 @@ void NodeServer::responder() // After responding to the incoming message the res
             // Send packet informing the File transfer will begin
             response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, std::string(""));
             send(new_socket, response->buffer().c_str(), BUFFER_SIZE, 0);
-            
-            std::cout << "[INFO] Sent DFTP SYN" << std::endl;
             return;
         }
         else if (this->packet->headers().type == BLOCKCHAIN_DATA_PACKET)
@@ -131,16 +129,11 @@ void NodeServer::responder() // After responding to the incoming message the res
             // Accept the new transaction and add it to the transaction pool
             Transaction transaction(this->packet->getPayload());
             this->transactionPool->setTransaction(&transaction);
-
-            std::cout << "[INFO] New transaction received from " << this->nodeIP << ":" << this->nodePort << " with ID " << transaction.getID() << std::endl;
         }
         else if (this->packet->headers().type == FTP_READY)
         {
-            std::cout << "[INFO] Received DFTP READY" << std::endl;
-
             if (this->packet->getPayload() == std::string("1"))
             {
-                std::cout << "[INFO] Transfering blockchain" << std::endl;
                 // Send the blockchain to the client
                 std::string serializedChain = Blockchain::toString(*this->blockchain);
 
@@ -191,12 +184,7 @@ int NodeServer::send_file(FILE* fp, int sockfd)
         }
         if(nread < PACKET_SIZE)
         {
-            if(feof(fp)) std::cout << "[INFO] File transfer complete" << std::endl;
-            else
-            {
-                std::cout << "[ERROR] Error reading file" << std::endl;
-                return -1;
-            }
+            if(!feof(fp)) return -1; // Return error if there was an error reading the file
             break;
         }
     }

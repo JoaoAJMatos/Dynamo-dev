@@ -52,6 +52,8 @@ public:
 
     static msgpack11::MsgPack serialize(TransactionPool* pool);
 
+    void show();
+
     /* GETTERS */
     std::map<char*, Transaction*> getPool();
 };

@@ -22,11 +22,7 @@ Transaction* Wallet::createTransaction(const std::string& recipient, int amount,
     this->balance = Wallet::calculateBalance(chain, this->keyPair->getPublic());
 
     // Check if the balance is sufficient
-    if (amount > this->balance)
-    {
-        std::cout << "[ERR] Transaction - Insufficient funds: " << this->balance << std::endl;
-        return nullptr;
-    }
+    if (amount > this->balance) return nullptr;
 
     return new Transaction(this->keyPair, recipient, amount, this->keyPair->getPublic(), this->balance);
 }

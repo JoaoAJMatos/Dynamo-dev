@@ -304,13 +304,16 @@ void showHelp()
     std::cout << "Dynamo (shell) | Node Interaction Interface" << std::endl;
     std::cout << "Usage: [command] [options]" << std::endl;
     std::cout << "Commands:" << std::endl;
-    std::cout << "  clear\t\tClear the console" << std::endl;
-    std::cout << "  help\t\tShow this help message" << std::endl;
-    std::cout << "  balance\tShow your wallet's balance" << std::endl;
-    std::cout << "  links\t\tList all known nodes" << std::endl;
-    std::cout << "  address\tShows your wallet's address" << std::endl;
-    std::cout << "  show-chain\tPrints the blockchain" << std::endl;
-    std::cout << "  exit\t\tExits the program" << std::endl;
+    std::cout << "  clear\t\t\tClear the console" << std::endl;
+    std::cout << "  help\t\t\tShow this help message" << std::endl;
+    std::cout << "  balance\t\tShow your wallet's balance" << std::endl;
+    std::cout << "  links\t\t\tList all known nodes" << std::endl;
+    std::cout << "  address\t\tShows your wallet's address" << std::endl;
+    std::cout << "  show-chain\t\tPrints the blockchain" << std::endl;
+    std::cout << "  show-block\t\tPrint a block at a given index" << std::endl;
+    std::cout << "  transaction-pool\tShows the transaction pool" << std::endl;
+    std::cout << "  transact\t\tConduct a transaction" << std::endl;
+    std::cout << "  exit\t\t\tExits the program" << std::endl;
     std::cout << std::endl;
 }
 
@@ -319,10 +322,65 @@ void Node::showAddress()
     std::cout << "[+] Your wallet's address is: " << this->wallet->getAddress() << std::endl;
 }
 
+void Node::showBlockAtIndex()
+{
+    std::cout << "[+] Block height: ";
+    int index;
+    std::cin >> index;
+    this->blockchain->printBlock(index);
+}
+
+void Node::transact()
+{
+    int balance = Wallet::calculateBalance(this->blockchain, this->wallet->getAddress());
+
+    std::cout << std::endl << "[+] Conduct Transaction" << std::endl;
+    std::cout << "[+] Your balance: " << balance << " D¥N" << std::endl;
+
+    std::cout << std::endl << "[ADDRESS]: ";
+    std::string address;
+    std::cin >> address;
+
+    std::cout << "[AMOUNT]: ";
+    int amount;
+    std::cin >> amount;
+
+    std::cout << std::endl << "[+] Are you sure you want to send " << amount << " D¥N to " << address << "? (y/n): ";
+    char confirm;
+    std::cin >> confirm;
+
+    if (confirm == 'Y' || confirm == 'y')
+    {   
+        Transaction* transaction = this->wallet->createTransaction(address, amount, this->blockchain);
+
+        if (transaction == nullptr)
+        {
+            std::cout << "[WARNING] Insufficient funds: " << balance << " D¥N" << std::endl << std::endl;
+            return;
+        }
+
+        std::cout << "[+] Sending " << amount << " D¥N to '" << address << "'" << std::endl;
+        std::cout << "[ID]: " << transaction->getID() << std::endl << std::endl;
+
+        std::string transactionString = Transaction::toString(transaction);
+        this->transactionPool->setTransaction(transaction);
+
+        DTP::Packet packet(TRANSACTION_PACKET, this->uuid, std::string("all"), 0, transactionString);
+
+        broadcast(packet.buffer());
+    }
+    else
+    {
+        std::cout << "[+] Transaction cancelled" << std::endl;
+        return;
+    }
+}
+
 void Node::getInput()
 {
     std::string input;
     std::cout << std::endl << Time::getCurrentDateTime() << " | Dynamo v.1" <<std::endl;
+    std::cout << "Type 'help' for a list of all the available commands" << std::endl;
 
     while (true)
     {
@@ -334,6 +392,9 @@ void Node::getInput()
         else if (input == "links") showKnownLinks();
         else if (input == "address") showAddress();
         else if (input == "show-chain") this->blockchain->printChain();
+        else if (input == "show-block") showBlockAtIndex();
+        else if (input == "transaction-pool") this->transactionPool->show();
+        else if (input == "transact") transact();
         else if (input == "exit") exit(0);
         else if (input == "help") showHelp();
         else std::cout << "Unknown command '" << input << "'" << std::endl;
@@ -374,7 +435,7 @@ int Node::receive_file(int sockfd)
 
     long double sz = 1;
 
-    while((bytesReceived = read(sockfd, buffer, PACKET_SIZE)) > 0)
+    while((bytesReceived = recv(sockfd, buffer, PACKET_SIZE, 0)) > 0)
     {
         sz++;
         gotoxy(0, 4);

@@ -10,5 +10,6 @@
 
 void logger(const std::string& text);
 void gotoxy(int x, int y);
+void print_logo();
 
 #endif //DEV_DYNAMO_LOGGER_H

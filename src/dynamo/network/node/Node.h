@@ -89,6 +89,8 @@ private:
     void showBalance();
     void showKnownLinks();
     void showAddress();
+    void showBlockAtIndex();
+    void transact();
 
 public:
     /* CONSTRUCTOR/DESTRUCTOR */

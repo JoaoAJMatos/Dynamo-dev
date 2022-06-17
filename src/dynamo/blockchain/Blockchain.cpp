@@ -107,6 +107,11 @@ void Blockchain::printChain() // Print the whole chain
 
 void Blockchain::printBlock(int index) // Print a specific block
 {
+    if (index > this->chain.size())
+    {
+        std::cout << "[ERROR] The block " << index << " does not exist" << std::endl;
+        return;
+    }
     this->chain[index]->printBlock();
 }
 

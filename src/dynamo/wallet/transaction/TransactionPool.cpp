@@ -103,6 +103,21 @@ msgpack11::MsgPack TransactionPool::serialize(TransactionPool* pool)
     return serialized;
 }
 
+void TransactionPool::show()
+{
+    if (this->pool.size() == 0)
+    {
+        std::cout << "[INFO] The transaction pool is empty." << std::endl;
+        return;
+    }
+
+    for (auto& [transactionID, transaction] : pool)
+    {
+        std::cout << "Transaction ID: " << transactionID << std::endl;
+        transaction->showTransaction();
+    }
+}
+
 std::map<char*, Transaction*> TransactionPool::getPool()
 {
     return pool;
