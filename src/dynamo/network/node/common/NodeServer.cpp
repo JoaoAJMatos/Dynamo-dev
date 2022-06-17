@@ -76,14 +76,6 @@ void NodeServer::accepter()
 
     nodeIP = inet_ntoa(address.sin_addr);
     nodePort = htons(address.sin_port);
- 
-    std::string ip(nodeIP);
-
-    // Check if the incomming node is in the known hosts list, if not, add it
-    if (!isKnownHost(ip, nodePort))
-    {
-        known_hosts->push_back({ip, nodePort});
-    }
 
     // Read the incoming message and store it in the buffer
     recv(new_socket, buffer, BUFFER_SIZE, 0);
@@ -96,6 +88,15 @@ void NodeServer::handler() // The handler will attempt to create a DTP packet in
     try
     {
         this->packet = new DTP::Packet(buffer);
+
+        std::string ip(nodeIP);
+        int servPort = this->packet->headers().serverPort;
+
+        // Check if the incomming node is in the known hosts list, if not, add it
+        if (!isKnownHost(ip, servPort))
+        {
+            known_hosts->push_back({ip, servPort});
+        }
     }
     catch(const std::exception& e)
     {
@@ -119,7 +120,7 @@ void NodeServer::responder() // After responding to the incoming message the res
         if (this->packet->headers().type == BLOCKCHAIN_REQUEST_PACKET)
         {
             // Send packet informing the File transfer will begin
-            response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, std::string(""));
+            response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), this->port, nodePort, std::string(""));
             send(new_socket, response->buffer().c_str(), BUFFER_SIZE, 0);
             return;
         }
@@ -140,7 +141,7 @@ void NodeServer::responder() // After responding to the incoming message the res
             msgpack = TransactionPool::serialize(this->transactionPool);
             payload = msgpack.dump();
 
-            response = new DTP::Packet(TRANSACTION_POOL_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), nodePort, payload);
+            response = new DTP::Packet(TRANSACTION_POOL_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), this->port, nodePort, payload);
         }
         else if (this->packet->headers().type == TRANSACTION_PACKET)
         {

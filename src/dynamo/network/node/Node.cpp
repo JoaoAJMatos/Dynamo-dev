@@ -366,7 +366,7 @@ void Node::transact()
         std::string transactionString = Transaction::toString(transaction);
         this->transactionPool->setTransaction(transaction);
 
-        DTP::Packet packet(TRANSACTION_PACKET, this->uuid, std::string("all"), 0, transactionString);
+        DTP::Packet packet(TRANSACTION_PACKET, this->uuid, std::string("all"), this->server_port, 0, transactionString);
 
         broadcast(packet.buffer());
     }
@@ -459,7 +459,7 @@ int Node::syncChains()
     // Keep asking the known nodes for an updated blockchain until one is received
     for (auto& node : known_hosts)
     {
-        DTP::Packet packet(1, this->uuid, node.first, node.second, std::string(""));
+        DTP::Packet packet(1, this->uuid, node.first, this->server_port, node.second, std::string(""));
 
         int res = this->client->request(node.first.c_str(), node.second, packet.buffer());
 
@@ -472,7 +472,7 @@ int Node::syncChains()
                 if (response.getIndicator() == DTP_INDICATOR && response.headers().type == BLOCKCHAIN_DATA_PACKET)
                 {
                     // Send the FTP ready packet to start the file transfer. The payload indicates what file should be sent
-                    DTP::Packet pkt(FTP_READY, this->uuid, node.first, node.second, std::string("1"));
+                    DTP::Packet pkt(FTP_READY, this->uuid, node.first, this->server_port, node.second, std::string("1"));
                     res = this->client->request(node.first.c_str(), node.second, pkt.buffer());
 
                     if (res == 0)

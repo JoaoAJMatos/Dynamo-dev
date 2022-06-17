@@ -2,7 +2,7 @@
 
 #include <utility>
 
-DTP::Packet::Packet(int type, std::string origin, std::string destination, int port, std::string payload)
+DTP::Packet::Packet(int type, std::string origin, std::string destination, int serverPort, int port, std::string payload)
 {
     this->indicator = DTP_INDICATOR;
     this->packetHeader.type = type;
@@ -30,6 +30,9 @@ DTP::Packet::Packet(const std::string& _buffer)
     buffer.erase(0, buffer.find(delimiter) + delimiter.length());
 
     this->packetHeader.destination = buffer.substr(pos, buffer.find(delimiter));
+    buffer.erase(0, buffer.find(delimiter) + delimiter.length());
+
+    this->packetHeader.serverPort = atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());
     buffer.erase(0, buffer.find(delimiter) + delimiter.length());
 
     this->packetHeader.port = atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());

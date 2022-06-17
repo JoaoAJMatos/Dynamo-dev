@@ -28,6 +28,7 @@ namespace DTP
         int type;                   // The type of the packet (-1 - ACK ,0 - BLOCKCHAIN_DATA, 1 - BLOCKCHAIN_REQUEST, 2 - TRANSACTION, 3 - TRANSACTION_POOL_DATA, 4 - TRANSACTION_POOL_REQUEST)
         std::string origin;         // IP address of the sender
         std::string destination;    // IP address of the receiver
+        int serverPort;             // Port of the sender's server instance
         int port;                   // Port of the receiver
     };
 
@@ -46,7 +47,7 @@ namespace DTP
 
     public:
         /* CONSTRUCTOR */
-        Packet(int type, std::string origin, std::string destination, int port, std::string payload);
+        Packet(int type, std::string origin, std::string destination, int serverPort, int port, std::string payload);
         
         Packet(const std::string& buffer);
 
