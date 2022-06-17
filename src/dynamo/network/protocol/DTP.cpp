@@ -59,8 +59,10 @@ void DTP::Packet::show()
     std::cout << " - Type: " << this->packetHeader.type << std::endl;
     std::cout << " - Origin: " << this->packetHeader.origin << std::endl;
     std::cout << " - Destination: " << this->packetHeader.destination << std::endl;
+    std::cout << " - Server Port: " << this->packetHeader.serverPort << std::endl;
     std::cout << " - Port: " << this->packetHeader.port << std::endl << std::endl;
     std::cout << " =====  BODY  =====" << std::endl;
+    std::cout << " - Payload size: " << this->payloadSize << std::endl;
     std::cout << " - Payload: " << this->payload << std::endl << std::endl;
 }
 

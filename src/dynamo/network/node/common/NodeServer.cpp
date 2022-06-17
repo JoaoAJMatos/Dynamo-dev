@@ -89,6 +89,8 @@ void NodeServer::handler() // The handler will attempt to create a DTP packet in
     {
         this->packet = new DTP::Packet(buffer);
 
+        this->packet->show();
+
         std::string ip(nodeIP);
         int servPort = this->packet->headers().serverPort;
         std::string destination = this->packet->headers().destination;
@@ -291,4 +293,9 @@ void NodeServer::set_known_hosts(std::vector<std::pair<std::string, int>>* known
 {
     this->known_hosts = known_hosts;
     std::cout << "[INFO] Known hosts set" << std::endl;
+}
+
+int NodeServer::getPort()
+{
+    return this->port;
 }

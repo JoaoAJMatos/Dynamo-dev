@@ -95,6 +95,8 @@ public:
     void set_working_transaction_pool(TransactionPool* transactionPool);
     void set_node_uuid(char* uuid);
     void set_known_hosts(std::vector<std::pair<std::string, int>>* known_hosts);
+
+    int getPort();
 };
 
 
