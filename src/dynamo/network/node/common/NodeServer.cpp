@@ -151,10 +151,13 @@ void NodeServer::responder() // After responding to the incoming message the res
             // Accept the new transaction and add it to the transaction pool
             Transaction* transaction = new Transaction(this->packet->getPayload());
 
-            transaction->showTransaction();
-
             this->transactionPool->setTransaction(transaction);
-            this->transactionPool->show();
+
+            if (transaction->getOutputMap().recipient.c_str() == this->address) // Show a notification if the transaction is for this node's wallet
+            {
+                // TODO: Fix this notification thingy
+                this->notification_buffer->assign("Transaction received");
+            }
         }
         else if (this->packet->headers().type == FTP_READY)
         {
@@ -295,4 +298,14 @@ void NodeServer::set_known_hosts(std::vector<std::pair<std::string, int>>* known
 int NodeServer::getPort()
 {
     return this->port;
+}
+
+void NodeServer::set_notification_buffer(std::string* buffer)
+{
+    this->notification_buffer = buffer;
+}
+
+void NodeServer::set_address(char* address)
+{
+    this->address = address;
 }

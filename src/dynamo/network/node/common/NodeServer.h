@@ -66,6 +66,9 @@ private:
     // Buffer to store the request
     char buffer[BUFFER_SIZE];
 
+    std::string* notification_buffer;
+    char* address;
+
     // New socket descriptor for the incoming connections
     unsigned long new_socket;
 
@@ -95,6 +98,8 @@ public:
     void set_working_transaction_pool(TransactionPool* transactionPool);
     void set_node_uuid(char* uuid);
     void set_known_hosts(std::vector<std::pair<std::string, int>>* known_hosts);
+    void set_notification_buffer(std::string* notification_buffer);
+    void set_address(char* address);
 
     int getPort();
 };

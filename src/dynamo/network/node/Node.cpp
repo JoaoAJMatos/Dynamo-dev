@@ -385,6 +385,7 @@ void Node::getInput()
 
     while (true)
     {
+        std::cout << "[NOTIFICATIONS]: " << notification_buffer << std::endl;
         std::cout << "dynamo@" << this->uuid << ":~$ ";
         std::cin >> input;
 
@@ -586,6 +587,8 @@ void Node::start()
         this->server->set_working_transaction_pool(this->transactionPool);
         this->server->set_node_uuid(this->uuid);
         this->server->set_known_hosts(&this->known_hosts);
+        this->server->set_address(this->wallet->getAddress());
+        this->server->set_notification_buffer(&this->notification_buffer);
 
         // Start the node's input loop
         getInput();

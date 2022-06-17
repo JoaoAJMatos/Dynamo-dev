@@ -82,6 +82,8 @@ private:
     int broadcast_flag;           // Flag to indicate if the node is broadcasting
     std::string broadcast_buffer; // The message to broadcast
 
+    std::string notification_buffer;
+
     /* PRIVATE FUNCTIONS */
     // This function will save the server and client configurations
     void save_config() const;

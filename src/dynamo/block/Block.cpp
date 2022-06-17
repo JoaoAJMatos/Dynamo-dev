@@ -81,16 +81,6 @@ Block::Block(std::string block_packet)
  */
 int setTarget(uint8_t* destinationBuffer, int difficulty)
 {
-
-    // Devide the difficulty by the number of octets in the buffer
-    // The integer part of the resulting division will correspond to the amount of octets that should be filled with zeros.
-    // The remainder part indicates how many left bits should be filled with zeros in the next octet (kinda)
-    //
-    // Example:
-    //  - For a difficulty of 13 bits, the resulting division will be 1.625. By filling the first octet of the buffer + 6
-    //    left bits on the second octet we get a total number of 14 bits (8 + 6), which is not what we are looking for. To
-    //    get the actual number of left bits we must subtract 1 to the amount of left bits indicated by the remainder. 
-    
     int div = difficulty / 8; // Get the integer part of the division
     int rem = difficulty % 8; // Get the remainder part
 
