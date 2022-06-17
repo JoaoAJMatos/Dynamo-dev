@@ -126,9 +126,14 @@ void NodeServer::responder() // After responding to the incoming message the res
         }
         else if (this->packet->headers().type == TRANSACTION_PACKET)
         {
+            std::cout << "Received transaction from " << nodeIP << " node" << std::endl;
             // Accept the new transaction and add it to the transaction pool
             Transaction transaction(this->packet->getPayload());
+
+            transaction.showTransaction();
+
             this->transactionPool->setTransaction(&transaction);
+            this->transactionPool->show();
         }
         else if (this->packet->headers().type == FTP_READY)
         {

@@ -210,6 +210,7 @@ int Node::broadcast(const std::string& message)
     // Loop through the list of known hosts and send the message
     for (auto& node : known_hosts)
     {
+        std::cout << "[+] Sending to [" << node.ip << ":" << node.port << "]" << std::endl;
         this->client->request(node.first.data(), node.second, message);
     }
 
