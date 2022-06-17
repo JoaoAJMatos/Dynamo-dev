@@ -585,6 +585,7 @@ void Node::start()
         this->server->set_working_blockchain(this->blockchain);
         this->server->set_working_transaction_pool(this->transactionPool);
         this->server->set_node_uuid(this->uuid);
+        this->server->set_known_hosts(&this->known_hosts);
 
         // Start the node's input loop
         getInput();

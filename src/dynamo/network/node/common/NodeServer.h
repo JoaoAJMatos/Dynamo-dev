@@ -60,6 +60,7 @@ private:
     std::string* broadcast_buffer; 
     Blockchain* blockchain;
     TransactionPool* transactionPool;
+    std::vector<std::pair<std::string, int>>* known_hosts;
     char* uuid;
 
     // Buffer to store the request
@@ -83,6 +84,8 @@ public:
 
     void launch() override;
 
+    int isKnownHost(std::string ip, int port);
+
     int send_file(FILE* fp, int socket);
     int receive_file(int sockfd);
     int ftp_transfer(std::string payload);
@@ -91,6 +94,7 @@ public:
     void set_working_blockchain(Blockchain* blockchain);
     void set_working_transaction_pool(TransactionPool* transactionPool);
     void set_node_uuid(char* uuid);
+    void set_known_hosts(std::vector<std::pair<std::string, int>>* known_hosts);
 };
 
 

@@ -51,6 +51,16 @@ NodeServer::~NodeServer()
 }
 
 /* PUBLIC FUNCTIONS AND FUNCTION OVERRIDES */
+int NodeServer::isKnownHost(std::string ip, int port)
+{
+    for (auto& host : *known_hosts)
+    {
+        if (host.first == ip && host.second == port) return 1;
+    }
+
+    return 0;
+}
+
 void NodeServer::accepter()
 {
     struct sockaddr_in address = get_socket()->get_address();
@@ -66,6 +76,14 @@ void NodeServer::accepter()
 
     nodeIP = inet_ntoa(address.sin_addr);
     nodePort = htons(address.sin_port);
+ 
+    std::string ip(nodeIP);
+
+    // Check if the incomming node is in the known hosts list, if not, add it
+    if (!isKnownHost(ip, nodePort))
+    {
+        known_hosts->push_back({ip, nodePort});
+    }
 
     // Read the incoming message and store it in the buffer
     recv(new_socket, buffer, BUFFER_SIZE, 0);
@@ -263,4 +281,10 @@ void NodeServer::set_node_uuid(char* uuid)
 {
     this->uuid = uuid;
     std::cout << "[INFO] Node UUID set" << std::endl;
+}
+
+void NodeServer::set_known_hosts(std::vector<std::pair<std::string, int>>* known_hosts)
+{
+    this->known_hosts = known_hosts;
+    std::cout << "[INFO] Known hosts set" << std::endl;
 }
