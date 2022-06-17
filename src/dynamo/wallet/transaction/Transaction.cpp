@@ -14,28 +14,6 @@ Transaction::Transaction(ECDSA* keyPair, const std::string& recipient, size_t am
 
 Transaction::Transaction(std::string transaction_packet)
 {
-    /*using namespace msgpack11;
-
-    // Deserialize the transaction packet
-    std::string err;
-    MsgPack transaction = MsgPack::parse(transaction_packet, err);
-
-    // Create a transaction object
-    try
-    {
-        strcpy(this->id, transaction["id"].string_value().c_str());
-        createOutput(transaction["outMap"]["recipient"].string_value(), (size_t)transaction["outMap"]["amount"].int_value(), transaction["outMap"]["sender"].string_value(), (size_t)transaction["inMap"]["balance"].int_value());
-
-        this->inMap.timestamp = transaction["inMap"]["timestamp"].int_value();
-        this->inMap.balance = transaction["inMap"]["balance"].int_value();
-        this->inMap.address = transaction["inMap"]["address"].string_value();
-        this->inMap.signature = transaction["inMap"]["signature"].string_value();
-    }
-    catch(const std::exception& e)
-    {
-        std::cout << "[ERROR] Unable to create a transaction instance from the incomming packet." << std::endl;
-    }*/
-
     int pos = 0;
     std::string delimiter = ";";
 

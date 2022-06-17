@@ -96,7 +96,7 @@ void NodeServer::handler() // The handler will attempt to create a DTP packet in
         std::string destination = this->packet->headers().destination;
 
         // Check if the incomming node is in the known hosts list, if not, add it
-        if (destination != std::string("all") && (!isKnownHost(ip, servPort)))
+        if (destination != std::string("all") && servPort > 0 && (!isKnownHost(ip, servPort)))
         {
             known_hosts->push_back({ip, servPort});
         }
@@ -148,15 +148,12 @@ void NodeServer::responder() // After responding to the incoming message the res
         }
         else if (this->packet->headers().type == TRANSACTION_PACKET)
         {
-            std::cout << "Received transaction from " << nodeIP << " node" << std::endl;
             // Accept the new transaction and add it to the transaction pool
-            Transaction transaction(this->packet->getPayload());
+            Transaction* transaction = new Transaction(this->packet->getPayload());
 
-            std::cout << "Packet payload for transaction: " << this->packet->getPayload() << std::endl;
+            transaction->showTransaction();
 
-            transaction.showTransaction();
-
-            this->transactionPool->setTransaction(&transaction);
+            this->transactionPool->setTransaction(transaction);
             this->transactionPool->show();
         }
         else if (this->packet->headers().type == FTP_READY)
