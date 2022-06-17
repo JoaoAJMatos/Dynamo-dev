@@ -461,6 +461,7 @@ int Node::syncChains()
     // Keep asking the known nodes for an updated blockchain until one is received
     for (auto& node : known_hosts)
     {
+        std::cout << "Node server port: " << this->server->getPort() << std::endl;
         DTP::Packet packet(1, this->uuid, node.first, this->server->getPort(), node.second, std::string(""));
 
         std::cout << "Asking " << node.first << ":" << node.second << " for a blockchain" << std::endl;

@@ -8,6 +8,7 @@ DTP::Packet::Packet(int type, std::string origin, std::string destination, int s
     this->packetHeader.type = type;
     this->packetHeader.origin = std::move(origin);
     this->packetHeader.destination = std::move(destination);
+    this->packetHeader.serverPort = serverPort;
     this->packetHeader.port = port;
     this->payloadSize = payload.length();
     this->payload = payload;
