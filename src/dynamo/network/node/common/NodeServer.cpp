@@ -149,6 +149,8 @@ void NodeServer::responder() // After responding to the incoming message the res
             // Accept the new transaction and add it to the transaction pool
             Transaction transaction(this->packet->getPayload());
 
+            std::cout << "Packet payload for transaction: " << this->packet->getPayload() << std::endl;
+
             transaction.showTransaction();
 
             this->transactionPool->setTransaction(&transaction);
