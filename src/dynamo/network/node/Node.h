@@ -30,6 +30,7 @@
 #include "../../../util/file-handling/config-handling/ConfigParser.h"
 #include "../../../util/file-handling/config-handling/StartupConfManager.h"
 #include "../../blockchain/Blockchain.h"
+#include "../../miner/Miner.h"
 #include "../../wallet/Wallet.h"
 #include "../../wallet/transaction/TransactionPool.h"
 #include "../../wallet/Wallet.h"
@@ -78,6 +79,12 @@ private:
     Wallet* wallet;                   // Wallet instance
     Blockchain* blockchain;           // Blockchain instance
     TransactionPool* transactionPool; // Transaction pool instance
+    Miner* miner;                     // Miner instance
+    std::thread* miner_thread;         // Thread for the miner instance
+
+    bool has_created_miner = false;
+    bool mine;                    // Indicate if the miner should mine or not
+    int mineLog;                  // Indicate if the miner should log or not
 
     int broadcast_flag;           // Flag to indicate if the node is broadcasting
     std::string broadcast_buffer; // The message to broadcast
@@ -93,6 +100,7 @@ private:
     void showAddress();
     void showBlockAtIndex();
     void transact();
+    void minerMenu();
 
 public:
     /* CONSTRUCTOR/DESTRUCTOR */

@@ -276,8 +276,8 @@ int Node::createWallet()
 
 void Node::showBalance()
 {
-    int balance = Wallet::calculateBalance(this->blockchain, this->wallet->getAddress());
-    std::cout << "[+] Your balance: " << balance << " D¥N" << std::endl;
+    float balance = Wallet::calculateBalance(this->blockchain, this->wallet->getAddress());
+    std::cout << "[+] Your balance: " << balance / COIN << " D¥N" << std::endl;
 }
 
 void Node::showKnownLinks()
@@ -314,6 +314,7 @@ void showHelp()
     std::cout << "  show-block\t\tPrint a block at a given index" << std::endl;
     std::cout << "  transaction-pool\tShows the transaction pool" << std::endl;
     std::cout << "  transact\t\tConduct a transaction" << std::endl;
+    std::cout << "  miner\t\t\tOpens the miner menu" << std::endl;
     std::cout << "  exit\t\t\tExits the program" << std::endl;
     std::cout << std::endl;
 }
@@ -336,14 +337,14 @@ void Node::transact()
     int balance = Wallet::calculateBalance(this->blockchain, this->wallet->getAddress());
 
     std::cout << std::endl << "[+] Conduct Transaction" << std::endl;
-    std::cout << "[+] Your balance: " << balance << " D¥N" << std::endl;
+    std::cout << "[+] Your balance: " << balance / COIN << " D¥N" << std::endl;
 
     std::cout << std::endl << "[ADDRESS]: ";
     std::string address;
     std::cin >> address;
 
     std::cout << "[AMOUNT]: ";
-    int amount;
+    float amount;
     std::cin >> amount;
 
     std::cout << std::endl << "[+] Are you sure you want to send " << amount << " D¥N to " << address << "? (y/n): ";
@@ -352,11 +353,11 @@ void Node::transact()
 
     if (confirm == 'Y' || confirm == 'y')
     {   
-        Transaction* transaction = this->wallet->createTransaction(address, amount, this->blockchain);
+        Transaction* transaction = this->wallet->createTransaction(address, amount * COIN, this->blockchain);
 
         if (transaction == nullptr)
         {
-            std::cout << "[WARNING] Insufficient funds: " << balance << " D¥N" << std::endl << std::endl;
+            std::cout << "[WARNING] Insufficient funds: " << balance / COIN << " D¥N" << std::endl << std::endl;
             return;
         }
 
@@ -374,6 +375,69 @@ void Node::transact()
     {
         std::cout << "[+] Transaction cancelled" << std::endl;
         return;
+    }
+}
+
+void Node::minerMenu()
+{
+    system("clear");
+
+    int option;
+    std::string address;
+    Stats* stats;
+
+    std::cout << "[+] MINER" << std::endl;
+    std::cout << "[+] 1. Start mining" << std::endl;
+    std::cout << "[+] 2. Stop mining" << std::endl;
+    std::cout << "[+] 3. Show mining status" << std::endl;
+    std::cout << "[+] 4. Change miner settings" << std::endl;
+    std::cout << "[+] 5. Back" << std::endl << std::endl;
+
+    std::cout << "[OPTION]: ";
+    std::cin >> option;
+
+    switch (option)
+    {
+        case 1:
+            std::cout << std::endl << "[+] Where do you wish to send the reward? (defaults to your wallet's address)" << std::endl;
+            std::cout << "[ADDRESS]: ";
+            std::cin >> address;
+            
+            if (!has_created_miner)
+            {
+                this->miner = new Miner(this->blockchain, this->transactionPool);
+                has_created_miner = true;
+            } 
+
+            this->miner->setRewardAddress(address);
+            mine = true;
+            
+            this->miner->setMine(&mine);
+            this->miner->setLog(&mineLog);
+
+            std::cout << "[+] Mining started" << std::endl;
+
+            miner_thread = new std::thread(&Miner::start, this->miner);
+            miner_thread->detach();
+            break;
+        case 2:
+            std::cout << "[+] Stopping mining" << std::endl;
+            this->mine = false;
+            break;
+        case 3:
+            stats = this->miner->getStats();
+            this->mine == true ? std::cout << "[+] Status: Online" << std::endl : std::cout << "[+] Status: Offline" << std::endl;
+            std::cout << "[+] Blocks mined: " << stats->blocks_mined << std::endl;
+            std::cout << "[+] Rewards earned: " << stats->rewards / COIN << std::endl;
+            this->mineLog = 1;
+            break;
+        case 4:
+            break;
+        case 5:
+            return;
+        default:
+            std::cout << "[+] Invalid option:" << option << std::endl;
+            break;
     }
 }
 
@@ -397,6 +461,7 @@ void Node::getInput()
         else if (input == "show-block") showBlockAtIndex();
         else if (input == "transaction-pool") this->transactionPool->show();
         else if (input == "transact") transact();
+        else if (input == "miner") minerMenu();
         else if (input == "exit") exit(0);
         else if (input == "help") showHelp();
         else std::cout << "Unknown command '" << input << "'" << std::endl;
