@@ -51,6 +51,8 @@ public:
      */
     int isTransactionDataValid(Blockchain chain);
 
+    Block getLastBlock();
+
     /**
      * @brief Validates the chain contents
      * 

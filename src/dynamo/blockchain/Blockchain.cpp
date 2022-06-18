@@ -28,6 +28,11 @@ Blockchain::Blockchain(std::string blockchain_packet)
     };
 }
 
+Block Blockchain::getLastBlock()
+{
+    return *this->chain.back();
+}
+
 int Blockchain::addBlock(std::vector<Transaction> data, int log)
 {
     Block* newBlock = Block::mineBlock(this->chain.back(), data, log);
