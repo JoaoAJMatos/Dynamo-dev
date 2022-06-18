@@ -4,17 +4,35 @@
 #include "../blockchain/Blockchain.h"
 #include "../wallet/transaction/TransactionPool.h"
 
+struct Stats
+{
+    int blocks_mined;// The number of blocks mined
+    int rewards;// The number of rewards received
+};
+
 class Miner
 {
 private:
     Blockchain* working_blockchain;
     TransactionPool* working_transaction_pool;
+    
+    bool* mine;  // Indicate if the miner should mine or not 
+    int* log;    // Indicate if the miner should log or not
+
+    std::string rewardAddress; // The destination address of the reward transaction
+    Stats* stats;              // The stats of the miner
+
+    void updateStats();
 
 public:
     Miner(Blockchain* working_blockchain, TransactionPool* working_transaction_pool);
-    ~Miner();
 
     void start();
+    void setMine(bool* mine);
+    void setRewardAddress(std::string rewardAddress);
+    void setLog(int* log);
+
+    Stats* getStats();
 };
 
 #endif
