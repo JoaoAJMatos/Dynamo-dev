@@ -204,33 +204,6 @@ Block* Block::genesis(const std::string& first_node_wallet_address, int reward)
     return new Block(timestamp, hash, hash, 0, 0, INITIAL_DIFFICULTY, data);
 }
 
-msgpack11::MsgPack Block::serialize(Block* block)
-{
-    /*using namespace msgpack11;
-
-    MsgPack data;
-    MsgPack::array tempData;
-
-    for (auto& transaction : block->data)
-    {
-        tempData.push_back(Transaction::serialize(&transaction));
-    }
-
-    data = tempData;
-
-    MsgPack tempBlock = MsgPack::object {
-        {"timestamp", block->getTimestamp()},
-        {"hash", Block::toString(block->getHash())},
-        {"prev_hash", Block::toString(block->getPrevHash())},
-        {"height", block->getHeight()},
-        {"nonce", block->getNonce()},
-        {"difficulty", block->getDifficulty()},
-        {"data", data}
-    };
-
-    return tempBlock;*/
-}
-
 std::string Block::toString(Block* block)
 {
     std::stringstream ss;

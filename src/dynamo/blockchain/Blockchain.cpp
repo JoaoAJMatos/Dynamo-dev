@@ -65,30 +65,6 @@ int Blockchain::replaceChain(const Blockchain& _chain)
     return 0;
 }
 
-msgpack11::MsgPack Blockchain::serialize(Blockchain chain)
-{
-    using namespace msgpack11;
-
-    MsgPack chainData;
-    MsgPack::array tempChain;
-
-    for (auto& block : chain.chain)
-    {
-        tempChain.push_back(Block::serialize(block));
-    }
-
-    chainData = tempChain;
-
-    MsgPack tempBlockchain = MsgPack::object {
-        {"chain", chainData}
-    };
-
-    std::cout << "Array size: " << tempBlockchain["chain"].array_items().size() << std::endl;
-    std::cout << "Is array? : " << tempBlockchain["chain"].is_array() << std::endl;
-
-    return tempBlockchain;
-}
-
 std::string Blockchain::toString(Blockchain chain)
 {
     std::stringstream ss;

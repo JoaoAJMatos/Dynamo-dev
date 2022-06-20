@@ -91,7 +91,6 @@ public:
      * @param block 
      * @return msgpack11::MsgPack 
      */
-    static msgpack11::MsgPack serialize(Block* block);
     static std::string toString(Block* block);
 
     /* PUBLIC FUNCTIONS */
