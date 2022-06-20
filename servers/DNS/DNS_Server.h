@@ -23,7 +23,7 @@
 #define DIR_SEP WINDOWS_DIR_SEP
 #endif // _WIN32
 
-#define BUFFER_SIZE 30000
+#define BUF_SIZE 30000
 #define CONF_PATH "DDNS_CONF_PATH"
 
 #include <map>
@@ -81,7 +81,7 @@ namespace servers
 
         // Message buffer
         // This buffer will hold the request
-        char buffer[BUFFER_SIZE];
+        char buffer[BUF_SIZE];
 
         // Multi threading and thread pool instance
         int number_of_threads;

@@ -142,11 +142,9 @@ void NodeServer::responder() // After responding to the incoming message the res
         }
         else if (this->packet->headers().type == TRANSACTION_POOL_REQUEST_PACKET)
         {
-            // Send the transaction pool to the client
-            msgpack = TransactionPool::serialize(this->transactionPool);
-            payload = msgpack.dump();
-
+            std::string payload = std::to_string(this->transactionPool->getPool().size());
             response = new DTP::Packet(TRANSACTION_POOL_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), this->port, nodePort, payload);
+            send(new_socket, response->buffer().c_str(), BUFFER_SIZE, 0);
         }
         else if (this->packet->headers().type == TRANSACTION_PACKET)
         {

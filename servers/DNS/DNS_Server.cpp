@@ -216,7 +216,7 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
     // TABLE STRUCTURE:
     // ____________________________
     // | UUID | IP | PORT | LINKS |
-    sql = "CREATE TABLE IF NOT EXISTS hosts(uuid CHAR(36) PRIMARY KEY NOT NULL, ip CHAR(15) NOT NULL, port INTEGER UNSIGNED NOT NULL, links INTEGER UNSIGNED)";
+    this->sql = std::string("CREATE TABLE IF NOT EXISTS hosts(uuid CHAR(36) PRIMARY KEY NOT NULL, ip CHAR(15) NOT NULL, port INTEGER UNSIGNED NOT NULL, links INTEGER UNSIGNED)").data();
 
     res = sqlite3_exec(db, sql, nullptr, nullptr, &zErrMsg);
 
@@ -254,7 +254,7 @@ void servers::DNS_Server::accepter()
     nodeIP = inet_ntoa(address.sin_addr);
 
     // Read the incoming message and store it in the buffer
-    recv(new_socket, buffer, BUFFER_SIZE, 0);
+    recv(new_socket, buffer, BUF_SIZE, 0);
 }
 
 /**
@@ -369,12 +369,4 @@ void servers::DNS_Server::launch()
             responder();
         }
     });
-}
-
-
-/* GETTERS */
-// Returns a dictionary containing all the known hosts
-std::map<std::string, std::string> servers::DNS_Server::get_known_hosts()
-{
-    //return known_hosts;
 }
