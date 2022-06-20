@@ -730,8 +730,9 @@ void Node::start()
                 logger("Unable to fetch the latest transaction pool. Creating a new one...");
                 logger("The changes of incomming transactions will be reflected in the next sync");
                 this->transactionPool = new TransactionPool();
+                isPoolLinked = true;
             }
-        }    
+        }
     }
 
     if (isChainLinked)
@@ -739,12 +740,12 @@ void Node::start()
         logger("Blockchain synced successfully!");
         
         this->server->set_working_blockchain(this->blockchain);
-        this->server->set_working_transaction_pool(this->transactionPool);
         this->server->set_node_uuid(this->uuid);
         this->server->set_known_hosts(&this->known_hosts);
         this->server->set_address(this->wallet->getAddress());
         this->server->set_notification_buffer(&this->notification_buffer);
-
+        this->server->set_working_transaction_pool(this->transactionPool);
+        
         // Start the node's input loop
         getInput();
     }

@@ -167,6 +167,15 @@ void NodeServer::responder() // After responding to the incoming message the res
                 // Send the blockchain file
                 ftp_transfer(serializedChain);
             }
+
+            if (this->packet->getPayload() == std::string("2"))
+            {
+                // Send the blockchain to the client
+                std::string serializedPool = TransactionPool::toString(this->transactionPool);
+
+                // Send the blockchain file
+                ftp_transfer(serializedPool);
+            }
         }
         else
         {
