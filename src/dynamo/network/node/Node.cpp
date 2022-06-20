@@ -37,7 +37,7 @@ Node::Node()
 
     isChainLinked = false;
 
-    std::string full_path = DEFAULT_CONFIG_PATH NODE_CONFIG_FILE_NAME;
+    std::string full_path = DEFAULT_CONFIG_NODE_PATH NODE_CONFIG_FILE_NAME;
 
     // Fetch the configs from the config file
     std::map<std::string, std::string> node_config;
@@ -84,7 +84,7 @@ Node::Node()
 
         /* Create config directories */
         #ifdef _WIN32
-            if(!(std::filesystem::create_directory(DEFAULT_CONFIG_PATH))) exit(-1);
+            if(!(std::filesystem::create_directory(DEFAULT_CONFIG_NODE_PATH))) exit(-1);
         #else
             if(int res = std::system("mkdir -p /etc/dynamo/Node/") < 0) exit(-1);
         #endif
@@ -159,7 +159,7 @@ Node::~Node()
 /* PRIVATE FUNCTIONS */
 void Node::save_config() const
 {
-    std::string full_path = DEFAULT_CONFIG_PATH NODE_CONFIG_FILE_NAME;
+    std::string full_path = DEFAULT_CONFIG_NODE_PATH NODE_CONFIG_FILE_NAME;
 
     std::cout << full_path;
 
@@ -567,6 +567,62 @@ int Node::syncChains()
         else 
         {
             logger("Error while syncing chain");
+        }
+    }
+
+    return -1;
+}
+
+int Node::syncPool()
+{
+    // Keep asking the known nodes for an updated transaction pool until one is received
+    for (auto& node : known_hosts)
+    {
+        DTP::Packet packet(4, this->uuid, node.first, this->server->getPort(), node.second, std::string(""));
+
+        int res = this->client->request(node.first.c_str(), node.second, packet.buffer());
+
+        if (res == 0)
+        {
+            try
+            {
+                DTP::Packet response(client->get_response_buffer());
+
+                if (response.getIndicator() == DTP_INDICATOR && response.headers().type == TRANSACTION_POOL_DATA_PACKET)
+                {
+                    if (response.getPayload() != "0") // Only send the FTP ready packet if the payload indicates a transaction pool size different than 0
+                    {
+                        // Send the FTP ready packet to start the file transfer. The payload indicates what file should be sent
+                        DTP::Packet pkt(FTP_READY, this->uuid, node.first, this->server->getPort(), node.second, std::string("2"));
+                        res = this->client->request(node.first.c_str(), node.second, pkt.buffer());
+
+                        if (res == 0) 
+                        {
+                            res = receive_file(client->get_sock());
+
+                            if (res == 0)
+                            {
+                                std::string transaction_pool_string = fromFileNode();
+                                this->transactionPool = new TransactionPool(transaction_pool_string);
+                                this->isPoolLinked = true;
+                                logger("Pool synced successfully");
+                                return 0;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        this->transactionPool = new TransactionPool();
+                        this->isPoolLinked = true;
+                        logger("Pool synced successfully");
+                        return 0;
+                    }
+                }
+            }
+            catch(const std::exception& e)
+            {
+                logger("Error while parsing transaction pool");
+            }
         }
     }
 

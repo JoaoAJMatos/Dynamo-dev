@@ -14,7 +14,7 @@
 #define DEFAULT_CONFIG_PATH DEFAULT_WINDOWS_NODE_CONFIG_PATH
 #define FULL_STARTUP_PATH FULL_STARTUP_PATH_WINDOWS
 #else
-#define DEFAULT_CONFIG_PATH DEFAULT_UNIX_NODE_CONFIG_PATH
+#define DEFAULT_CONFIG_NODE_PATH DEFAULT_UNIX_NODE_CONFIG_PATH
 #define FULL_STARTUP_PATH FULL_STARTUP_PATH_UNIX
 #endif // _WIN32
 
@@ -61,6 +61,7 @@ private:
     char uuid[38];
 
     bool isChainLinked;
+    bool isPoolLinked;
 
     // Array of all the known hosts
     // This map will store the IP address and port of all the server nodes
@@ -116,6 +117,7 @@ public:
     int broadcast(const std::string& message);
 
     int syncChains();
+    int syncPool();
 
     int createWallet();
 
