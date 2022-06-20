@@ -25,6 +25,8 @@ std::string fromFile()
             return line;
         }
     }
+
+    return "";
 }
 
 /* CONSTRUCTOR */
@@ -225,7 +227,7 @@ int NodeServer::receive_file(int sockfd)
 {
     int n;
     FILE* fp;
-    char* filename = "temp.txt";
+    char filename[] = "temp.txt";
     char buffer[PACKET_SIZE];
     int bytesReceived = 0;
 
