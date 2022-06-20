@@ -6,29 +6,25 @@ TransactionPool::TransactionPool()
 }
 
 TransactionPool::TransactionPool(std::string transaction_pool_data_packet)
-{
-    using namespace msgpack11;
-    pool.clear();
+{ 
+    std::string delimiter = "|";
+    std::string buffer = transaction_pool_data_packet;
+    std::map<char*, Transaction*> tempPool;
+    std::string transactionString;
 
-    // Deserialize the transaction packet
-    std::string err;
-    MsgPack transaction_pool = MsgPack::parse(transaction_pool_data_packet, err);
-
-    try
+    while((transactionString = buffer.substr(0, buffer.find("|"))) != "")
     {
-        MsgPack::array transactions = transaction_pool["pool"].array_items();
+        buffer.erase(0, buffer.find(delimiter) + delimiter.length());
 
-        for (auto& element : transactions)
+        if (transactionString != "-")
         {
-            Transaction* transaction = new Transaction(element.dump());
-            this->pool[transaction->getID()] = transaction;
+            Transaction* transact = new Transaction(transactionString);
+            tempPool[transact->getID()] = transact;
         }
+        else break;
     }
-    catch(const std::exception& e)
-    {
-        std::cout << "[ERROR] Unable to create a transaction-pool instance from the incomming packet." << std::endl;
-    }
-    
+
+    this->pool = tempPool;
 }
 
 void TransactionPool::clear()
@@ -101,6 +97,19 @@ msgpack11::MsgPack TransactionPool::serialize(TransactionPool* pool)
     serialized = MsgPack::object{{"pool", poolArray}};
 
     return serialized;
+}
+
+std::string TransactionPool::toString(TransactionPool* pool)
+{
+    std::stringstream ss;
+    for (auto& [transactionID, transaction] : pool->getPool())
+    {
+        ss << Transaction::toString(transaction) << "|";
+    }
+
+    ss << "-";
+
+    return ss.str();
 }
 
 void TransactionPool::show()

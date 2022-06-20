@@ -51,6 +51,7 @@ public:
     void clearBlockchainTransactions(Blockchain* chain);
 
     static msgpack11::MsgPack serialize(TransactionPool* pool);
+    static std::string toString(TransactionPool* pool);
 
     void show();
 
