@@ -6,6 +6,7 @@
 #define DEV_DYNAMO_HTTP_H
 
 #include <cstring>
+#include <string>
 #include <cstdlib>
 #include <map>
 
@@ -27,7 +28,7 @@ namespace net {
     class HTTP {
     private:
         /* MEMBER VARIABLES */
-        std::map<char*, char*> request_line;
+        std::map<std::string, char*> request_line;
         std::map<char*, char*> header_fields;
         std::map<char*, char*> body;
 
