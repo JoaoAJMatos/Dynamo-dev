@@ -1,4 +1,5 @@
 #include <iostream>
+
 #include <string>
 #include <vector>
 #include <unistd.h>
@@ -286,27 +287,23 @@ int main()
 
     minedBlock->printBlock();
 */
+    /*TransactionPool pool;
+    ECDSA ec;
+    Transaction transact(&ec, std::string("me"), (size_t)10, std::string("you"), (size_t)20);
+
+    pool.setTransaction(&transact);
+
+    pool.show();
+
+    std::string pool2string = TransactionPool::toString(&pool);
+
+    TransactionPool pool2(pool2string);
+    pool2.show();*/
+
     /*uint8_t buffer[32];
 
     setTarget2(buffer, sizeof(buffer), 13);*/
-
-    /*ECDSA ec;
-
-    SHA256 sha;
-    sha.update("123");
-    uint8_t* hash = sha.digest();
-
-    sha.update("hey");
-    uint8_t* lastHash = sha.digest();
-
-    char* pubKey = ec.getPublicKeyHex();
-    std::string publicKey(pubKey);
-
-    std::string recipient = "you";
-    std::string sender = "me";
-
-    Transaction transaction(nullptr, recipient, (size_t)2, sender, (size_t)10);
-    Transaction transaction2(nullptr, recipient, (size_t)10, sender, (size_t)10);
+    /*Transaction transaction2(nullptr, recipient, (size_t)10, sender, (size_t)10);
 
     std::vector<Transaction> transactionArray;
     std::vector<Transaction> transactionArray2;
