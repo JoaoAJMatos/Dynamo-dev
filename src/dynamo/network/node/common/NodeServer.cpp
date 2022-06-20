@@ -91,8 +91,6 @@ void NodeServer::handler() // The handler will attempt to create a DTP packet in
     {
         this->packet = new DTP::Packet(buffer);
 
-        this->packet->show();
-
         std::string ip(nodeIP);
         int servPort = this->packet->headers().serverPort;
         std::string destination = this->packet->headers().destination;

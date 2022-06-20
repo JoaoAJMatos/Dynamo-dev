@@ -688,18 +688,50 @@ void Node::start()
         std::cout << "[+] Linking with " << known_hosts.size() << " nodes..." << std::endl;
 
         logger("Syncing with the latest blockchain...");
+        
+        int tries = 0;
 
         while(!isChainLinked)
         {
+            tries++;
             int result = syncChains();
 
             if (result < 0)
             {
-                logger("Unable to sync with the network");
+                logger("Unable to fetch the latest blockchain");
                 logger("Retrying...");
                 Time::sleep(1000);
             }
+
+            if (tries == 3 && result < 0)
+            {
+                logger("Unable to sync with the network");
+                logger("Exiting");
+                exit(-1);
+            }
         }
+
+        tries = 0;
+
+        while(!isPoolLinked)
+        {
+            tries++;
+            int result = syncPool();
+
+            if (result < 0)
+            {
+                logger("Unable to fetch the latest transaction pool");
+                logger("Retrying...");
+                Time::sleep(1000);
+            }
+
+            if (tries == 3 && result < 0)
+            {
+                logger("Unable to fetch the latest transaction pool. Creating a new one...");
+                logger("The changes of incomming transactions will be reflected in the next sync");
+                this->transactionPool = new TransactionPool();
+            }
+        }    
     }
 
     if (isChainLinked)
