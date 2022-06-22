@@ -139,6 +139,20 @@ void NodeServer::responder() // After responding to the incoming message the res
             {
                 std::cout << "[INFO] Blockchain instance updated to " << nodeIP << " node state" << std::endl;
             }
+
+            // TODO: Implement DFTP for blockchain data
+            
+            /*std::cout << "Updating blockchain" << std::endl;
+
+            receive_file(new_socket, "temp.txt");
+
+            std::string chainString = fromFile();
+            Blockchain new_chain(chainString);
+            
+            if(this->blockchain->replaceChain(new_chain) == 0)
+            {
+                std::cout << "[INFO] Blockchain instance updated to " << nodeIP << " node state" << std::endl;
+            }*/
         }
         else if (this->packet->headers().type == TRANSACTION_POOL_REQUEST_PACKET)
         {

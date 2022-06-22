@@ -50,11 +50,33 @@ void Miner::start()
             this->working_blockchain->addBlock(valid_transactions, *log);
             this->working_transaction_pool->clear();
             updateStats();
+            broadCastChain();
         }
+    }
+}
+
+void Miner::broadCastChain()
+{
+    std::string payload = Blockchain::toString(*this->working_blockchain);
+
+    for (auto& [ip, port] : *this->known_hosts)
+    {
+        DTP::Packet* packet = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, "none", "all", port, port, payload);
+        this->client->request(ip.c_str(), port, packet->buffer());
     }
 }
 
 Stats* Miner::getStats()
 {
     return this->stats;
+}
+
+void Miner::setClient(NodeClient* pclient)
+{
+    this->client = pclient;
+}
+
+void Miner::setKnownHosts(hostMap* pKnown_hosts)
+{
+    this->known_hosts = pKnown_hosts;
 }

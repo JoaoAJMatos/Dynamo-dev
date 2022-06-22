@@ -414,6 +414,8 @@ void Node::minerMenu()
             
             this->miner->setMine(&mine);
             this->miner->setLog(&mineLog);
+            this->miner->setClient(this->client);
+            this->miner->setKnownHosts(&known_hosts);
 
             std::cout << "[+] Mining started" << std::endl;
 

@@ -44,6 +44,8 @@
 #include <filesystem>
 #include <thread>
 
+typedef std::vector<std::pair<std::string, int>> hostMap;
+
 class Node
 {
 private:
@@ -66,10 +68,10 @@ private:
     // Array of all the known hosts
     // This map will store the IP address and port of all the server nodes
     // This map will be filled in after the node syncs its state with the name server
-    std::vector<std::pair<std::string, int>> known_hosts;
+    hostMap known_hosts;
 
     // Map of all the default DDNS servers
-    std::vector<std::pair<std::string, int>> known_DDNS;
+    hostMap known_DDNS;
 
     // Node Server & Client instances
     // These instances will be launched in separate threads

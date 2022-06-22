@@ -11,13 +11,6 @@
 #define BUFFER_SIZE 300000
 #define PACKET_SIZE 1024
 
-#define ACK -1
-#define BLOCKCHAIN_DATA_PACKET 0
-#define BLOCKCHAIN_REQUEST_PACKET 1
-#define TRANSACTION_PACKET 2
-#define TRANSACTION_POOL_DATA_PACKET 3
-#define TRANSACTION_POOL_REQUEST_PACKET 4
-
 #include <unistd.h>
 #include <fstream>
 
