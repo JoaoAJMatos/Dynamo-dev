@@ -30,7 +30,7 @@ Block::Block(std::string block_packet)
     int pos = 0;
     std::string delimiter = ",";
 
-    std::string buffer = block_packet;
+    std::string buffer = std::move(block_packet);
 
     this->timestamp = (time_t)atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());
     buffer.erase(0, buffer.find(delimiter) + delimiter.length());
@@ -53,9 +53,9 @@ Block::Block(std::string block_packet)
     std::vector<Transaction> dataArray;
     std::string transactionString;
 
-    while((transactionString = buffer.substr(pos, buffer.find("|"))) != "")
+    while(!(transactionString = buffer.substr(pos, buffer.find('|'))).empty())
     {
-        buffer.erase(0, buffer.find("|") + delimiter.length());
+        buffer.erase(0, buffer.find('|') + delimiter.length());
         
         if (transactionString != "-")
         {
@@ -103,7 +103,7 @@ int setTarget(uint8_t* destinationBuffer, int difficulty)
  * 
  * @details This function performs the proof of work required to mine a block
  */
-Block* Block::mineBlock(Block* lastBlock, std::vector<Transaction> data, int log)
+Block* Block::mineBlock(Block* lastBlock, const std::vector<Transaction>& data, int log)
 {
     uint8_t* hash;
     std::time_t timestamp;
@@ -199,7 +199,7 @@ Block* Block::genesis(const std::string& first_node_wallet_address, int reward)
 
     // Create transaction data
     std::vector<Transaction> data;
-    data.push_back(Transaction(nullptr, first_node_wallet_address, reward, sender, reward));
+    data.emplace_back(nullptr, first_node_wallet_address, reward, sender, reward);
 
     return new Block(timestamp, hash, hash, 0, 0, INITIAL_DIFFICULTY, data);
 }
@@ -250,7 +250,7 @@ std::vector<Transaction>* Block::getData()
     return &this->data;
 }
 
-size_t Block::getHeight()
+size_t Block::getHeight() const
 {
     return this->height;
 }
@@ -270,12 +270,12 @@ std::time_t Block::getTimestamp() const
     return this->timestamp;
 }
 
-size_t Block::getNonce()
+size_t Block::getNonce() const
 {
     return this->nonce;
 }
 
-int Block::getDifficulty()
+int Block::getDifficulty() const
 {
     return this->difficulty;
 }

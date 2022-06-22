@@ -65,7 +65,7 @@ int Blockchain::replaceChain(const Blockchain& _chain)
     return 0;
 }
 
-std::string Blockchain::toString(Blockchain chain)
+std::string Blockchain::toString(const Blockchain& chain)
 {
     std::stringstream ss;
     for (auto& block : chain.chain)
@@ -111,9 +111,9 @@ int Blockchain::calculateBalanceOfAddress(const std::string& address)
     return outputsTotal; 
 }
 
-int Blockchain::isTransactionDataValid(Blockchain chain)
+int Blockchain::isTransactionDataValid(Blockchain blockchain)
 {
-    for (auto& block : chain.chain)
+    for (auto& block : blockchain.chain)
     {
         int rewardTransactionCount = 0;
         std::map<char*, Transaction> transactions; // This will be used to ensure that there are no duplicate transactions
@@ -147,7 +147,7 @@ int Blockchain::isTransactionDataValid(Blockchain chain)
                     return 0; // Sender's balance is not accurate
                 }
 
-                if (transactions.insert(std::pair<char*, Transaction>(transaction.getID(), transaction)).second == false)
+                if (!transactions.insert(std::pair<char *, Transaction>(transaction.getID(), transaction)).second)
                 {
                     std::cout << "[ERROR] Blockchain Validation Error: On block " << block->getHeight() << " the transaction " << transaction.getID() << " is a duplicate" << std::endl;
                     return 0; // Transaction is a duplicate
@@ -189,7 +189,7 @@ int Blockchain::isValid(Blockchain chain)
 
         if (block->getHash() != hash) return 0;
 
-        if (lastBlock->getDifficulty() - block->getDifficulty() > 1) return 0; // Prevent difficulty jumps
+        if (lastBlock->getDifficulty() - block->getDifficulty() > DIFFICULTY_ADJUSTMENT_INTERVAL) return 0; // Prevent difficulty jumps
     }
 
     return 1;

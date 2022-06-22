@@ -1,5 +1,7 @@
 #include "Miner.h"
 
+#include <utility>
+
 Miner::Miner(Blockchain* working_blockchain, TransactionPool* working_transaction_pool)
 {
     this->working_blockchain = working_blockchain;
@@ -10,19 +12,19 @@ Miner::Miner(Blockchain* working_blockchain, TransactionPool* working_transactio
     this->stats->rewards = 0;
 }
 
-void Miner::setRewardAddress(std::string rewardAddress)
+void Miner::setRewardAddress(std::string rewardAddr)
 {
-    this->rewardAddress = rewardAddress;
+    this->rewardAddress = std::move(rewardAddr);
 }
 
-void Miner::setLog(int* log)
+void Miner::setLog(int* log_flag)
 {
-    this->log = log;
+    this->log = log_flag;
 }
 
-void Miner::setMine(bool* mine)
+void Miner::setMine(bool* mine_flag)
 {
-    this->mine = mine;
+    this->mine = mine_flag;
 }
 
 void Miner::updateStats()
@@ -38,7 +40,7 @@ void Miner::start()
         // Get the valid transactions in the pool
         std::vector<Transaction> valid_transactions = working_transaction_pool->getValidTransactions();
 
-        if(valid_transactions.size() > 0)
+        if(!valid_transactions.empty())
         {
             // Create a reward trasnaction
             Block lastBlock = working_blockchain->getLastBlock();

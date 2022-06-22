@@ -90,18 +90,18 @@ public:
     int isKnownHost(std::string ip, int port);
 
     int send_file(FILE* fp, int socket);
-    int receive_file(int sockfd);
+    int receive_file(int sockfd, char* filename);
     int ftp_transfer(std::string payload);
 
     /* GETTERS/SETTERS */
-    void set_working_blockchain(Blockchain* blockchain);
-    void set_working_transaction_pool(TransactionPool* transactionPool);
-    void set_node_uuid(char* uuid);
-    void set_known_hosts(std::vector<std::pair<std::string, int>>* known_hosts);
-    void set_notification_buffer(std::string* notification_buffer);
-    void set_address(char* address);
+    void set_working_blockchain(Blockchain* chain);
+    void set_working_transaction_pool(TransactionPool* pool);
+    void set_node_uuid(char* node_id);
+    void set_known_hosts(std::vector<std::pair<std::string, int>>* known_hosts_list);
+    void set_notification_buffer(std::string* buf);
+    void set_address(char* addr);
 
-    int getPort();
+    int getPort() const;
 };
 
 

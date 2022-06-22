@@ -24,7 +24,7 @@ public:
      */
     Blockchain(int isRoot, const std::string& firstNodeAddress);
 
-    Blockchain(std::string blockchain_packet); // Build a Blockchain class from an incomming messagepack
+    explicit Blockchain(std::string blockchain_packet); // Build a Blockchain class from an incomming messagepack
 
     /* PUBLIC FUNCTIONS */
     /**
@@ -44,12 +44,12 @@ public:
     int addBlock(std::vector<Transaction> data, int log);
 
     /**
-     * @brief Validates the transactions inside the chain
+     * @brief Validates the transactions inside the blockchain
      * 
-     * @param chain 
+     * @param blockchain
      * @return int 
      */
-    int isTransactionDataValid(Blockchain chain);
+    int isTransactionDataValid(Blockchain blockchain);
 
     Block getLastBlock();
 
@@ -59,9 +59,9 @@ public:
      * @param chain 
      * @return int 
      */
-    int isValid(Blockchain chain);
+    static int isValid(Blockchain chain);
 
-    static std::string toString(Blockchain chain);
+    static std::string toString(const Blockchain& chain);
 
     /**
      * @brief Prints the chain to the std out

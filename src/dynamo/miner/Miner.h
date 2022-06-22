@@ -28,9 +28,9 @@ public:
     Miner(Blockchain* working_blockchain, TransactionPool* working_transaction_pool);
 
     void start();
-    void setMine(bool* mine);
-    void setRewardAddress(std::string rewardAddress);
-    void setLog(int* log);
+    void setMine(bool* mine_flag);
+    void setRewardAddress(std::string rewardAddr);
+    void setLog(int* log_flag);
 
     Stats* getStats();
 };

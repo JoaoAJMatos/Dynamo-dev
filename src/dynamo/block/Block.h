@@ -56,7 +56,7 @@ public:
      */
     Block(std::time_t timestamp, uint8_t* hash, uint8_t* prev_hash, size_t height, size_t nonce, int difficulty, std::vector<Transaction> data);
     
-    Block(std::string block_packet);
+    explicit Block(std::string block_packet);
 
     /* STATIC FUNCTIONS */
     /**
@@ -67,7 +67,7 @@ public:
      * 
      * @return Block* 
      */
-    static Block* mineBlock(Block* lastBlock, std::vector<Transaction> data, int log);
+    static Block* mineBlock(Block* lastBlock, const std::vector<Transaction>& data, int log);
 
     /**
      * @brief Adjusts the block mining difficulty in order to keep the mining rate between the defined boundries
@@ -101,12 +101,12 @@ public:
     void printBlock();
 
     /* GETTERS */
-    std::time_t getTimestamp() const;
+    [[nodiscard]] std::time_t getTimestamp() const;
     uint8_t* getHash();
     uint8_t* getPrevHash();
-    size_t getHeight();
-    size_t getNonce();
-    int getDifficulty();
+    [[nodiscard]] size_t getHeight() const;
+    [[nodiscard]] size_t getNonce() const;
+    [[nodiscard]] int getDifficulty() const;
     std::vector<Transaction>* getData();
 };
 

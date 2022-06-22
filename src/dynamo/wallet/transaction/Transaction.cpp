@@ -122,7 +122,7 @@ int Transaction::validTransaction(Transaction* transaction)
     std::cout << "Sender: " << transaction->inMap.address << std::endl;
     std::cout << "strcmp out: " << strcmp(transaction->inMap.address.c_str(), "Genesis") << std::endl;
 
-    // Check if the transaction is comming from the Genesis block or is a reward transaction
+    // Check if the transaction is coming from the Genesis block or is a reward transaction
     if ((strcmp(transaction->inMap.address.c_str(), "Genesis") == 0) || (strcmp(transaction->inMap.address.c_str(), "dynamo-consensus-node-reward") == 0))
     {
         // Check if the balance is sufficient
@@ -144,7 +144,7 @@ int Transaction::validTransaction(Transaction* transaction)
  * 
  * @return std::string 
  */
-std::string Transaction::getTransactionDataBuffer()
+std::string Transaction::getTransactionDataBuffer() const
 {
     // Create the string buffer with the output map data
     std::string buffer = this->outMap.recipient 
@@ -219,7 +219,7 @@ Transaction Transaction::rewardTransaction(size_t blockHeight, const std::string
 {
     int reward = getBlockSubsidy(blockHeight);
 
-    return Transaction(nullptr, recipient, reward, "dynamo-consensus-node-reward", reward);
+    return Transaction{nullptr, recipient, static_cast<size_t>(reward), "dynamo-consensus-node-reward", static_cast<size_t>(reward)};
 }
 
 msgpack11::MsgPack Transaction::serialize(Transaction* transaction)

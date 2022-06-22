@@ -15,7 +15,7 @@ private:
 
 public:
     TransactionPool();
-    TransactionPool(std::string transaction_pool_data_packet); // Build a transaction pool object from an incoming DTP packet
+    explicit TransactionPool(std::string transaction_pool_data_packet); // Build a transaction pool object from an incoming DTP packet
 
     /**
      * @brief Clear the transaction pool
@@ -26,12 +26,12 @@ public:
     int setTransaction(Transaction* transaction);
 
     /**
-     * @brief Set this transaction pool to an incomming one
+     * @brief Set this transaction transactionPool to an incomming one
      * 
-     * @param pool 
+     * @param transactionPool
      * @return int 
      */
-    int set(std::map<char*, Transaction*> pool);
+    int set(std::map<char*, Transaction*> transactionPool);
 
     /**
      * @brief Checks if there's a transaction with the same sender

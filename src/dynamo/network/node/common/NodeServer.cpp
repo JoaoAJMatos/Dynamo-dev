@@ -4,6 +4,8 @@
 
 #include "NodeServer.h"
 
+#include <utility>
+
 /* HELPER FUNCTIONS */
 void toFile(std::string content)
 {
@@ -140,8 +142,11 @@ void NodeServer::responder() // After responding to the incoming message the res
         }
         else if (this->packet->headers().type == TRANSACTION_POOL_REQUEST_PACKET)
         {
+            std::cout << "Client requesting pool" << std::endl;
             std::string payload = std::to_string(this->transactionPool->getPool().size());
             response = new DTP::Packet(TRANSACTION_POOL_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), this->port, nodePort, payload);
+            std::cout << "Packet: " << std::endl;
+            response->show();
             send(new_socket, response->buffer().c_str(), BUFFER_SIZE, 0);
         }
         else if (this->packet->headers().type == TRANSACTION_PACKET)
@@ -170,10 +175,9 @@ void NodeServer::responder() // After responding to the incoming message the res
 
             if (this->packet->getPayload() == std::string("2"))
             {
-                // Send the blockchain to the client
                 std::string serializedPool = TransactionPool::toString(this->transactionPool);
 
-                // Send the blockchain file
+                // Send the transaction-pool file
                 ftp_transfer(serializedPool);
             }
         }
@@ -228,12 +232,12 @@ int NodeServer::send_file(FILE* fp, int sockfd)
     return 0;
 }
 
-int NodeServer::receive_file(int sockfd)
+int NodeServer::receive_file(int sockfd, char* name)
 {
     int n;
     FILE* fp;
-    char filename[] = "temp.txt";
-    char buffer[PACKET_SIZE];
+    char* filename = filename;
+    char buf[PACKET_SIZE];
     int bytesReceived = 0;
 
     fp = fopen(filename, "ab");
@@ -245,13 +249,13 @@ int NodeServer::receive_file(int sockfd)
 
     long double sz = 1;
 
-    while((bytesReceived = read(sockfd, buffer, PACKET_SIZE)) > 0)
+    while((bytesReceived = read(sockfd, buf, PACKET_SIZE)) > 0)
     {
         sz++;
         gotoxy(0, 4);
-        printf("Received: %llf Mb", (sz/PACKET_SIZE));
+        printf("Received: %Lf Mb", (sz/PACKET_SIZE));
         fflush(stdout);
-        fwrite(buffer, 1, bytesReceived, fp);
+        fwrite(buf, 1, bytesReceived, fp);
     }
 
     if (bytesReceived < 0)
@@ -265,7 +269,7 @@ int NodeServer::receive_file(int sockfd)
 
 int NodeServer::ftp_transfer(std::string payload)
 {
-    toFile(payload); // Write the contents of the serialized blockchain to a temp file
+    toFile(std::move(payload)); // Write the contents of the serialized blockchain to a temp file
     FILE* fp = fopen("temp.txt", "rb");
 
     int res;
@@ -278,41 +282,41 @@ int NodeServer::ftp_transfer(std::string payload)
     return res;
 }
 
-void NodeServer::set_working_blockchain(Blockchain* blockchain)
+void NodeServer::set_working_blockchain(Blockchain* chain)
 {
-    this->blockchain = blockchain;
+    this->blockchain = chain;
     std::cout << "[INFO] Working Blockchain instance set" << std::endl;
 }
 
-void NodeServer::set_working_transaction_pool(TransactionPool* transactionPool)
+void NodeServer::set_working_transaction_pool(TransactionPool* pool)
 {
-    this->transactionPool = transactionPool;
+    this->transactionPool = pool;
     std::cout << "[INFO] Working Transaction Pool instance set" << std::endl;
 }
 
-void NodeServer::set_node_uuid(char* uuid)
+void NodeServer::set_node_uuid(char* node_id)
 {
-    this->uuid = uuid;
+    this->uuid = node_id;
     std::cout << "[INFO] Node UUID set" << std::endl;
 }
 
-void NodeServer::set_known_hosts(std::vector<std::pair<std::string, int>>* known_hosts)
+void NodeServer::set_known_hosts(std::vector<std::pair<std::string, int>>* known_hosts_list)
 {
-    this->known_hosts = known_hosts;
+    this->known_hosts = known_hosts_list;
     std::cout << "[INFO] Known hosts set" << std::endl;
 }
 
-int NodeServer::getPort()
+int NodeServer::getPort() const
 {
     return this->port;
 }
 
-void NodeServer::set_notification_buffer(std::string* buffer)
+void NodeServer::set_notification_buffer(std::string* buf)
 {
-    this->notification_buffer = buffer;
+    this->notification_buffer = buf;
 }
 
-void NodeServer::set_address(char* address)
+void NodeServer::set_address(char* addr)
 {
-    this->address = address;
+    this->address = addr;
 }

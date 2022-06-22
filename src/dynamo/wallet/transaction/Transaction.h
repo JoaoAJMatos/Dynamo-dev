@@ -94,7 +94,7 @@ public:
     Transaction(ECDSA* keyPair, const std::string& recipient, size_t amount, const std::string& sender, size_t balanceBeforeTransaction);
     
     // A transaction can also be build from an incoming serialized msgpack object 
-    Transaction(std::string transaction_packet);
+    explicit Transaction(std::string transaction_packet);
 
     /* PUBLIC FUNCTIONS */
     /**
@@ -109,7 +109,7 @@ public:
      * 
      * @return std::string 
      */
-    std::string getTransactionDataBuffer();
+    std::string getTransactionDataBuffer() const;
 
     /**
      * @brief Prints the transaction data into the standard-out 

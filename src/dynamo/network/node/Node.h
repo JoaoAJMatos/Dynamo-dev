@@ -122,7 +122,7 @@ public:
     int createWallet();
 
     int send_file(FILE* fp, int socket);
-    int receive_file(int sockfd);
+    int receive_file(int sockfd, char* filename);
 
     /**
      * @brief This function is responsible for taking the input from the user and processing it

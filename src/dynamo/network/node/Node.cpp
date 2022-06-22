@@ -145,8 +145,6 @@ Node::Node()
     // Set broadcast flag to 0 and clear the broadcast buffer
     broadcast_flag = 0;
     broadcast_buffer.clear();
-
-    this->transactionPool = new TransactionPool();
 }
 
 /* DESTRUCTOR */
@@ -487,11 +485,11 @@ int Node::send_file(FILE* fp, int sockfd)
     return 0;
 }
 
-int Node::receive_file(int sockfd)
+int Node::receive_file(int sockfd, char* name)
 {
     int n;
     FILE* fp;
-    char filename[] = "temp.txt";
+    char* filename = name;
     char buffer[PACKET_SIZE];
     int bytesReceived = 0;
 
@@ -545,7 +543,7 @@ int Node::syncChains()
 
                     if (res == 0)
                     {
-                        res = receive_file(client->get_sock());
+                        res = receive_file(client->get_sock(), "temp.txt");
 
                         if (res == 0)
                         {
@@ -578,7 +576,7 @@ int Node::syncPool()
     // Keep asking the known nodes for an updated transaction pool until one is received
     for (auto& node : known_hosts)
     {
-        DTP::Packet packet(4, this->uuid, node.first, this->server->getPort(), node.second, std::string(""));
+        DTP::Packet packet(TRANSACTION_POOL_REQUEST_PACKET, this->uuid, node.first, this->server->getPort(), node.second, std::string(""));
 
         int res = this->client->request(node.first.c_str(), node.second, packet.buffer());
 
@@ -598,20 +596,21 @@ int Node::syncPool()
 
                         if (res == 0) 
                         {
-                            res = receive_file(client->get_sock());
+                            res = receive_file(client->get_sock(), "temp.txt");
 
                             if (res == 0)
                             {
                                 std::string transaction_pool_string = fromFileNode();
                                 this->transactionPool = new TransactionPool(transaction_pool_string);
                                 this->isPoolLinked = true;
-                                logger("Pool synced successfully");
+                                logger("Pool synced successfully with incoming Node");
                                 return 0;
                             }
                         }
                     }
                     else
                     {
+                        logger("Incoming pool is empty. Initializing a new one.");
                         this->transactionPool = new TransactionPool();
                         this->isPoolLinked = true;
                         logger("Pool synced successfully");
@@ -623,6 +622,10 @@ int Node::syncPool()
             {
                 logger("Error while parsing transaction pool");
             }
+        }
+        else
+        {
+            logger("[ERROR] On Node, SyncPool(): Request() exitted with errors");
         }
     }
 
@@ -668,6 +671,8 @@ void Node::start()
         logger("Initializing the blockchain...");
 
         this->blockchain = new Blockchain(1, this->wallet->getAddress());
+        this->transactionPool = new TransactionPool();
+        isPoolLinked = true;
         isChainLinked = true;
     }
     else // Else: Loop through the string and parse the request
@@ -745,7 +750,7 @@ void Node::start()
         this->server->set_address(this->wallet->getAddress());
         this->server->set_notification_buffer(&this->notification_buffer);
         this->server->set_working_transaction_pool(this->transactionPool);
-        
+
         // Start the node's input loop
         getInput();
     }

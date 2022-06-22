@@ -49,7 +49,7 @@ namespace DTP
         /* CONSTRUCTOR */
         Packet(int type, std::string origin, std::string destination, int serverPort, int port, std::string payload);
         
-        Packet(const std::string& buffer);
+        explicit Packet(const std::string& buffer);
 
         /* PUBLIC FUNCTIONS */
         /**
@@ -68,10 +68,10 @@ namespace DTP
         /* GETTERS */
         header headers();
 
-        int getIndicator();
+        int getIndicator() const;
 
         std::string getPayload();
-        int getPayloadSize();
+        int getPayloadSize() const;
     };
 }
 

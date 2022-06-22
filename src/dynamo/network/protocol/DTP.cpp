@@ -77,12 +77,12 @@ std::string DTP::Packet::getPayload()
     return this->payload;
 }
 
-int DTP::Packet::getIndicator()
+int DTP::Packet::getIndicator() const
 {
     return this->indicator;
 }
 
-int DTP::Packet::getPayloadSize()
+int DTP::Packet::getPayloadSize() const
 {
     return this->payloadSize;
 }

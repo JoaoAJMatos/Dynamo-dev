@@ -45,7 +45,7 @@ public:
 
     /* GETTERS */
     char* get_response_buffer();
-    int get_sock();
+    [[nodiscard]] int get_sock() const;
 };
 
 #endif //DEV_DYNAMO_NODECLIENT_H

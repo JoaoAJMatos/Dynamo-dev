@@ -1,5 +1,7 @@
 #include "TransactionPool.h"
 
+#include <utility>
+
 TransactionPool::TransactionPool()
 {
     pool.clear();
@@ -8,17 +10,18 @@ TransactionPool::TransactionPool()
 TransactionPool::TransactionPool(std::string transaction_pool_data_packet)
 { 
     std::string delimiter = "|";
-    std::string buffer = transaction_pool_data_packet;
+    std::string buffer = std::move(transaction_pool_data_packet);
     std::map<char*, Transaction*> tempPool;
     std::string transactionString;
 
-    while((transactionString = buffer.substr(0, buffer.find("|"))) != "")
+    while(!(transactionString = buffer.substr(0, buffer.find('|'))).empty())
     {
         buffer.erase(0, buffer.find(delimiter) + delimiter.length());
 
         if (transactionString != "-")
         {
-            Transaction* transact = new Transaction(transactionString);
+            std::cout << "[INFO] Transaction string: " << transactionString << std::endl << std::endl;
+            auto* transact = new Transaction(transactionString);
             tempPool[transact->getID()] = transact;
         }
         else break;
@@ -38,9 +41,9 @@ int TransactionPool::setTransaction(Transaction* transaction)
     return 0;
 }
 
-int TransactionPool::set(std::map<char*, Transaction*> pool)
+int TransactionPool::set(std::map<char*, Transaction*> transactionPool)
 {
-    this->pool = pool;
+    this->pool = std::move(transactionPool);
     return 0;
 }
 
@@ -114,7 +117,7 @@ std::string TransactionPool::toString(TransactionPool* pool)
 
 void TransactionPool::show()
 {
-    if (this->pool.size() == 0)
+    if (this->pool.empty())
     {
         std::cout << "[INFO] The transaction pool is empty." << std::endl;
         return;

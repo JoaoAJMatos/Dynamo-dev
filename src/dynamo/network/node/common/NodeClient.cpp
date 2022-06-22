@@ -77,7 +77,7 @@ char* NodeClient::get_response_buffer()
     return response_buffer;
 }
 
-int NodeClient::get_sock()
+int NodeClient::get_sock() const
 {
     return sock;
 }
