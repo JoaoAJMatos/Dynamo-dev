@@ -488,11 +488,11 @@ int Node::send_file(FILE* fp, int sockfd)
     return 0;
 }
 
-int Node::receive_file(int sockfd, char* name)
+int Node::receive_file(int sockfd)
 {
     int n;
     FILE* fp;
-    char* filename = name;
+    char filename[] = "temp.txt";
     char buffer[PACKET_SIZE];
     int bytesReceived = 0;
 
@@ -540,24 +540,13 @@ int Node::syncChains()
 
                 if (response.getIndicator() == DTP_INDICATOR && response.headers().type == BLOCKCHAIN_DATA_PACKET)
                 {
-                    std::cout << "Received blockchain data packet" << std::endl;
-
-                    response.show();
-                    this->blockchain = new Blockchain(response.getPayload());
-                    this->blockchain->printChain();
-                    if (this->blockchain->chain.empty()) return -1;
-                    this->isChainLinked = true;
-                    logger("Chain synced successfully");
-                    return 0;
-
-
                     // Send the FTP ready packet to start the file transfer. The payload indicates what file should be sent
                     DTP::Packet pkt(FTP_READY, this->uuid, node.first, this->server->getPort(), node.second, std::string("1"));
                     res = this->client->request(node.first.c_str(), node.second, pkt.buffer());
 
                     if (res == 0)
                     {
-                        res = receive_file(client->get_sock(), "temp.txt");
+                        res = receive_file(client->get_sock());
 
                         if (res == 0)
                         {
@@ -611,7 +600,7 @@ int Node::syncPool()
 
                         if (res == 0) 
                         {
-                            res = receive_file(client->get_sock(), "temp.txt");
+                            res = receive_file(client->get_sock());
 
                             if (res == 0)
                             {

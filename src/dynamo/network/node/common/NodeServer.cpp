@@ -125,8 +125,7 @@ void NodeServer::responder() // After responding to the incoming message the res
         if (this->packet->headers().type == BLOCKCHAIN_REQUEST_PACKET)
         {
             // Send packet informing the File transfer will begin
-            std::string payload = Blockchain::toString(*this->blockchain);
-            response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), this->port, nodePort, payload);
+            response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), this->port, nodePort, std::string(""));
             send(new_socket, response->buffer().c_str(), BUFFER_SIZE, 0);
         }
         else if (this->packet->headers().type == BLOCKCHAIN_DATA_PACKET)

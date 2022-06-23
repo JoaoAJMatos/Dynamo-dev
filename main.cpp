@@ -81,6 +81,15 @@ int main()
     Node n;
     n.start();
 
+    /*Blockchain chain2(1, std::string("hehe"));
+
+    std::string str = Blockchain::toString(chain2);
+    std::cout << str << std::endl;
+
+    Blockchain chain(str);
+
+    chain.printChain();*/
+
     /*std::vector<std::string> params = {"1", "2", "3"};
 
     std::string me = "me";

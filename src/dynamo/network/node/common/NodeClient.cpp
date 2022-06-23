@@ -49,7 +49,7 @@ int NodeClient::request(const char *server_ip, const int server_port, const std:
         int bytes = send(sock, buffer.data(), buffer.size(), 0);
         int res = 1;
 
-        res = recv(sock, response_buffer, 300000, 0);
+        res = recv(sock, response_buffer, 3000000, 0);
 
         if (res < 0)
         {

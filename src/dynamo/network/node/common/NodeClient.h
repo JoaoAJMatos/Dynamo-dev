@@ -24,7 +24,7 @@ private:
     int sock;
 
     // Buffer for the incoming server's response
-    char response_buffer[300000];
+    char response_buffer[3000000];
     std::string response_string;
 
     // Variables regarding the connection with the server
