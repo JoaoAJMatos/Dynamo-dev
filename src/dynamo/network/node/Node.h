@@ -91,6 +91,7 @@ private:
 
     int broadcast_flag;           // Flag to indicate if the node is broadcasting
     std::string broadcast_buffer; // The message to broadcast
+    int sendBlock_flag = 0;       // Flag to indicate if the node is sending a block
 
     std::string notification_buffer;
 
@@ -137,6 +138,8 @@ public:
      * 
      */
     void start();
+
+    void broadCastHandler();
 };
 
 

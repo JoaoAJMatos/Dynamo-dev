@@ -119,9 +119,6 @@ int Transaction::validTransaction(Transaction* transaction)
 {
     ECDSA keyPair;
 
-    std::cout << "Sender: " << transaction->inMap.address << std::endl;
-    std::cout << "strcmp out: " << strcmp(transaction->inMap.address.c_str(), "Genesis") << std::endl;
-
     // Check if the transaction is coming from the Genesis block or is a reward transaction
     if ((strcmp(transaction->inMap.address.c_str(), "Genesis") == 0) || (strcmp(transaction->inMap.address.c_str(), "dynamo-consensus-node-reward") == 0))
     {

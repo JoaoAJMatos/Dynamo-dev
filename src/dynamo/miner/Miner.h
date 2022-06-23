@@ -25,6 +25,7 @@ private:
 
     bool* mine;  // Indicate if the miner should mine or not 
     int* log;    // Indicate if the miner should log or not
+    int* sendBlock; // Indicate if the miner should send a block or not
 
     std::string rewardAddress; // The destination address of the reward transaction
     Stats* stats;              // The stats of the miner
@@ -40,6 +41,7 @@ public:
     void setLog(int* log_flag);
     void setClient(NodeClient* pClient);
     void setKnownHosts(hostMap* known_hosts);
+    void setSendBlock(int* sendBlock);
 
     void broadCastChain();
 

@@ -134,11 +134,15 @@ void NodeServer::responder() // After responding to the incoming message the res
             // Create a new Blockchain from the incomming packet payload
             // validate it and replace the current blockchain with the new one
         
+            std::cout << "Receiving chain data..." << std::endl;
+
             Blockchain new_chain(this->packet->getPayload());
             if(this->blockchain->replaceChain(new_chain) == 0)
             {
                 std::cout << "[INFO] Blockchain instance updated to " << nodeIP << " node state" << std::endl;
             }
+
+            this->transactionPool->clear();
 
             // TODO: Implement DFTP for blockchain data
             
@@ -154,12 +158,24 @@ void NodeServer::responder() // After responding to the incoming message the res
                 std::cout << "[INFO] Blockchain instance updated to " << nodeIP << " node state" << std::endl;
             }*/
         }
+        else if (this->packet->headers().type == NEW_BLOCK_PACKET)
+        {
+            std::cout << "Received new block packet: " << std::endl;
+
+            // Create a new Block from the incomming packet payload and add it to the chain, then, try to replace the chain
+            Block new_block = Block(this->packet->getPayload());
+            Blockchain temp_chain(Blockchain::toString(*this->blockchain));
+            temp_chain.chain.push_back(&new_block);
+            
+            if(this->blockchain->replaceChain(temp_chain) == 0)
+            {
+                std::cout << "[INFO] Blockchain instance updated to " << nodeIP << " node state" << std::endl;
+            }
+        }
         else if (this->packet->headers().type == TRANSACTION_POOL_REQUEST_PACKET)
         {
-            std::cout << "Client requesting pool" << std::endl;
             std::string payload = std::to_string(this->transactionPool->getPool().size());
             response = new DTP::Packet(TRANSACTION_POOL_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), this->port, nodePort, payload);
-            std::cout << "Packet: " << std::endl;
             response->show();
             send(new_socket, response->buffer().c_str(), BUFFER_SIZE, 0);
         }
@@ -190,6 +206,8 @@ void NodeServer::responder() // After responding to the incoming message the res
             if (this->packet->getPayload() == std::string("2"))
             {
                 std::string serializedPool = TransactionPool::toString(this->transactionPool);
+
+                std::cout << "Sending pool: " << serializedPool << std::endl;
 
                 // Send the transaction-pool file
                 ftp_transfer(serializedPool);

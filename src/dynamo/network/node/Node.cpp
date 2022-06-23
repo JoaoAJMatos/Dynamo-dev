@@ -416,6 +416,7 @@ void Node::minerMenu()
             this->miner->setLog(&mineLog);
             this->miner->setClient(this->client);
             this->miner->setKnownHosts(&known_hosts);
+            this->miner->setSendBlock(&this->sendBlock_flag);
 
             std::cout << "[+] Mining started" << std::endl;
 
@@ -495,7 +496,7 @@ int Node::receive_file(int sockfd, char* name)
     char buffer[PACKET_SIZE];
     int bytesReceived = 0;
 
-    fp = fopen(filename, "ab");
+    fp = fopen(filename, "wb");
     if (fp == nullptr)
     {
         std::cout << "[ERROR] (At NodeServer::receive_file(1)): Failed to open file for writing" << std::endl;
@@ -551,6 +552,7 @@ int Node::syncChains()
                         {
                             std::string blockchain_string = fromFileNode();
                             this->blockchain = new Blockchain(blockchain_string);
+                            this->blockchain->printChain();
                             if (this->blockchain->chain.empty()) return -1;
                             this->isChainLinked = true;
                             logger("Chain synced successfully");
@@ -634,6 +636,21 @@ int Node::syncPool()
     return -1;
 }
 
+void Node::broadCastHandler()
+{
+    while(true)
+    {
+        if (this->sendBlock_flag)
+        {
+            Block new_block = this->blockchain->getLastBlock();
+            std::string blockString = Block::toString(&new_block);
+            DTP::Packet packet(NEW_BLOCK_PACKET, this->uuid, this->uuid, this->server->getPort(), this->server->getPort(), blockString);
+            broadcast(packet.buffer());
+            this->sendBlock_flag = false;
+        }
+    }
+}
+
 void Node::start()
 {
     logger("Initiating client and server instances");
@@ -646,6 +663,11 @@ void Node::start()
     logger("Server node launch sequence initiated");
     std::thread server_thread(&NodeServer::launch, this->server);
     server_thread.detach();
+
+    // Launch broadcast handler in a new thread
+    logger("Starting broadcast handler");
+    std::thread broadcast_thread(&Node::broadCastHandler, this);
+    broadcast_thread.detach();
 
     // Create the node wallet
     createWallet();
