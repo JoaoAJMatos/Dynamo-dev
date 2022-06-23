@@ -125,9 +125,9 @@ void NodeServer::responder() // After responding to the incoming message the res
         if (this->packet->headers().type == BLOCKCHAIN_REQUEST_PACKET)
         {
             // Send packet informing the File transfer will begin
-            response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), this->port, nodePort, std::string(""));
+            std::string payload = Blockchain::toString(this->blockchain);
+            response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), this->port, nodePort, payload);
             send(new_socket, response->buffer().c_str(), BUFFER_SIZE, 0);
-            return;
         }
         else if (this->packet->headers().type == BLOCKCHAIN_DATA_PACKET)
         {
@@ -142,7 +142,7 @@ void NodeServer::responder() // After responding to the incoming message the res
                 std::cout << "[INFO] Blockchain instance updated to " << nodeIP << " node state" << std::endl;
             }
 
-            this->transactionPool->clear();
+            return;
 
             // TODO: Implement DFTP for blockchain data
             
@@ -170,6 +170,7 @@ void NodeServer::responder() // After responding to the incoming message the res
             if(this->blockchain->replaceChain(temp_chain) == 0)
             {
                 std::cout << "[INFO] Blockchain instance updated to " << nodeIP << " node state" << std::endl;
+                this->transactionPool->clearBlockchainTransactions(this->blockchain);
             }
         }
         else if (this->packet->headers().type == TRANSACTION_POOL_REQUEST_PACKET)

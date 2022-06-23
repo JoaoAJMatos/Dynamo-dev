@@ -540,6 +540,17 @@ int Node::syncChains()
 
                 if (response.getIndicator() == DTP_INDICATOR && response.headers().type == BLOCKCHAIN_DATA_PACKET)
                 {
+                    std::cout << "Received blockchain data packet" << std::endl;
+
+                    response.show();
+                    this->blockchain = new Blockchain(response.getPayload());
+                    this->blockchain->printChain();
+                    if (this->blockchain->chain.empty()) return -1;
+                    this->isChainLinked = true;
+                    logger("Chain synced successfully");
+                    return 0;
+
+
                     // Send the FTP ready packet to start the file transfer. The payload indicates what file should be sent
                     DTP::Packet pkt(FTP_READY, this->uuid, node.first, this->server->getPort(), node.second, std::string("1"));
                     res = this->client->request(node.first.c_str(), node.second, pkt.buffer());
@@ -659,15 +670,15 @@ void Node::start()
     this->client = new NodeClient(this->domain, this->service, this->protocol);
     this->server = new NodeServer(this->domain, this->service, this->protocol, this->server_port, this->server_interface, this->backlog, this->number_of_threads);
 
-    // Start the server in a new thread
-    logger("Server node launch sequence initiated");
-    std::thread server_thread(&NodeServer::launch, this->server);
-    server_thread.detach();
-
     // Launch broadcast handler in a new thread
     logger("Starting broadcast handler");
     std::thread broadcast_thread(&Node::broadCastHandler, this);
     broadcast_thread.detach();
+
+    // Start the server in a new thread
+    logger("Server node launch sequence initiated");
+    std::thread server_thread(&NodeServer::launch, this->server);
+    server_thread.detach();
 
     // Create the node wallet
     createWallet();
