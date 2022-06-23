@@ -127,6 +127,7 @@ void NodeServer::responder() // After responding to the incoming message the res
             // Send packet informing the File transfer will begin
             response = new DTP::Packet(BLOCKCHAIN_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), this->port, nodePort, std::string(""));
             send(new_socket, response->buffer().c_str(), BUFFER_SIZE, 0);
+            return;
         }
         else if (this->packet->headers().type == BLOCKCHAIN_DATA_PACKET)
         {
@@ -200,7 +201,8 @@ void NodeServer::responder() // After responding to the incoming message the res
                 std::string serializedChain = Blockchain::toString(*this->blockchain);
 
                 // Send the blockchain file
-                ftp_transfer(serializedChain);
+                int res = ftp_transfer(serializedChain);
+                std::cout << "FTP res: " << res << std::endl;
             }
 
             if (this->packet->getPayload() == std::string("2"))
@@ -272,7 +274,7 @@ int NodeServer::receive_file(int sockfd, char* name)
     char buf[PACKET_SIZE];
     int bytesReceived = 0;
 
-    fp = fopen(filename, "ab");
+    fp = fopen(filename, "wb");
     if (fp == nullptr)
     {
         std::cout << "[ERROR] (At NodeServer::receive_file(1)): Failed to open file for writing" << std::endl;

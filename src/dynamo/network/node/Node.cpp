@@ -496,7 +496,7 @@ int Node::receive_file(int sockfd)
     char buffer[PACKET_SIZE];
     int bytesReceived = 0;
 
-    fp = fopen(filename, "wb");
+    fp = fopen(filename, "ab");
     if (fp == nullptr)
     {
         std::cout << "[ERROR] (At NodeServer::receive_file(1)): Failed to open file for writing" << std::endl;
