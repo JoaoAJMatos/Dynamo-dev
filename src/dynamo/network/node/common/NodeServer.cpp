@@ -7,18 +7,18 @@
 #include <utility>
 
 /* HELPER FUNCTIONS */
-void toFile(std::string content)
+void toFile(std::string content, char* filename)
 {
     std::ofstream tempFile;
-    tempFile.open("temp.txt");
+    tempFile.open(filename);
     tempFile << content;
     tempFile.close();
 }
 
-std::string fromFile()
+std::string fromFile(char* filename)
 {
     std::string line;
-    std::ifstream myfile("temp.txt");
+    std::ifstream myfile(filename);
     if (myfile.is_open())
     {
         while (getline(myfile, line))
@@ -134,49 +134,19 @@ void NodeServer::responder() // After responding to the incoming message the res
             // Create a new Blockchain from the incomming packet payload
             // validate it and replace the current blockchain with the new one
         
-            std::cout << "Receiving chain data..." << std::endl;
-
             Blockchain new_chain(this->packet->getPayload());
             if(this->blockchain->replaceChain(new_chain) == 0)
             {
                 std::cout << "[INFO] Blockchain instance updated to " << nodeIP << " node state" << std::endl;
             }
-
-            return;
-
-            // TODO: Implement DFTP for blockchain data
-            
-            /*std::cout << "Updating blockchain" << std::endl;
-
-            receive_file(new_socket, "temp.txt");
-
-            std::string chainString = fromFile();
-            Blockchain new_chain(chainString);
-            
-            if(this->blockchain->replaceChain(new_chain) == 0)
-            {
-                std::cout << "[INFO] Blockchain instance updated to " << nodeIP << " node state" << std::endl;
-            }*/
-        }
-        else if (this->packet->headers().type == NEW_BLOCK_PACKET)
-        {
-            std::cout << "Received new block packet: " << std::endl;
-
-            // Create a new Block from the incomming packet payload and add it to the chain, then, try to replace the chain
-            Block new_block = Block(this->packet->getPayload());
-            Blockchain temp_chain(Blockchain::toString(*this->blockchain));
-            temp_chain.chain.push_back(&new_block);
-            
-            if(this->blockchain->replaceChain(temp_chain) == 0)
-            {
-                std::cout << "[INFO] Blockchain instance updated to " << nodeIP << " node state" << std::endl;
-                this->transactionPool->clearBlockchainTransactions(this->blockchain);
-            }
         }
         else if (this->packet->headers().type == TRANSACTION_POOL_REQUEST_PACKET)
         {
+            std::cout << "Client requesting pool" << std::endl;
             std::string payload = std::to_string(this->transactionPool->getPool().size());
+            //std::string payload = TransactionPool::toString(this->transactionPool);
             response = new DTP::Packet(TRANSACTION_POOL_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), this->port, nodePort, payload);
+            std::cout << "Packet: " << std::endl;
             response->show();
             send(new_socket, response->buffer().c_str(), BUFFER_SIZE, 0);
         }
@@ -193,6 +163,19 @@ void NodeServer::responder() // After responding to the incoming message the res
                 this->notification_buffer->assign("Transaction received");
             }
         }
+        else if (this->packet->headers().type == NEW_BLOCK_PACKET)
+        {
+            // Create a temporary chain to add the incoming block, then attempt to replace the chain
+            Blockchain temp_chain(Blockchain::toString(*this->blockchain));
+            Block* block = new Block(this->packet->getPayload());
+            temp_chain.chain.push_back(block);
+
+            if (this->blockchain->replaceChain(temp_chain) == 0)
+            {
+                std::cout << "[INFO] Blockchain instance updated to " << nodeIP << " node state" << std::endl;
+                this->transactionPool->clearBlockchainTransactions(this->blockchain);
+            }
+        }
         else if (this->packet->headers().type == FTP_READY)
         {
             if (this->packet->getPayload() == std::string("1"))
@@ -201,18 +184,17 @@ void NodeServer::responder() // After responding to the incoming message the res
                 std::string serializedChain = Blockchain::toString(*this->blockchain);
 
                 // Send the blockchain file
-                int res = ftp_transfer(serializedChain);
-                std::cout << "FTP res: " << res << std::endl;
+                int res = ftp_transfer(serializedChain, "chain.txt");
+                std::cout << "FTP (chain) result: " << res << std::endl;
             }
 
             if (this->packet->getPayload() == std::string("2"))
             {
                 std::string serializedPool = TransactionPool::toString(this->transactionPool);
 
-                std::cout << "Sending pool: " << serializedPool << std::endl;
-
                 // Send the transaction-pool file
-                ftp_transfer(serializedPool);
+                int res = ftp_transfer(serializedPool, "pool.txt");
+                std::cout << "FTP (pool) result: " << res << std::endl;
             }
         }
         else
@@ -266,45 +248,10 @@ int NodeServer::send_file(FILE* fp, int sockfd)
     return 0;
 }
 
-int NodeServer::receive_file(int sockfd, char* name)
+int NodeServer::ftp_transfer(std::string payload, char* filename)
 {
-    int n;
-    FILE* fp;
-    char* filename = filename;
-    char buf[PACKET_SIZE];
-    int bytesReceived = 0;
-
-    fp = fopen(filename, "wb");
-    if (fp == nullptr)
-    {
-        std::cout << "[ERROR] (At NodeServer::receive_file(1)): Failed to open file for writing" << std::endl;
-        return -1;
-    }
-
-    long double sz = 1;
-
-    while((bytesReceived = read(sockfd, buf, PACKET_SIZE)) > 0)
-    {
-        sz++;
-        gotoxy(0, 4);
-        printf("Received: %Lf Mb", (sz/PACKET_SIZE));
-        fflush(stdout);
-        fwrite(buf, 1, bytesReceived, fp);
-    }
-
-    if (bytesReceived < 0)
-    {
-        std::cout << "[ERROR] (At NodeServer::receive_file(2)): Failed to read from socket" << std::endl;
-        return -1;
-    }
-
-    return 0;
-}
-
-int NodeServer::ftp_transfer(std::string payload)
-{
-    toFile(std::move(payload)); // Write the contents of the serialized blockchain to a temp file
-    FILE* fp = fopen("temp.txt", "rb");
+    toFile(std::move(payload), filename); // Write the contents of the serialized blockchain to a temp file
+    FILE* fp = fopen(filename, "rb");
 
     int res;
 
@@ -353,4 +300,29 @@ void NodeServer::set_notification_buffer(std::string* buf)
 void NodeServer::set_address(char* addr)
 {
     this->address = addr;
+}
+
+int NodeServer::getDomain() const
+{
+    return this->domain;
+}
+
+int NodeServer::getService() const
+{
+    return this->service;
+}
+
+int NodeServer::getProtocol() const
+{
+    return this->protocol;
+}
+
+int NodeServer::getBacklog() const
+{
+    return this->backlog;
+}
+
+int NodeServer::getNumberOfThreads() const
+{
+    return this->tp->get_number_of_threads();
 }

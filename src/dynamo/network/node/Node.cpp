@@ -5,18 +5,18 @@
 #include "Node.h"
 
 /* HELPER FUNCTIONS */
-void toFileNode(std::string content)
+void toFileNode(std::string content, char* filename)
 {
     std::ofstream tempFile;
-    tempFile.open("temp.txt");
+    tempFile.open(filename);
     tempFile << content;
     tempFile.close();
 }
 
-std::string fromFileNode()
+std::string fromFileNode(char* filename)
 {
     std::string line;
-    std::ifstream myfile("temp.txt");
+    std::ifstream myfile(filename);
     if (myfile.is_open())
     {
         while (getline(myfile, line))
@@ -37,7 +37,7 @@ Node::Node()
 
     isChainLinked = false;
 
-    std::string full_path = DEFAULT_CONFIG_NODE_PATH NODE_CONFIG_FILE_NAME;
+    std::string full_path = NODE_CONFIG_FILE_NAME;
 
     // Fetch the configs from the config file
     std::map<std::string, std::string> node_config;
@@ -157,7 +157,7 @@ Node::~Node()
 /* PRIVATE FUNCTIONS */
 void Node::save_config() const
 {
-    std::string full_path = DEFAULT_CONFIG_NODE_PATH NODE_CONFIG_FILE_NAME;
+    std::string full_path = NODE_CONFIG_FILE_NAME;
 
     std::cout << full_path;
 
@@ -315,6 +315,7 @@ void showHelp()
     std::cout << "  transaction-pool\tShows the transaction pool" << std::endl;
     std::cout << "  transact\t\tConduct a transaction" << std::endl;
     std::cout << "  miner\t\t\tOpens the miner menu" << std::endl;
+    std::cout << "  server-info\t\tDisplays server configuration" << std::endl;
     std::cout << "  exit\t\t\tExits the program" << std::endl;
     std::cout << std::endl;
 }
@@ -405,9 +406,9 @@ void Node::minerMenu()
             
             if (!has_created_miner)
             {
-                this->miner = new Miner(this->blockchain, this->transactionPool);
+                this->miner = new Miner();
                 has_created_miner = true;
-            } 
+            }
 
             this->miner->setRewardAddress(address);
             mine = true;
@@ -417,11 +418,14 @@ void Node::minerMenu()
             this->miner->setClient(this->client);
             this->miner->setKnownHosts(&known_hosts);
             this->miner->setSendBlock(&this->sendBlock_flag);
+            this->miner->setWorkingBlockchain(this->blockchain);
+            this->miner->setWorkingTransactionPool(this->transactionPool);
 
             std::cout << "[+] Mining started" << std::endl;
 
             miner_thread = new std::thread(&Miner::start, this->miner);
             miner_thread->detach();
+
             break;
         case 2:
             std::cout << "[+] Stopping mining" << std::endl;
@@ -429,7 +433,7 @@ void Node::minerMenu()
             break;
         case 3:
             stats = this->miner->getStats();
-            this->mine == true ? std::cout << "[+] Status: Online" << std::endl : std::cout << "[+] Status: Offline" << std::endl;
+            this->mine ? std::cout << "[+] Status: Online" << std::endl : std::cout << "[+] Status: Offline" << std::endl;
             std::cout << "[+] Blocks mined: " << stats->blocks_mined << std::endl;
             std::cout << "[+] Rewards earned: " << stats->rewards / COIN << std::endl;
             this->mineLog = 1;
@@ -442,6 +446,18 @@ void Node::minerMenu()
             std::cout << "[+] Invalid option:" << option << std::endl;
             break;
     }
+}
+
+void Node::showServerConfig()
+{
+    std::cout << std::endl << "[+] Server configuration: " << std::endl;
+    std::cout << " Port: " << this->server_port << std::endl;
+    std::cout << " Interfaces: all" << std::endl;
+    std::cout << " Domain: " << this->server->getDomain() << std::endl;
+    std::cout << " Service: " << this->server->getService() << std::endl;
+    std::cout << " Protocol: " << this->server->getProtocol() << std::endl;
+    std::cout << " Backlog: " << this->server->getBacklog() << std::endl;
+    std::cout << " Threads: " << this->server->getNumberOfThreads() << std::endl << std::endl;
 }
 
 void Node::getInput()
@@ -465,34 +481,17 @@ void Node::getInput()
         else if (input == "transaction-pool") this->transactionPool->show();
         else if (input == "transact") transact();
         else if (input == "miner") minerMenu();
+        else if (input == "server-info") showServerConfig();
         else if (input == "exit") exit(0);
         else if (input == "help") showHelp();
         else std::cout << "Unknown command '" << input << "'" << std::endl;
     }
 }
 
-int Node::send_file(FILE* fp, int sockfd)
-{
-    char data[PACKET_SIZE] = {0};
-
-    while(fgets(data, PACKET_SIZE, fp) != NULL)
-    {
-        if(send(sockfd, data, sizeof(data), 0) < 0)
-        {
-            std::cout << "[ERROR] (At NodeServer::send_file(2)): Failed to send file" << std::endl;
-            return -1;
-        }
-        bzero(data, PACKET_SIZE);
-    }
-
-    return 0;
-}
-
-int Node::receive_file(int sockfd)
+int Node::receive_file(int sockfd, char* filename)
 {
     int n;
     FILE* fp;
-    char filename[] = "temp.txt";
     char buffer[PACKET_SIZE];
     int bytesReceived = 0;
 
@@ -507,11 +506,8 @@ int Node::receive_file(int sockfd)
 
     while((bytesReceived = recv(sockfd, buffer, PACKET_SIZE, 0)) > 0)
     {
-        sz++;
-        gotoxy(0, 4);
-        printf("Received: %llf Mb", (sz/PACKET_SIZE));
-        fflush(stdout);
         fwrite(buffer, 1, bytesReceived, fp);
+        fflush(fp);
     }
 
     if (bytesReceived < 0)
@@ -528,7 +524,7 @@ int Node::syncChains()
     // Keep asking the known nodes for an updated blockchain until one is received
     for (auto& node : known_hosts)
     {
-        DTP::Packet packet(1, this->uuid, node.first, this->server->getPort(), node.second, std::string(""));
+        DTP::Packet packet(BLOCKCHAIN_REQUEST_PACKET, this->uuid, node.first, this->server->getPort(), node.second, std::string(""));
 
         int res = this->client->request(node.first.c_str(), node.second, packet.buffer());
 
@@ -538,6 +534,8 @@ int Node::syncChains()
             {
                 DTP::Packet response(client->get_response_buffer());
 
+                response.show();
+
                 if (response.getIndicator() == DTP_INDICATOR && response.headers().type == BLOCKCHAIN_DATA_PACKET)
                 {
                     // Send the FTP ready packet to start the file transfer. The payload indicates what file should be sent
@@ -546,13 +544,13 @@ int Node::syncChains()
 
                     if (res == 0)
                     {
-                        res = receive_file(client->get_sock());
+                        res = receive_file(client->get_sock(), "chain.txt");
 
                         if (res == 0)
                         {
-                            std::string blockchain_string = fromFileNode();
+                            std::string blockchain_string = fromFileNode("chain.txt");
+                            remove("temp.txt");
                             this->blockchain = new Blockchain(blockchain_string);
-                            this->blockchain->printChain();
                             if (this->blockchain->chain.empty()) return -1;
                             this->isChainLinked = true;
                             logger("Chain synced successfully");
@@ -600,11 +598,11 @@ int Node::syncPool()
 
                         if (res == 0) 
                         {
-                            res = receive_file(client->get_sock());
+                            res = receive_file(client->get_sock(), "pool.txt");
 
                             if (res == 0)
                             {
-                                std::string transaction_pool_string = fromFileNode();
+                                std::string transaction_pool_string = fromFileNode("pool.txt");
                                 this->transactionPool = new TransactionPool(transaction_pool_string);
                                 this->isPoolLinked = true;
                                 logger("Pool synced successfully with incoming Node");
@@ -642,11 +640,13 @@ void Node::broadCastHandler()
     {
         if (this->sendBlock_flag)
         {
-            Block new_block = this->blockchain->getLastBlock();
+            /*Block new_block = this->blockchain->getLastBlock();
             std::string blockString = Block::toString(&new_block);
-            DTP::Packet packet(NEW_BLOCK_PACKET, this->uuid, this->uuid, this->server->getPort(), this->server->getPort(), blockString);
-            broadcast(packet.buffer());
-            this->sendBlock_flag = false;
+            DTP::Packet* packet = new DTP::Packet(NEW_BLOCK_PACKET, this->uuid, this->uuid, this->server->getPort(), this->server->getPort(), blockString);
+            std::cout << "Broadcasting new block" << std::endl;
+            broadcast(packet->buffer());
+            std::cout << "Block broadcasted" << std::endl;
+            this->sendBlock_flag = false;*/
         }
     }
 }
@@ -742,7 +742,9 @@ void Node::start()
 
         tries = 0;
 
-        while(!isPoolLinked)
+        int result = syncPool();
+
+        /*while(!isPoolLinked)
         {
             tries++;
             int result = syncPool();
@@ -761,7 +763,7 @@ void Node::start()
                 this->transactionPool = new TransactionPool();
                 isPoolLinked = true;
             }
-        }
+        }*/
     }
 
     if (isChainLinked)

@@ -41,7 +41,7 @@ public:
      * @param log 
      * @return int 
      */
-    int addBlock(std::vector<Transaction> data, int log);
+    int addBlock(std::vector<Transaction*> data, int log);
 
     /**
      * @brief Validates the transactions inside the blockchain

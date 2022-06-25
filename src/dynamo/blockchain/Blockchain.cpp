@@ -33,9 +33,9 @@ Block Blockchain::getLastBlock()
     return *this->chain.back();
 }
 
-int Blockchain::addBlock(std::vector<Transaction> data, int log)
+int Blockchain::addBlock(std::vector<Transaction*> data, int log)
 {
-    Block* newBlock = Block::mineBlock(this->chain.back(), data, log);
+    auto* newBlock = Block::mineBlock(this->chain.back(), std::move(data), log);
 
     this->chain.push_back(newBlock);
 
@@ -68,7 +68,7 @@ int Blockchain::replaceChain(const Blockchain& _chain)
 std::string Blockchain::toString(const Blockchain& chain)
 {
     std::stringstream ss;
-    for (auto& block : chain.chain)
+    for (auto block : chain.chain)
     {
         ss << Block::toString(block) << "/";
     }
@@ -80,7 +80,7 @@ std::string Blockchain::toString(const Blockchain& chain)
 
 void Blockchain::printChain() // Print the whole chain
 {
-    for (auto& block : this->chain)
+    for (auto block : this->chain)
     {
         block->printBlock();
     }
@@ -104,8 +104,8 @@ int Blockchain::calculateBalanceOfAddress(const std::string& address)
     {
         for (auto& transaction : block->data)
         {
-            if (transaction.getOutputMap().recipient == address) outputsTotal += transaction.getOutputMap().amount;
-            if (transaction.getOutputMap().sender == address) outputsTotal -= transaction.getOutputMap().amount;
+            if (transaction->getOutputMap().recipient == address) outputsTotal += transaction->getOutputMap().amount;
+            if (transaction->getOutputMap().sender == address) outputsTotal -= transaction->getOutputMap().amount;
         }
     }
     return outputsTotal; 
@@ -116,11 +116,11 @@ int Blockchain::isTransactionDataValid(Blockchain blockchain)
     for (auto& block : blockchain.chain)
     {
         int rewardTransactionCount = 0;
-        std::map<char*, Transaction> transactions; // This will be used to ensure that there are no duplicate transactions
+        std::map<char*, Transaction*> transactions; // This will be used to ensure that there are no duplicate transactions
 
         for (auto& transaction : block->data)
         {
-            if (transaction.getInputMap().address == "dynamo-consensus-node-reward")
+            if (transaction->getInputMap().address == "dynamo-consensus-node-reward")
             {
                 rewardTransactionCount++;
 
@@ -129,7 +129,7 @@ int Blockchain::isTransactionDataValid(Blockchain blockchain)
                     std::cout << "[ERROR] There are more than one reward transactions in block" << std::endl;
                     return 0; // Block has more than one reward transaction
                 } 
-                if (transaction.getOutputMap().amount != Transaction::getBlockSubsidy(block->getHeight()))
+                if (transaction->getOutputMap().amount != Transaction::getBlockSubsidy(block->getHeight()))
                 {
                     std::cout << "[ERROR] The reward transaction amount is not correct" << std::endl;
                     return 0; // Mining reward isn't correct
@@ -137,19 +137,19 @@ int Blockchain::isTransactionDataValid(Blockchain blockchain)
             }
             else 
             {
-                if(!Transaction::validTransaction(&transaction)) return 0; // Transaction is not valid
+                if(!Transaction::validTransaction(transaction)) return 0; // Transaction is not valid
 
-                int trueBalance = calculateBalanceOfAddress(transaction.getInputMap().address);
+                int trueBalance = calculateBalanceOfAddress(transaction->getInputMap().address);
 
-                if (((strcmp(transaction.getInputMap().address.c_str(), "Genesis") != 0) && (strcmp(transaction.getInputMap().address.c_str(), "dynamo-consensus-node-reward") != 0)) && (transaction.getInputMap().balance != trueBalance))
+                if (((strcmp(transaction->getInputMap().address.c_str(), "Genesis") != 0) && (strcmp(transaction->getInputMap().address.c_str(), "dynamo-consensus-node-reward") != 0)) && (transaction->getInputMap().balance != trueBalance))
                 {
-                    std::cout << "[ERROR] Blockchain Validation Error: On block " << block->getHeight() << " the balance of " << transaction.getInputMap().address << " (" << transaction.getInputMap().balance << ") does not match the expected balance of: " << trueBalance << std::endl;
+                    std::cout << "[ERROR] Blockchain Validation Error: On block " << block->getHeight() << " the balance of " << transaction->getInputMap().address << " (" << transaction->getInputMap().balance << ") does not match the expected balance of: " << trueBalance << std::endl;
                     return 0; // Sender's balance is not accurate
                 }
 
-                if (!transactions.insert(std::pair<char *, Transaction>(transaction.getID(), transaction)).second)
+                if (!transactions.insert(std::pair<char *, Transaction*>(transaction->getID(), transaction)).second)
                 {
-                    std::cout << "[ERROR] Blockchain Validation Error: On block " << block->getHeight() << " the transaction " << transaction.getID() << " is a duplicate" << std::endl;
+                    std::cout << "[ERROR] Blockchain Validation Error: On block " << block->getHeight() << " the transaction " << transaction->getID() << " is a duplicate" << std::endl;
                     return 0; // Transaction is a duplicate
                 }
             }
@@ -165,7 +165,7 @@ int Blockchain::isValid(Blockchain chain)
     std::stringstream blockBuffer;
 
     // Check if the genesis block of the chain matches the agreed genesis block
-    if (chain.chain[0]->getHeight() != 0 || chain.chain[0]->data[0].getInputMap().address != "Genesis") return 0;
+    if (chain.chain[0]->getHeight() != 0 || chain.chain[0]->data[0]->getInputMap().address != "Genesis") return 0;
 
     for (int i = 1; i < chain.chain.size(); i++)
     {
@@ -179,7 +179,7 @@ int Blockchain::isValid(Blockchain chain)
         std::string dataToHash;
         for (auto& transaction : block->data)
         {
-            dataToHash.append(transaction.getTransactionDataBuffer());
+            dataToHash.append(transaction->getTransactionDataBuffer());
         }
 
         blockBuffer << block->getTimestamp() << block->getHeight() << block->getPrevHash() << dataToHash << block->getDifficulty() << block->getNonce() << std::endl;

@@ -35,8 +35,8 @@ int Wallet::calculateBalance(Blockchain* chain, const std::string& address)
     {
         for (auto& transaction : block->data)
         {
-            if (transaction.getOutputMap().recipient == address) outputsTotal += transaction.getOutputMap().amount;
-            if (transaction.getOutputMap().sender == address) outputsTotal -= transaction.getOutputMap().amount;
+            if (transaction->getOutputMap().recipient == address) outputsTotal += transaction->getOutputMap().amount;
+            if (transaction->getOutputMap().sender == address) outputsTotal -= transaction->getOutputMap().amount;
         }
     }
 

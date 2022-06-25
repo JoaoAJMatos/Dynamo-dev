@@ -33,7 +33,7 @@ private:
     void updateStats();
 
 public:
-    Miner(Blockchain* working_blockchain, TransactionPool* working_transaction_pool);
+    Miner();
 
     void start();
     void setMine(bool* mine_flag);
@@ -42,6 +42,10 @@ public:
     void setClient(NodeClient* pClient);
     void setKnownHosts(hostMap* known_hosts);
     void setSendBlock(int* sendBlock);
+    void setWorkingBlockchain(Blockchain* chain);
+    void setWorkingTransactionPool(TransactionPool* pool);
+
+    void mineBlock();
 
     void broadCastChain();
 

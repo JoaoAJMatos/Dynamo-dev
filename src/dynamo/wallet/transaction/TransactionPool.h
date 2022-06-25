@@ -46,7 +46,7 @@ public:
      * 
      * @param transaction 
      */
-    std::vector<Transaction> getValidTransactions();
+    std::vector<Transaction*> getValidTransactions();
 
     void clearBlockchainTransactions(Blockchain* chain);
 

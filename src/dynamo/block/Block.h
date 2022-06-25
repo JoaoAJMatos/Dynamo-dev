@@ -41,7 +41,7 @@ private:
     static std::string uint8ToString(uint8_t* str);
 
 public:
-    std::vector<Transaction> data; // Array of transactions
+    std::vector<Transaction*> data; // Array of transactions
 
     /* CONSTRUCTOR */
     /**
@@ -54,7 +54,7 @@ public:
      * @param nonce 
      * @param difficulty 
      */
-    Block(std::time_t timestamp, uint8_t* hash, uint8_t* prev_hash, size_t height, size_t nonce, int difficulty, std::vector<Transaction> data);
+    Block(std::time_t timestamp, uint8_t* hash, uint8_t* prev_hash, size_t height, size_t nonce, int difficulty, std::vector<Transaction*> data);
     
     explicit Block(std::string block_packet);
 
@@ -67,7 +67,7 @@ public:
      * 
      * @return Block* 
      */
-    static Block* mineBlock(Block* lastBlock, const std::vector<Transaction>& data, int log);
+    static Block* mineBlock(Block* lastBlock, std::vector<Transaction*> data, int log);
 
     /**
      * @brief Adjusts the block mining difficulty in order to keep the mining rate between the defined boundries
@@ -107,7 +107,7 @@ public:
     [[nodiscard]] size_t getHeight() const;
     [[nodiscard]] size_t getNonce() const;
     [[nodiscard]] int getDifficulty() const;
-    std::vector<Transaction>* getData();
+    std::vector<Transaction*> getData();
 };
 
 

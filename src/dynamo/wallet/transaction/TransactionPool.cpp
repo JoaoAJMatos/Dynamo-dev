@@ -9,6 +9,8 @@ TransactionPool::TransactionPool()
 
 TransactionPool::TransactionPool(std::string transaction_pool_data_packet)
 { 
+    std::cout << "[INFO] Transaction pool packet: " << transaction_pool_data_packet << std::endl;
+
     std::string delimiter = "|";
     std::string buffer = std::move(transaction_pool_data_packet);
     std::map<char*, Transaction*> tempPool;
@@ -49,7 +51,7 @@ int TransactionPool::set(std::map<char*, Transaction*> transactionPool)
 
 int TransactionPool::existsTransaction(const std::string& sender)
 {
-    for (auto& [transactionID, transaction] : pool)
+    for (auto [transactionID, transaction] : pool)
     {
         if (transaction->getInputMap().address == sender) return 1;
     }
@@ -57,15 +59,15 @@ int TransactionPool::existsTransaction(const std::string& sender)
     return 0;
 }
 
-std::vector<Transaction> TransactionPool::getValidTransactions()
+std::vector<Transaction*> TransactionPool::getValidTransactions()
 {
-    std::vector<Transaction> validTransactions;
+    std::vector<Transaction*> validTransactions;
 
-    for (auto& [transactionID, transaction] : pool)
+    for (auto item : pool)
     {
-        if (Transaction::validTransaction(transaction))
+        if (Transaction::validTransaction(item.second))
         {
-            validTransactions.push_back(*transaction);
+            validTransactions.push_back(item.second);
         }
     }
 
@@ -78,9 +80,9 @@ void TransactionPool::clearBlockchainTransactions(Blockchain* chain)
     {
         if (block->getHeight() == 0) continue; // Skip the Genesis block
 
-        for (auto& transaction : block->data)
+        for (auto transaction : block->data)
         {
-            if (this->pool[transaction.getID()]) delete this->pool[transaction.getID()];
+            if (this->pool[transaction->getID()]) delete this->pool[transaction->getID()];
         }
     }
 }
@@ -105,9 +107,9 @@ msgpack11::MsgPack TransactionPool::serialize(TransactionPool* pool)
 std::string TransactionPool::toString(TransactionPool* pool)
 {
     std::stringstream ss;
-    for (auto& [transactionID, transaction] : pool->getPool())
+    for (auto item : pool->getPool())
     {
-        ss << Transaction::toString(transaction) << "|";
+        ss << Transaction::toString(item.second) << "|";
     }
 
     ss << "-";
@@ -123,10 +125,9 @@ void TransactionPool::show()
         return;
     }
 
-    for (auto& [transactionID, transaction] : pool)
+    for (auto item : pool)
     {
-        std::cout << "Transaction ID: " << transactionID << std::endl;
-        transaction->showTransaction();
+        item.second->showTransaction();
     }
 }
 

@@ -14,7 +14,7 @@
  * @param nonce 
  * @param difficulty 
  */
-Block::Block(std::time_t timestamp, uint8_t* hash, uint8_t* prev_hash, size_t height, size_t nonce, int difficulty, std::vector<Transaction> data)
+Block::Block(std::time_t timestamp, uint8_t* hash, uint8_t* prev_hash, size_t height, size_t nonce, int difficulty, std::vector<Transaction*> data)
 {
     this->timestamp = timestamp;
     this->hash = hash;
@@ -50,7 +50,7 @@ Block::Block(std::string block_packet)
     this->difficulty = atoi(buffer.substr(pos, buffer.find(delimiter)).c_str());
     buffer.erase(0, buffer.find(delimiter) + delimiter.length());
 
-    std::vector<Transaction> dataArray;
+    std::vector<Transaction*> dataArray;
     std::string transactionString;
 
     while(!(transactionString = buffer.substr(pos, buffer.find('|'))).empty())
@@ -59,7 +59,7 @@ Block::Block(std::string block_packet)
         
         if (transactionString != "-")
         {
-            Transaction transact(transactionString);
+            auto* transact = new Transaction(transactionString);
             dataArray.push_back(transact);
         }
         else break;
@@ -103,7 +103,7 @@ int setTarget(uint8_t* destinationBuffer, int difficulty)
  * 
  * @details This function performs the proof of work required to mine a block
  */
-Block* Block::mineBlock(Block* lastBlock, const std::vector<Transaction>& data, int log)
+Block* Block::mineBlock(Block* lastBlock, std::vector<Transaction*> data, int log)
 {
     uint8_t* hash;
     std::time_t timestamp;
@@ -122,7 +122,7 @@ Block* Block::mineBlock(Block* lastBlock, const std::vector<Transaction>& data, 
     std::string dataToHash;
     for (auto& transaction : data)
     {
-        dataToHash.append(transaction.getTransactionDataBuffer());
+        dataToHash.append(transaction->getTransactionDataBuffer());
     }
 
     t.startHighResClock();
@@ -198,8 +198,9 @@ Block* Block::genesis(const std::string& first_node_wallet_address, int reward)
     std::string sender = "Genesis";
 
     // Create transaction data
-    std::vector<Transaction> data;
-    data.emplace_back(nullptr, first_node_wallet_address, reward, sender, reward);
+    std::vector<Transaction*> data;
+    auto* transact = new Transaction(nullptr, first_node_wallet_address, reward, sender, reward);
+    data.emplace_back(transact);
 
     return new Block(timestamp, hash, hash, 0, 0, INITIAL_DIFFICULTY, data);
 }
@@ -211,7 +212,7 @@ std::string Block::toString(Block* block)
     ss << block->getTimestamp() << "," << SHA256::toString(block->getHash()) << "," << SHA256::toString(block->getPrevHash()) << "," << block->getHeight() << "," << block->getNonce() << "," << block->getDifficulty() << ",";
     for (auto& transaction : block->data)
     {
-        ss << Transaction::toString(&transaction) << "|";
+        ss << Transaction::toString(transaction) << "|";
     }
 
     ss << "-"; // Block separator
@@ -236,18 +237,18 @@ void Block::printBlock()
     std::cout << "  Data:" << std::endl;
     std::cout << "  {" << std::endl;
 
-    for (auto& transaction : this->data)
+    for (auto transaction : this->data)
     {
-        transaction.showTransaction();
+        transaction->showTransaction();
     }
 
     std::cout << "  }" << std::endl;
     std::cout << "}" << std::endl;
 }
 
-std::vector<Transaction>* Block::getData()
+std::vector<Transaction*> Block::getData()
 {
-    return &this->data;
+    return this->data;
 }
 
 size_t Block::getHeight() const

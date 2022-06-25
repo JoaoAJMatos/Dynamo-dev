@@ -109,7 +109,7 @@ public:
      * 
      * @return std::string 
      */
-    std::string getTransactionDataBuffer() const;
+    [[nodiscard]] std::string getTransactionDataBuffer() const;
 
     /**
      * @brief Prints the transaction data into the standard-out 
@@ -125,7 +125,7 @@ public:
      * 
      * @details This function creates a reward transaction for the miner given the height of the block
      */
-    static Transaction rewardTransaction(size_t blockHeight, const std::string& recipient);
+    static Transaction* rewardTransaction(size_t blockHeight, const std::string& recipient);
 
     static int getBlockSubsidy(int blockHeight);
 

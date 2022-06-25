@@ -83,8 +83,7 @@ public:
     int isKnownHost(std::string ip, int port);
 
     int send_file(FILE* fp, int socket);
-    int receive_file(int sockfd, char* filename);
-    int ftp_transfer(std::string payload);
+    int ftp_transfer(std::string payload, char* filename);
 
     /* GETTERS/SETTERS */
     void set_working_blockchain(Blockchain* chain);
@@ -95,6 +94,11 @@ public:
     void set_address(char* addr);
 
     int getPort() const;
+    int getDomain() const;
+    int getService() const;
+    int getProtocol() const;
+    int getBacklog() const;
+    int getNumberOfThreads() const;  
 };
 
 

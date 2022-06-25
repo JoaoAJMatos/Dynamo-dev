@@ -2,10 +2,8 @@
 
 #include <utility>
 
-Miner::Miner(Blockchain* working_blockchain, TransactionPool* working_transaction_pool)
+Miner::Miner()
 {
-    this->working_blockchain = working_blockchain;
-    this->working_transaction_pool = working_transaction_pool;
     this->stats = new Stats;
 
     this->stats->blocks_mined = 0;
@@ -33,24 +31,32 @@ void Miner::updateStats()
     this->stats->rewards += Transaction::getBlockSubsidy(this->working_blockchain->getLastBlock().getHeight());
 }
 
+void Miner::mineBlock()
+{
+    // Get the valid transactions in the pool
+    std::vector<Transaction*> valid_transactions = this->working_transaction_pool->getValidTransactions();
+
+    if(!valid_transactions.empty())
+    {
+        // Create a reward transaction
+        Block lastBlock = working_blockchain->getLastBlock();
+        auto* reward = Transaction::rewardTransaction(lastBlock.getHeight() + 1, rewardAddress);
+        valid_transactions.push_back(reward);
+
+        this->working_blockchain->addBlock(valid_transactions, 1);
+        this->working_transaction_pool->clear();
+        updateStats();
+        *sendBlock = 1; // Tell the node to broadcast the block
+    }
+}
+
 void Miner::start()
 {
     while(*mine)
     {
-        // Get the valid transactions in the pool
-        std::vector<Transaction> valid_transactions = working_transaction_pool->getValidTransactions();
-
-        if(!valid_transactions.empty())
+        if (!this->working_transaction_pool->getPool().empty())
         {
-            // Create a reward trasnaction
-            Block lastBlock = working_blockchain->getLastBlock();
-            Transaction reward = Transaction::rewardTransaction(lastBlock.getHeight() + 1, rewardAddress);
-            valid_transactions.push_back(reward);
-
-            this->working_blockchain->addBlock(valid_transactions, *log);
-            this->working_transaction_pool->clear();
-            updateStats();
-            *this->sendBlock = 1;
+            mineBlock();
         }
     }
 }
@@ -73,4 +79,14 @@ void Miner::setKnownHosts(hostMap* pKnown_hosts)
 void Miner::setSendBlock(int* sendBlock)
 {
     this->sendBlock = sendBlock;
+}
+
+void Miner::setWorkingBlockchain(Blockchain* chain)
+{
+    this->working_blockchain = chain;
+}
+
+void Miner::setWorkingTransactionPool(TransactionPool* pool)
+{
+    this->working_transaction_pool = pool;
 }
