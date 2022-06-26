@@ -17,6 +17,8 @@ public:
     std::vector<Block*> chain;
 
     /* CONSTRUCTOR */
+    Blockchain();
+
     /**
      * @brief Construct a new Blockchain object
      * 

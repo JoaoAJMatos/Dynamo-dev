@@ -36,18 +36,20 @@ void Miner::mineBlock()
     // Get the valid transactions in the pool
     std::vector<Transaction*> valid_transactions = this->working_transaction_pool->getValidTransactions();
 
-    if(!valid_transactions.empty())
-    {
-        // Create a reward transaction
-        Block lastBlock = working_blockchain->getLastBlock();
-        auto* reward = Transaction::rewardTransaction(lastBlock.getHeight() + 1, rewardAddress);
-        valid_transactions.push_back(reward);
+    Blockchain tempChain;
 
-        this->working_blockchain->addBlock(valid_transactions, 1);
-        this->working_transaction_pool->clear();
-        updateStats();
-        *sendBlock = 1; // Tell the node to broadcast the block
-    }
+    tempChain.chain = this->working_blockchain->chain;
+
+    // Create a reward transaction
+    Block lastBlock = working_blockchain->getLastBlock();
+    auto* reward = Transaction::rewardTransaction(lastBlock.getHeight() + 1, rewardAddress);
+    valid_transactions.push_back(reward);
+
+    tempChain.addBlock(valid_transactions, 0);
+    this->working_blockchain->replaceChain(tempChain);
+    this->working_transaction_pool->clear();
+    updateStats();
+    *sendBlock = 1; // Tell the node to broadcast the block
 }
 
 void Miner::start()

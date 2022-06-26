@@ -63,11 +63,14 @@ std::vector<Transaction*> TransactionPool::getValidTransactions()
 {
     std::vector<Transaction*> validTransactions;
 
-    for (auto item : pool)
+    if (!pool.empty())
     {
-        if (Transaction::validTransaction(item.second))
+        for (auto item : pool)
         {
-            validTransactions.push_back(item.second);
+            if (Transaction::validTransaction(item.second))
+            {
+                validTransactions.push_back(item.second);
+            }
         }
     }
 

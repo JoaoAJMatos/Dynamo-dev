@@ -25,7 +25,7 @@ net::DNS::DNS(int type, const std::string& source, const std::string& body)
     this->body = body;
     this->source_node = source;
 
-    this->query_string = std::to_string(type) + "/" + source + "/" + body;
+    this->query_string = std::to_string(type) + "/" + source + "/" + body + "/";
 }
 
 /* GETTERS */

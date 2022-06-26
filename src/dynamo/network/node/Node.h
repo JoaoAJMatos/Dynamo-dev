@@ -95,6 +95,8 @@ private:
 
     std::string notification_buffer;
 
+    std::string root_address;
+
     /* PRIVATE FUNCTIONS */
     // This function will save the server and client configurations
     void save_config() const;
@@ -106,6 +108,7 @@ private:
     void transact();
     void minerMenu();
     void showServerConfig();
+    void showRootAddress();
 
 public:
     /* CONSTRUCTOR/DESTRUCTOR */
@@ -122,10 +125,11 @@ public:
 
     int syncChains();
     int syncPool();
-
     int createWallet();
-
     int receive_file(int sockfd, char* filename);
+    void broadCastHandler();
+    int notify_root(); // Notifies the name servers that my address is the root node address
+    int get_root_address(); // Gets the root node address from the name servers
 
     /**
      * @brief This function is responsible for taking the input from the user and processing it
@@ -138,8 +142,6 @@ public:
      * 
      */
     void start();
-
-    void broadCastHandler();
 };
 
 

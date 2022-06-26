@@ -142,12 +142,9 @@ void NodeServer::responder() // After responding to the incoming message the res
         }
         else if (this->packet->headers().type == TRANSACTION_POOL_REQUEST_PACKET)
         {
-            std::cout << "Client requesting pool" << std::endl;
             std::string payload = std::to_string(this->transactionPool->getPool().size());
             //std::string payload = TransactionPool::toString(this->transactionPool);
             response = new DTP::Packet(TRANSACTION_POOL_DATA_PACKET, std::string(this->uuid), std::string(nodeIP), this->port, nodePort, payload);
-            std::cout << "Packet: " << std::endl;
-            response->show();
             send(new_socket, response->buffer().c_str(), BUFFER_SIZE, 0);
         }
         else if (this->packet->headers().type == TRANSACTION_PACKET)
@@ -166,14 +163,16 @@ void NodeServer::responder() // After responding to the incoming message the res
         else if (this->packet->headers().type == NEW_BLOCK_PACKET)
         {
             // Create a temporary chain to add the incoming block, then attempt to replace the chain
-            Blockchain temp_chain(Blockchain::toString(*this->blockchain));
+            Blockchain temp_chain;
+            temp_chain.chain = this->blockchain->chain;
+
             Block* block = new Block(this->packet->getPayload());
             temp_chain.chain.push_back(block);
 
             if (this->blockchain->replaceChain(temp_chain) == 0)
             {
                 std::cout << "[INFO] Blockchain instance updated to " << nodeIP << " node state" << std::endl;
-                this->transactionPool->clearBlockchainTransactions(this->blockchain);
+                this->transactionPool->clear();
             }
         }
         else if (this->packet->headers().type == FTP_READY)
@@ -185,7 +184,6 @@ void NodeServer::responder() // After responding to the incoming message the res
 
                 // Send the blockchain file
                 int res = ftp_transfer(serializedChain, "chain.txt");
-                std::cout << "FTP (chain) result: " << res << std::endl;
             }
 
             if (this->packet->getPayload() == std::string("2"))
@@ -194,7 +192,6 @@ void NodeServer::responder() // After responding to the incoming message the res
 
                 // Send the transaction-pool file
                 int res = ftp_transfer(serializedPool, "pool.txt");
-                std::cout << "FTP (pool) result: " << res << std::endl;
             }
         }
         else

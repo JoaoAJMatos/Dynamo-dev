@@ -17,7 +17,7 @@ DTP::Packet::Packet(int type, std::string origin, std::string destination, int s
 DTP::Packet::Packet(const std::string& _buffer)
 {
     int pos = 0;
-    std::string delimiter = "|";
+    std::string delimiter = "\\";
 
     std::string buffer = _buffer;
 
@@ -48,7 +48,7 @@ DTP::Packet::Packet(const std::string& _buffer)
 std::string DTP::Packet::buffer()
 {
     std::stringstream ss;
-    ss << this->indicator << "|" << this->packetHeader.type << "|" << this->packetHeader.origin << "|" << this->packetHeader.destination << "|" << this->packetHeader.serverPort << "|" << this->packetHeader.port << "|" << this->payloadSize << "|" << this->payload << "|";
+    ss << this->indicator << "\\" << this->packetHeader.type << "\\" << this->packetHeader.origin << "\\" << this->packetHeader.destination << "\\" << this->packetHeader.serverPort << "\\" << this->packetHeader.port << "\\" << this->payloadSize << "\\" << this->payload << "\\";
     return ss.str();
 }
 

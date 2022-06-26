@@ -23,6 +23,27 @@ NodeClient::NodeClient(int domain, int service, int protocol)
 #endif
 }
 
+int sendAll(int sockfd, const std::string& str)
+{
+    const char* data_ptr = str.data();
+    size_t data_size = str.size();
+
+    int bytes_sent;
+
+    while (data_size > 0)
+    {
+        bytes_sent = send(sockfd, data_ptr, data_size, 0);
+        if (bytes_sent < 0)
+        {
+            return -1;
+        }
+
+        data_ptr += bytes_sent;
+        data_size -= bytes_sent;
+    }
+
+    return 0;
+}
 
 /* PUBLIC FUNCTIONS */
 int NodeClient::request(const char *server_ip, const int server_port, const std::string& buffer)
@@ -46,7 +67,8 @@ int NodeClient::request(const char *server_ip, const int server_port, const std:
     // Check for errors
     if (connection == 0)
     {
-        int bytes = send(sock, buffer.data(), buffer.size(), 0);
+        sendAll(sock, buffer);
+        
         int res = 1;
 
         res = recv(sock, response_buffer, 3000000, 0);

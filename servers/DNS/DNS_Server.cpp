@@ -44,6 +44,23 @@ int servers::DNS_Server::get_known_hosts_callback(void* known_hosts, int count, 
     return 0;
 }
 
+int servers::DNS_Server::callback(void* pServer, int count, char** data, char** columns)
+{
+    servers::DNS_Server* server = (servers::DNS_Server*) pServer;
+
+    server->host = std::make_pair(data[0], std::stoi(data[1]));
+
+    return 0;
+}
+
+int servers::DNS_Server::whos_root_callback(void* pServer, int count, char** data, char** columns)
+{
+    servers::DNS_Server* server = (servers::DNS_Server*) pServer;
+
+    server->root_address = data[0];
+
+    return 0;
+}
 
 /* CONSTRUCTOR/DESTRUCTOR */
 /**
@@ -201,7 +218,6 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
     logger("Name server successfully started");
 
     /* OPENING DATABASE */
-
     logger("Opening database");
 
     int res = sqlite3_open(KNOWN_HOSTS_LIST_PATH, &db);
@@ -216,9 +232,18 @@ servers::DNS_Server::DNS_Server(int domain, int service, int protocol, int port,
     // TABLE STRUCTURE:
     // ____________________________
     // | UUID | IP | PORT | LINKS |
-    this->sql = std::string("CREATE TABLE IF NOT EXISTS hosts(uuid CHAR(36) PRIMARY KEY NOT NULL, ip CHAR(15) NOT NULL, port INTEGER UNSIGNED NOT NULL, links INTEGER UNSIGNED)").data();
+    res = sqlite3_exec(db, std::string("CREATE TABLE IF NOT EXISTS hosts(uuid CHAR(36) PRIMARY KEY NOT NULL, ip CHAR(15) NOT NULL, port INTEGER UNSIGNED NOT NULL, links INTEGER UNSIGNED)").c_str(), nullptr, nullptr, &zErrMsg);
 
-    res = sqlite3_exec(db, sql, nullptr, nullptr, &zErrMsg);
+    if (res != SQLITE_OK)
+    {
+        std::cout << "SQL error: " << zErrMsg << " Res: " << res << std::endl;
+        sqlite3_free(zErrMsg);
+    }
+
+    // TABLE STRUCTURE:
+    // _____________________________________
+    // | UUID | IP | PORT | ADDRESS | ROOT |
+    res = sqlite3_exec(db, std::string("CREATE TABLE IF NOT EXISTS wallets(uuid CHAR(36) PRIMARY KEY NOT NULL, ip CHAR(15) NOT NULL, port INTEGER UNSIGNED NOT NULL, address CHAR(64) NOT NULL, root BIT NOT NULL);").data(), nullptr, nullptr, &zErrMsg);
 
     if (res != SQLITE_OK)
     {
@@ -260,7 +285,7 @@ void servers::DNS_Server::accepter()
 /**
  * @brief The handler function is responsible for handling the incoming request and parsing it to create
  * a new DNS request class instance.
- * 
+ *
  */
 void servers::DNS_Server::handler()
 {
@@ -342,7 +367,48 @@ void servers::DNS_Server::responder()
             {
                 messageBuffer = "root";
             }
-            
+        }
+        else if (DNS_query->get_type() == IM_ROOT)
+        {
+            std::stringstream query2;
+            query2 << "SELECT ip, port FROM hosts WHERE uuid == '" << DNS_query->get_source() << "'";
+
+            // Execute the code
+            int res = sqlite3_exec(db, query2.str().c_str(), callback, this, &zErrMsg);
+
+            if (res != SQLITE_OK)
+            {
+                std::cout << "SQL error: " << zErrMsg << std::endl;
+                sqlite3_free(zErrMsg);
+            }
+
+            // Build the query
+            std::stringstream query;
+            query << "INSERT OR REPLACE INTO wallets(uuid, ip, port, address, root) VALUES('" << DNS_query->get_source() << "','" << this->host.first << "'," << this->host.second << ",'" << DNS_query->get_body() << "',1)";
+
+            int result = sqlite3_exec(db, query.str().c_str(), nullptr, nullptr, &zErrMsg);
+
+            if (result != SQLITE_OK)
+            {
+                std::cout << "SQL error: " << zErrMsg << std::endl;
+                sqlite3_free(zErrMsg);
+            }
+        }
+        else if (DNS_query->get_type() == WHOS_ROOT)
+        {
+            std::stringstream query2;
+            query2 << "SELECT address FROM wallets WHERE root == 1";
+
+            // Execute the code
+            int res = sqlite3_exec(db, query2.str().c_str(), whos_root_callback, this, &zErrMsg);
+
+            if (res != SQLITE_OK)
+            {
+                std::cout << "SQL error: " << zErrMsg << std::endl;
+                sqlite3_free(zErrMsg);
+            }
+
+            messageBuffer = this->root_address;
         }
 
         // Send the response and clear the list

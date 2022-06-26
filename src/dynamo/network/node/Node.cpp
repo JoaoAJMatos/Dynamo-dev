@@ -181,7 +181,7 @@ int Node::discover_peers()
     int i; // For loop iterator
 
     // Build the DNS query
-    net::DNS query(SYNC_ME, this->uuid, std::to_string(this->server_port));
+    net::DNS* query = new net::DNS(SYNC_ME, this->uuid, std::to_string(this->server_port));
 
     // Attempt to fetch the list of known hosts from a server from the default list
     for (auto const& [ip, port]: known_DDNS)
@@ -192,7 +192,7 @@ int Node::discover_peers()
         for (i = 1; i <= MAX_ATTEMPTS; i++)
         {
             // Send the request to the server and wait for a response
-            result = client->request(ip.c_str(), port, query.get_string());
+            result = client->request(ip.c_str(), port, query->get_string());
             if (result == 0) break; // Exit the loop if the connection was successful
             if (result < 0 && i == MAX_ATTEMPTS) return -1; // Return if the connection wasn't successful and the maximum amount of tries was exceeded
             logger("Connection unsuccessful, trying again...");
@@ -208,9 +208,8 @@ int Node::discover_peers()
 int Node::broadcast(const std::string& message)
 {
     // Loop through the list of known hosts and send the message
-    for (auto& node : known_hosts)
+    for (auto node : known_hosts)
     {
-        std::cout << "[+] Sending to [" << node.first << ":" << node.second << "]" << std::endl;
         this->client->request(node.first.data(), node.second, message);
     }
 
@@ -316,6 +315,7 @@ void showHelp()
     std::cout << "  transact\t\tConduct a transaction" << std::endl;
     std::cout << "  miner\t\t\tOpens the miner menu" << std::endl;
     std::cout << "  server-info\t\tDisplays server configuration" << std::endl;
+    std::cout << "  root\t\t\tDisplays the root node's address" << std::endl;
     std::cout << "  exit\t\t\tExits the program" << std::endl;
     std::cout << std::endl;
 }
@@ -448,6 +448,17 @@ void Node::minerMenu()
     }
 }
 
+void Node::showRootAddress()
+{
+    if (this->root_address == this->wallet->getAddress())
+    {
+        std::cout << "[INFO] You are the root node" << std::endl;
+        return;
+    }
+
+    std::cout << "[INFO] Root address: " << this->root_address << std::endl;
+}
+
 void Node::showServerConfig()
 {
     std::cout << std::endl << "[+] Server configuration: " << std::endl;
@@ -468,7 +479,6 @@ void Node::getInput()
 
     while (true)
     {
-        std::cout << "[NOTIFICATIONS]: " << notification_buffer << std::endl;
         std::cout << "dynamo@" << this->uuid << ":~$ ";
         std::cin >> input;
 
@@ -478,10 +488,11 @@ void Node::getInput()
         else if (input == "address") showAddress();
         else if (input == "show-chain") this->blockchain->printChain();
         else if (input == "show-block") showBlockAtIndex();
-        else if (input == "transaction-pool") this->transactionPool->show();
+        else if (input == "transaction-pool" || input == "pool") this->transactionPool->show();
         else if (input == "transact") transact();
         else if (input == "miner") minerMenu();
         else if (input == "server-info") showServerConfig();
+        else if (input == "root") showRootAddress();
         else if (input == "exit") exit(0);
         else if (input == "help") showHelp();
         else std::cout << "Unknown command '" << input << "'" << std::endl;
@@ -549,7 +560,7 @@ int Node::syncChains()
                         if (res == 0)
                         {
                             std::string blockchain_string = fromFileNode("chain.txt");
-                            remove("temp.txt");
+                            remove("chain.txt");
                             this->blockchain = new Blockchain(blockchain_string);
                             if (this->blockchain->chain.empty()) return -1;
                             this->isChainLinked = true;
@@ -640,14 +651,59 @@ void Node::broadCastHandler()
     {
         if (this->sendBlock_flag)
         {
-            /*Block new_block = this->blockchain->getLastBlock();
+            Block new_block = this->blockchain->getLastBlock();
             std::string blockString = Block::toString(&new_block);
             DTP::Packet* packet = new DTP::Packet(NEW_BLOCK_PACKET, this->uuid, this->uuid, this->server->getPort(), this->server->getPort(), blockString);
-            std::cout << "Broadcasting new block" << std::endl;
             broadcast(packet->buffer());
-            std::cout << "Block broadcasted" << std::endl;
-            this->sendBlock_flag = false;*/
+            this->sendBlock_flag = false;
         }
+    }
+}
+
+int Node::get_root_address()
+{
+    net::DNS query(WHOS_ROOT, this->uuid, std::string(""));
+
+    int result;
+
+    // Attempt to fetch the list of known hosts from a server from the default list
+    for (auto const& [ip, port]: known_DDNS)
+    {
+        // Make 3 attempts at making the request
+        for (int i = 1; i <= MAX_ATTEMPTS; i++)
+        {
+            // Send the request to the server and wait for a response
+            result = client->request(ip.c_str(), port, query.get_string());
+            if (result == 0) break; // Exit the loop if the connection was successful
+            if (result < 0 && i == MAX_ATTEMPTS) return -1; // Return if the connection wasn't successful and the maximum amount of tries was exceeded
+            logger("Connection unsuccessful, trying again...");
+        }
+
+        this->root_address = this->client->get_response_buffer();
+        if (result == 0) return 0;
+    }
+}
+
+int Node::notify_root()
+{
+    net::DNS query(IM_ROOT, this->uuid, this->wallet->getAddress());
+
+    int result;
+
+    // Attempt to fetch the list of known hosts from a server from the default list
+    for (auto const& [ip, port]: known_DDNS)
+    {
+        // Make 3 attempts at making the request
+        for (int i = 1; i <= MAX_ATTEMPTS; i++)
+        {
+            // Send the request to the server and wait for a response
+            result = client->request(ip.c_str(), port, query.get_string());
+            if (result == 0) break; // Exit the loop if the connection was successful
+            if (result < 0 && i == MAX_ATTEMPTS) return -1; // Return if the connection wasn't successful and the maximum amount of tries was exceeded
+            logger("Connection unsuccessful, trying again...");
+        }
+            
+        if (result == 0) return 0;
     }
 }
 
@@ -698,6 +754,15 @@ void Node::start()
         this->transactionPool = new TransactionPool();
         isPoolLinked = true;
         isChainLinked = true;
+
+        // Inform the name server of our address so that other nodes know we are the root node
+        int res = notify_root();
+        if (res < 0)
+        {
+            logger("Unable to notify the name server of your address");
+            logger("Exiting");
+            exit(-1);
+        }
     }
     else // Else: Loop through the string and parse the request
     {
@@ -715,6 +780,14 @@ void Node::start()
         }
 
         std::cout << "[+] Linking with " << known_hosts.size() << " nodes..." << std::endl;
+
+        int res = get_root_address();
+        if (res < 0)
+        {
+            logger("Unable to fetch the root address");
+            logger("Exiting");
+            exit(-1);
+        }
 
         logger("Syncing with the latest blockchain...");
         
@@ -742,9 +815,7 @@ void Node::start()
 
         tries = 0;
 
-        int result = syncPool();
-
-        /*while(!isPoolLinked)
+        while(!isPoolLinked)
         {
             tries++;
             int result = syncPool();
@@ -763,7 +834,7 @@ void Node::start()
                 this->transactionPool = new TransactionPool();
                 isPoolLinked = true;
             }
-        }*/
+        }
     }
 
     if (isChainLinked)

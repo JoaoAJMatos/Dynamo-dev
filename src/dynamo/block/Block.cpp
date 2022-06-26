@@ -144,7 +144,7 @@ Block* Block::mineBlock(Block* lastBlock, std::vector<Transaction*> data, int lo
         setTarget(target, difficulty);
 
         // Make the block buffer to hash
-        blockBuffer << timestamp << height << lastHash << dataToHash << difficulty << nonce << std::endl;
+        blockBuffer << timestamp << height << SHA256::toString(lastHash) << dataToHash << difficulty << nonce << std::endl;
 
         sha.update(blockBuffer.str());
         hash = sha.digest();
@@ -163,9 +163,6 @@ Block* Block::mineBlock(Block* lastBlock, std::vector<Transaction*> data, int lo
     } while (memcmp(target, hash, sizeof(target)) < 0);
 
     t.stopHighResClock();
-
-    std::cout << std::endl << "[+] Nonce found for block [" << height << "] | Mining time: " << t.getTimeElapsed() << " seconds" << std::endl;
-
     return new Block(timestamp, hash, lastHash, height, nonce, difficulty, data);
 }
 

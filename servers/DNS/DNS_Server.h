@@ -58,6 +58,7 @@ namespace servers
         // Array of all the known hosts
         // Each element conatins a string identifying the Node's IP and port, like: "192.168.1.109:1500"
         std::vector<std::string> known_hosts;
+        std::pair<std::string, int> host;
 
         // Variables regarding the server
         int domain;
@@ -75,9 +76,11 @@ namespace servers
         // An instance of a DNS protocol class
         net::DNS* DNS_query;
         char* zErrMsg = 0;
-        char* sql;
+        const char* sql;
 
         unsigned long new_socket;
+
+        std::string root_address;
 
         // Message buffer
         // This buffer will hold the request
@@ -88,7 +91,6 @@ namespace servers
         sys::ThreadPool* tp;
 
         /* VIRTUAL FUNCTION OVERRIDES */
-        // TODO: Define the virtual functions
         void accepter() override;
         // The handler is used in a multi threaded environment to handle incoming connections
         void handler() override;
@@ -98,6 +100,8 @@ namespace servers
         // This function saves the server configs in the config file
         void save_config() const;
         static int get_known_hosts_callback(void* unused, int count, char** data, char** columns);
+        static int callback(void* unused, int count, char** data, char** columns);
+        static int whos_root_callback(void* unused, int count, char** data, char** columns);
 
     public:
         /* CONSTRUCTOR */

@@ -36,6 +36,8 @@
 #define SYNC 2
 #define IM_ALIVE 3
 #define REDIRECT 4
+#define WHOS_ROOT 5
+#define IM_ROOT 6
 
 namespace net
 {
